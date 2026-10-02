@@ -3,6 +3,7 @@
 | Path | Contents |
 |---|---|
 | [`decisions/`](decisions/) | Architecture/research decision records (ADRs). One file per decision, numbered, never rewritten. Superseded ADRs are marked as such. |
+| [`gazetteer.md`](gazetteer.md) | Reference gazetteer: sources, build steps, table schema, quality checks, limitations. |
 
 Planned with milestone M0 (added when written, not before):
 

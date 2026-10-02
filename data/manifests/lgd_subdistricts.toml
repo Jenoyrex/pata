@@ -1,0 +1,36 @@
+# Provenance manifest (ADR-0001 section 5). Data file itself is never committed.
+id = "lgd_subdistricts"
+name = "Local Government Directory (LGD) - Sub-Districts"
+publisher = "Ministry of Panchayati Raj, Government of India (Local Government Directory)"
+dataset_url = "https://www.data.gov.in/resource/local-government-directory-lgd-sub-districts"
+resource_id = "6be51a29-876a-403a-a6da-42fde795e751"
+distributor = "Open Government Data (OGD) Platform India, data.gov.in (NIC, MeitY)"
+license = "GODL-India"  # Government Open Data License - India; no SPDX identifier exists
+license_url = "https://www.data.gov.in/Godl"
+# License applies via data.gov.in platform policy (the resource-level licence field is empty).
+# The GODL page is client-rendered and was not machine-verified on 2026-10-02; see ADR-0002.
+redistribution = "permitted with attribution under GODL-India; Pata does not redistribute it (raw data stays out of git)"
+attribution = "Contains data from Ministry of Panchayati Raj, Government of India (Local Government Directory), published on data.gov.in under the Government Open Data License - India (https://www.data.gov.in/Godl). Source: https://www.data.gov.in/resource/local-government-directory-lgd-sub-districts"
+retrieval = """
+Manual. Open https://www.data.gov.in/resource/local-government-directory-lgd-sub-districts, use Download (CSV). Direct
+file links returned HTTP 403/301 to scripts on 2026-10-02; the site flow may ask for a form or login.
+Save as data/raw/data.gov.in/lgd_subdistricts.csv. API alternative (untested by Pata, needs a personal data.gov.in
+API key): https://api.data.gov.in/resource/6be51a29-876a-403a-a6da-42fde795e751?format=csv&api-key=YOUR_KEY
+Then run: uv run scripts/build_gazetteer.py --snapshot-info  and pin [snapshot] below.
+"""
+entity = "admin_unit"
+level = "subdistrict"
+raw_file = "data.gov.in/lgd_subdistricts.csv"
+
+[snapshot]  # pinned after retrieval; build refuses files that do not match
+retrieved = ""
+sha256 = ""
+rows = 0
+
+[columns]  # canonical name = source header
+# UNMAPPED: data.gov.in publishes no field list for this resource. Fill these from the
+# real header (--snapshot-info prints it). Do not guess: e.g. LGD code vs Census code columns.
+code = ""
+name = ""
+name_local = ""
+parent_code = ""

@@ -25,7 +25,9 @@ experiment.
 Current milestone, **M0 "Know the data"**:
 
 - [x] Repository, tooling, CI, data/privacy policy
-- [ ] All-India reference gazetteer (with quality audit)
+- [ ] All-India reference gazetteer (with quality audit). The build pipeline, schema and
+      manifests are done ([docs/gazetteer.md](docs/gazetteer.md)). Source snapshots
+      still have to be downloaded and pinned.
 - [ ] Annotation schema v0.1 and pilot annotation (with inter-annotator agreement)
 - [ ] Evaluation harness and trivial baselines
 
@@ -63,12 +65,13 @@ uv run ruff format .       # format
 
 ```
 src/pata/        toolkit (library code)
+scripts/         build entry points (e.g. build_gazetteer.py)
 tests/           tests
 docs/            documentation and decision records
 data/manifests/  dataset provenance manifests (data itself is not committed)
 ```
 
-More directories (`bench/`, `scripts/`, `experiments/`) are added when they get content.
+More directories (`bench/`, `experiments/`) are added when they get content.
 
 ## License
 
