@@ -7,10 +7,22 @@ resource_id = "5c2f62fe-5afa-4119-a499-fec9d604d5bd"
 distributor = "Open Government Data (OGD) Platform India, data.gov.in (NIC, MeitY)"
 license = "GODL-India"  # Government Open Data License - India; no SPDX identifier exists
 license_url = "https://www.data.gov.in/Godl"
-# License applies via data.gov.in platform policy (the resource-level licence field is empty).
-# The GODL page is client-rendered and was not machine-verified on 2026-10-02; see ADR-0002.
+# Licence verified 2026-10-02 from the official GODL-India text served by data.gov.in
+# (/Godl) and the site-wide notice that content on data.gov.in is licensed under it (the
+# resource-level licence field is empty). Conditions: attribution in the GODL section 5
+# format, non-endorsement, no warranty; section 6 exempts personal information.
+# Resource dates as shown in data.gov.in metadata on metadata_checked. They describe the
+# publisher's resource, not Pata's copy: snapshot.retrieved is when we downloaded it.
+resource_published = "2020-12-04"
+resource_last_updated = "2025-10-03"
+metadata_checked = "2026-10-02"
+# The resource note says "Data will be updated on monthly basis", but its metadata shows
+# last update 2025-10-03: do not describe this source as monthly or current.
 redistribution = "permitted with attribution under GODL-India; Pata does not redistribute it (raw data stays out of git)"
-attribution = "Contains data from Department of Posts, Ministry of Communications, Government of India, published on data.gov.in under the Government Open Data License - India (https://www.data.gov.in/Godl). Source: https://www.data.gov.in/resource/all-india-pincode-directory-till-last-month"
+# GODL section 5 template: Provider, Year of Publication, Name of Data, Repository,
+# Version/Date of Publication, URL. Published under Licence: URL. Year = resource_published;
+# date = resource_last_updated. Re-check both against the resource when pinning a snapshot.
+attribution = "Department of Posts, Ministry of Communications, Government of India, 2020, All India Pincode Directory till last month, Open Government Data (OGD) Platform India, 03/10/2025, https://www.data.gov.in/resource/all-india-pincode-directory-till-last-month. Published under Government Open Data License - India: https://www.data.gov.in/Godl."
 retrieval = """
 Manual. Open https://www.data.gov.in/resource/all-india-pincode-directory-till-last-month, use Download (CSV). Direct
 file links returned HTTP 403/301 to scripts on 2026-10-02; the site flow may ask for a form or login.

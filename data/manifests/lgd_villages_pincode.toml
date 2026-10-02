@@ -7,10 +7,20 @@ resource_id = "f17a1608-5f10-4610-bb50-a63c80d83974"
 distributor = "Open Government Data (OGD) Platform India, data.gov.in (NIC, MeitY)"
 license = "GODL-India"  # Government Open Data License - India; no SPDX identifier exists
 license_url = "https://www.data.gov.in/Godl"
-# License applies via data.gov.in platform policy (the resource-level licence field is empty).
-# The GODL page is client-rendered and was not machine-verified on 2026-10-02; see ADR-0002.
+# Licence verified 2026-10-02 from the official GODL-India text served by data.gov.in
+# (/Godl) and the site-wide notice that content on data.gov.in is licensed under it (the
+# resource-level licence field is empty). Conditions: attribution in the GODL section 5
+# format, non-endorsement, no warranty; section 6 exempts personal information.
+# Resource dates as shown in data.gov.in metadata on metadata_checked. They describe the
+# publisher's resource, not Pata's copy: snapshot.retrieved is when we downloaded it.
+resource_published = "2022-09-22"
+resource_last_updated = "2026-09-01"
+metadata_checked = "2026-10-02"
 redistribution = "permitted with attribution under GODL-India; Pata does not redistribute it (raw data stays out of git)"
-attribution = "Contains data from Ministry of Panchayati Raj, Government of India (Local Government Directory), published on data.gov.in under the Government Open Data License - India (https://www.data.gov.in/Godl). Source: https://www.data.gov.in/resource/local-government-directory-lgd-villages-pin-codes"
+# GODL section 5 template: Provider, Year of Publication, Name of Data, Repository,
+# Version/Date of Publication, URL. Published under Licence: URL. Year = resource_published;
+# date = resource_last_updated. Re-check both against the resource when pinning a snapshot.
+attribution = "Ministry of Panchayati Raj, Government of India (Local Government Directory), 2022, Local Government Directory (LGD) - Villages with PIN Codes, Open Government Data (OGD) Platform India, 01/09/2026, https://www.data.gov.in/resource/local-government-directory-lgd-villages-pin-codes. Published under Government Open Data License - India: https://www.data.gov.in/Godl."
 retrieval = """
 Manual. Open https://www.data.gov.in/resource/local-government-directory-lgd-villages-pin-codes, use Download (CSV). Direct
 file links returned HTTP 403/301 to scripts on 2026-10-02; the site flow may ask for a form or login.

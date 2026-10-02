@@ -7,16 +7,46 @@ The data policy is in [ADR-0001](decisions/0001-data-privacy-licensing-scope.md)
 
 ## Sources
 
-| Manifest | Publisher | Provides | Field list |
-|---|---|---|---|
-| `dop_pincode_directory` | Department of Posts | post offices, PIN codes, India Post circle/region/division, district/state labels, lat/lon | from data.gov.in metadata |
-| `lgd_villages_pincode` | Ministry of Panchayati Raj (LGD) | state → district → sub-district → village codes and names, village → PIN | from data.gov.in metadata |
-| `lgd_states` | Ministry of Panchayati Raj (LGD) | states/UTs | **not published; map after download** |
-| `lgd_districts` | Ministry of Panchayati Raj (LGD) | districts | **not published; map after download** |
-| `lgd_subdistricts` | Ministry of Panchayati Raj (LGD) | sub-districts (tehsil/taluk/mandal …) | **not published; map after download** |
+| Manifest | Publisher | Provides | Field list | Resource last updated* |
+|---|---|---|---|---|
+| `dop_pincode_directory` | Department of Posts | post offices, PIN codes, India Post circle/region/division, district/state labels, lat/lon | from data.gov.in metadata | **03/10/2025** (stale; see below) |
+| `lgd_villages_pincode` | Ministry of Panchayati Raj (LGD) | state → district → sub-district → village codes and names, village → PIN | from data.gov.in metadata | 01/09/2026 |
+| `lgd_states` | Ministry of Panchayati Raj (LGD) | states/UTs | **not published; map after download** | 25/09/2026 |
+| `lgd_districts` | Ministry of Panchayati Raj (LGD) | districts | **not published; map after download** | 25/09/2026 |
+| `lgd_subdistricts` | Ministry of Panchayati Raj (LGD) | sub-districts (tehsil/taluk/mandal …) | **not published; map after download** | 25/09/2026 |
 
-All five are distributed by data.gov.in under GODL-India, which allows reuse with
-attribution. Each manifest holds the attribution text. Pata never commits the data.
+\* As shown in data.gov.in resource metadata, checked 2026-10-02.
+
+**Freshness.** The PIN directory's resource note says "Data will be updated on
+monthly basis", but it was last updated 03/10/2025. Do not treat it as monthly or
+current.
+
+**Two kinds of date.** Each manifest records the publisher's dates for the
+resource (`resource_published`, `resource_last_updated`, and `metadata_checked`,
+the day we looked) separately from Pata's download date (`snapshot.retrieved`).
+These are different facts. The resource can change after we download it.
+
+**Licence.** All five are distributed by data.gov.in. The site states that its
+content is licensed under the Government Open Data License – India (GODL-India).
+This was verified 2026-10-02 from the official text at https://www.data.gov.in/Godl
+(details in ADR-0002). GODL allows use, adaptation, redistribution and derivative
+works for lawful purposes. Its conditions:
+- an attribution statement in the GODL section 5 format: *Name of Data Provider,
+  Year of Publication, Name of Data, Name of Data Repository/Website, Version
+  Number and/or Date of Publication, DOI/URL/URI. Published under Name of License:
+  URL of License.*
+- non-endorsement
+- no warranty
+- section 6 exemptions, including personal information
+
+Each manifest's `attribution` follows that template, using the resource's
+publication year and its last-updated date. Re-check both when a snapshot is
+pinned. Pata never commits the data.
+
+The LGD portal (lgdirectory.gov.in) has its own Copyright Policy. It allows free
+reproduction with prominent acknowledgement of the source, provided the material
+is reproduced accurately and not used in a derogatory or misleading way. Its
+downloads are PDF/HTML/XLS/ODT behind a CAPTCHA, and v0 does not use them.
 
 ## Building
 
@@ -127,5 +157,6 @@ are never overwritten.
 - India Post district/state labels are not resolved to LGD. That is a future,
   measured task.
 - Post-office coordinates are unverified and not suitable as geocoding ground truth.
-- The GODL-India terms were taken from secondary summaries. The official page
-  couldn't be machine-read (see ADR-0002).
+- The India Post PIN directory was last updated 03/10/2025 (per data.gov.in
+  metadata, checked 2026-10-02). Offices and PIN codes created or changed since
+  then may be missing or out of date.

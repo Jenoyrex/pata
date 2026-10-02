@@ -3,6 +3,9 @@
 - **Status:** Accepted
 - **Date:** 2026-10-02
 - **Deciders:** Project maintainer
+- **Corrected:** 2026-10-02, after a provenance verification pass. Factual context
+  only: GODL-India terms verified from the official text, LGD portal reuse terms,
+  PIN directory freshness, attribution format. The decisions are unchanged.
 
 ## Context
 
@@ -15,8 +18,10 @@ Findings from source research (2026-10-02):
 - **Department of Posts** publishes the *All India Pincode Directory till last month*
   on data.gov.in (resource `5c2f62fe-5afa-4119-a499-fec9d604d5bd`). The metadata
   lists the fields: circlename, regionname, divisionname, officename, pincode,
-  officetype, delivery, district, statename, latitude, longitude. It is updated
-  monthly. The file has no stable post-office identifier.
+  officetype, delivery, district, statename, latitude, longitude. Its resource note
+  says "Data will be updated on monthly basis", but the metadata shows it was
+  published 04/12/2020 and **last updated 03/10/2025** (checked 2026-10-02). It must
+  not be described as monthly or current. The file has no stable post-office identifier.
 - **Ministry of Panchayati Raj (LGD)** publishes four relevant resources on data.gov.in:
   - States (`a71e60f0-…`)
   - Districts (`37231365-…`)
@@ -25,16 +30,38 @@ Findings from source research (2026-10-02):
     districtCode, districtNameEnglish, subdistrictCode, subdistrictNameEnglish,
     villageCode, villageNameEnglish, pincode
   
-  The resource notes say they are updated monthly. data.gov.in publishes **no field
-  list** for the States, Districts and Sub-Districts files.
-- **lgdirectory.gov.in** (the primary LGD site) offers downloads behind a CAPTCHA
-  and shows no reuse licence on its download page. The data.gov.in copies come with
-  a clear licence and are the same publisher's data, so they are preferred.
-- **Licence:** data.gov.in content is under the Government Open Data License – India
-  (GODL-India), which allows use, adaptation and redistribution with attribution.
-  The per-resource licence fields are empty, so the licence applies through platform
-  policy. The GODL page is rendered client-side and could not be machine-verified,
-  so its terms here come from secondary summaries.
+  The resource notes say they are updated on the 1st of every month. Their metadata
+  (checked 2026-10-02) shows last updates of 25/09/2026 for States, Districts and
+  Sub-Districts, and 01/09/2026 for Villages with PIN Codes. data.gov.in publishes
+  **no field list** for the States, Districts and Sub-Districts files.
+- **lgdirectory.gov.in** (the primary LGD site) offers downloads in PDF, HTML, XLS and
+  ODT only (no CSV), behind a CAPTCHA. Its Copyright Policy (`copyRightPolicy.do`)
+  states that material "may be reproduced free of charge in any format or media
+  without requiring specific permission", subject to accurate reproduction, no
+  derogatory or misleading use, and prominent acknowledgement of the source when it
+  is published. The data.gov.in copies are preferred because they are CSV and carry
+  GODL-India terms. They are the same publisher's data.
+- **Licence (verified 2026-10-02 from the official GODL-India text served by
+  data.gov.in at `/Godl`):** data.gov.in states that "the content published on
+  data.gov.in is owned by the respective Ministry/State/Department/Organization and
+  licensed under the Government Open Data License - India". The per-resource licence
+  fields are empty, so this site-wide statement is what applies. GODL-India grants a
+  worldwide, royalty-free, non-exclusive licence to use, adapt, publish, translate,
+  display, add value to, and create derivative works from the data, for lawful
+  commercial and non-commercial purposes. Its conditions:
+  - **Attribution:** the user must acknowledge the provider, source and licence by
+    publishing an attribution statement that includes the DOI, URL or URI of the
+    data. The section 5 template is: *Name of Data Provider, Year of Publication,
+    Name of Data, Name of Data Repository/Website, Version Number and/or Date of
+    Publication, DOI/URL/URI. Published under Name of License: URL of License.*
+    When many datasets are combined, a link to a separate attribution page is allowed.
+  - **Non-endorsement:** the user must not suggest the provider endorses them or their use.
+  - **No warranty**, and no guarantee that updated data will keep being supplied.
+  - **Exemptions** (section 6): personal information; data the provider isn't
+    authorised to license; names, crests, logos and official symbols; data under other
+    IP rights; data that shouldn't have been disclosed under RTI Act section 8.
+  - **Termination:** rights end automatically on breach and are reinstated if the
+    breach is cured within 30 days. The provider may withdraw the licence for a specific dataset.
 - **Access:** direct file URLs returned HTTP 403/301 to scripted requests, and
   `api.data.gov.in` was unreachable from the development machine. Every source
   currently has to be **downloaded manually**.
@@ -72,6 +99,11 @@ Considered and deferred:
    and info items are written to `issues.csv`. See `docs/gazetteer.md`.
 7. **Standard library only** (csv, tomllib, hashlib). The outputs are sorted CSV
    files, so they are byte-reproducible from the same snapshot.
+8. **Attribution and dates.** Each manifest carries a GODL section 5 attribution
+   string. It also records the resource's own dates as shown on data.gov.in
+   (`resource_published`, `resource_last_updated`, `metadata_checked`), kept separate
+   from Pata's download date (`snapshot.retrieved`). The attribution date is
+   re-checked whenever a snapshot is pinned.
 
 ## Consequences
 
