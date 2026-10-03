@@ -31,6 +31,9 @@ API key): https://api.data.gov.in/resource/5c2f62fe-5afa-4119-a499-fec9d604d5bd?
 Then run: uv run scripts/build_gazetteer.py --snapshot-info  and pin [snapshot] below.
 """
 entity = "post_office"
+# Not built in v0 (ADR-0004 section 7): no openly licensed first-party copy could be retrieved.
+# The build skips this manifest and the pincode_not_in_dop cross-check until this line is removed.
+deferred = "India Post PIN directory not retrievable from data.gov.in; deferred by ADR-0004"
 raw_file = "data.gov.in/pincode.csv"
 
 [snapshot]  # pinned after retrieval; build refuses files that do not match

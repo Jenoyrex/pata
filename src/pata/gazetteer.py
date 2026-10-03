@@ -4,7 +4,8 @@ Publishers' concepts are kept apart. LGD administrative units and India Post
 post offices live in separate tables and are linked only where a source itself
 states the link (LGD's village -> PIN code crosswalk). India Post's district and
 state labels stay raw strings; they are NOT resolved to LGD units here.
-See docs/gazetteer.md and docs/decisions/0002-gazetteer-sources-and-schema.md.
+See docs/gazetteer.md and docs/decisions/0002-gazetteer-sources-and-schema.md
+(XLSX sources: 0004-lgd-portal-xlsx-snapshots.md).
 """
 
 import csv
@@ -14,10 +15,14 @@ import math
 import re
 import subprocess
 import tomllib
+import warnings
 from collections import Counter, defaultdict
+from collections.abc import Iterator
 from dataclasses import asdict, dataclass
 from datetime import date
 from pathlib import Path
+
+from openpyxl import load_workbook
 
 from pata import __version__
 from pata.normalize import name_key
@@ -112,6 +117,10 @@ def check_manifest(m: dict, path: Path) -> list[str]:
         problems.append(f"admin_unit needs level in {LEVELS}")
     if not {"retrieved", "sha256", "rows"} <= set(m.get("snapshot", {})):
         problems.append("snapshot needs retrieved, sha256, rows")
+    if str(m.get("raw_file", "")).endswith(".xlsx") and not (
+        isinstance(m.get("title"), str) and isinstance(m.get("header"), list)
+    ):
+        problems.append("an .xlsx source needs title (row 1) and header (row 2)")
     return problems
 
 
@@ -130,6 +139,63 @@ def load_manifests(manifest_dir: Path) -> list[tuple[Path, dict]]:
 def sha256_file(path: Path) -> str:
     with path.open("rb") as f:
         return hashlib.file_digest(f, "sha256").hexdigest()
+
+
+def _xlsx_rows(path: Path) -> Iterator[tuple]:
+    """Cell values of the first worksheet, row by row."""
+    with warnings.catch_warnings():
+        # LGD portal workbooks carry no default style; irrelevant for reading values.
+        warnings.filterwarnings("ignore", "Workbook contains no default style")
+        wb = load_workbook(path, read_only=True, data_only=True)
+    try:
+        yield from wb.worksheets[0].iter_rows(values_only=True)
+    finally:
+        wb.close()
+
+
+def _xlsx_cell(v, where: str) -> str:
+    """Decode a stored cell to the published text (ADR-0004 section 4). Not normalization."""
+    if v is None:
+        return ""
+    if isinstance(v, str):
+        return v  # exactly as stored, whitespace included
+    if isinstance(v, int) and not isinstance(v, bool):
+        return str(v)
+    if isinstance(v, float) and v.is_integer():
+        return str(int(v))  # numeric cell 35.0 -> "35"
+    raise BuildError(f"{where}: cannot decode {type(v).__name__} cell {v!r}; never rounded")
+
+
+def _read_xlsx(m: dict, path: Path, cols: dict[str, str]) -> list[dict[str, str]]:
+    """Row 1 = report title, row 2 = header, data from row 3; all checked against the manifest."""
+    sid, rows = m["id"], _xlsx_rows(path)
+    title = [c for c in next(rows, ()) if c is not None]
+    if title != [m["title"]]:
+        raise BuildError(f"{sid}: row 1 is {title}, manifest title is {m['title']!r}")
+    header = list(next(rows, ()))
+    if header != m["header"]:
+        raise BuildError(f"{sid}: row 2 header {header} != manifest header {m['header']}")
+    if missing := [v for v in cols.values() if v not in header]:
+        raise BuildError(f"{sid}: columns {missing} not in header {header}")
+    idx = {k: header.index(v) for k, v in cols.items()}
+    return [
+        {k: _xlsx_cell(r[i] if i < len(r) else None, f"{sid} row {n} {cols[k]!r}")
+         for k, i in idx.items()}
+        for n, r in enumerate(rows, start=3)
+    ]  # fmt: skip
+
+
+def _read_csv(sid: str, path: Path, cols: dict[str, str]) -> list[dict[str, str]]:
+    try:
+        with path.open(encoding="utf-8-sig", newline="") as f:
+            reader = csv.DictReader(f)
+            header = {h.strip().casefold(): h for h in reader.fieldnames or ()}
+            if missing := [v for v in cols.values() if v.strip().casefold() not in header]:
+                raise BuildError(f"{sid}: columns {missing} not in header {reader.fieldnames}")
+            src = {k: header[v.strip().casefold()] for k, v in cols.items()}
+            return [{k: (r[h] or "").strip() for k, h in src.items()} for r in reader]
+    except UnicodeDecodeError as e:
+        raise BuildError(f"{sid}: not UTF-8 ({e})") from e
 
 
 def read_source(m: dict, raw_dir: Path) -> list[dict[str, str]]:
@@ -154,16 +220,7 @@ def read_source(m: dict, raw_dir: Path) -> list[dict[str, str]]:
         )
     if unknown := sorted(set(cols) - set(required) - set(optional)):
         raise BuildError(f"{sid}: unknown canonical columns {unknown}")
-    try:
-        with path.open(encoding="utf-8-sig", newline="") as f:
-            reader = csv.DictReader(f)
-            header = {h.strip().casefold(): h for h in reader.fieldnames or ()}
-            if missing := [v for v in cols.values() if v.strip().casefold() not in header]:
-                raise BuildError(f"{sid}: columns {missing} not in header {reader.fieldnames}")
-            src = {k: header[v.strip().casefold()] for k, v in cols.items()}
-            rows = [{k: (r[h] or "").strip() for k, h in src.items()} for r in reader]
-    except UnicodeDecodeError as e:
-        raise BuildError(f"{sid}: not UTF-8 ({e})") from e
+    rows = _read_xlsx(m, path, cols) if path.suffix == ".xlsx" else _read_csv(sid, path, cols)
     if len(rows) != snap["rows"]:
         raise BuildError(f"{sid}: parsed {len(rows)} rows, manifest pins {snap['rows']}")
     return rows
@@ -174,17 +231,27 @@ def snapshot_info(manifest_dir: Path, raw_dir: Path) -> str:
     out = []
     for path, m in load_manifests(manifest_dir):
         f = raw_dir / m["raw_file"]
+        if m.get("deferred"):
+            out.append(f"# {m['id']}: deferred ({m['deferred']})\n")
+            continue
         if not f.is_file():
             out.append(f"# {m['id']}: {f} not found\n")
             continue
-        with f.open(encoding="utf-8-sig", newline="") as fh:
-            reader = csv.reader(fh)
-            header = next(reader, [])
-            rows = sum(1 for _ in reader)
+        title = ""
+        if f.suffix == ".xlsx":
+            it = _xlsx_rows(f)
+            title = f"# title (row 1): {[c for c in next(it, ()) if c is not None]}\n"
+            header = list(next(it, ()))
+            rows = sum(1 for _ in it)
+        else:
+            with f.open(encoding="utf-8-sig", newline="") as fh:
+                reader = csv.reader(fh)
+                header = next(reader, [])
+                rows = sum(1 for _ in reader)
         retrieved = date.fromtimestamp(f.stat().st_mtime).isoformat()
         out.append(
             f"# {path.name}  (retrieved = file modification date; correct it if needed)\n"
-            f"# header: {header}\n[snapshot]\n"
+            f"{title}# header: {header}\n[snapshot]\n"
             f'retrieved = "{retrieved}"\nsha256 = "{sha256_file(f)}"\nrows = {rows}\n'
         )
     return "\n".join(out)
@@ -345,12 +412,15 @@ def _pincodes(offices: list[dict]) -> tuple[list[dict], list[Issue]]:
     return rows, issues
 
 
-def _check_links(links: list[dict], dop_pincodes: set[str]) -> list[Issue]:
+def _check_links(links: list[dict], dop_pincodes: set[str] | None) -> list[Issue]:
+    """dop_pincodes is None when India Post is not built: the cross-check is skipped."""
     issues = [
         Issue("error", "invalid_pincode", lk["village_id"], repr(lk["pincode"]))
         for lk in links
         if not PINCODE_RE.fullmatch(lk["pincode"])
     ]
+    if dop_pincodes is None:
+        return issues
     valid = {lk["pincode"] for lk in links if PINCODE_RE.fullmatch(lk["pincode"])}
     issues += [
         Issue("warning", "pincode_not_in_dop", pin, "LGD village PIN absent from India Post list")
@@ -362,7 +432,12 @@ def _check_links(links: list[dict], dop_pincodes: set[str]) -> list[Issue]:
 def build(manifest_dir: Path, raw_dir: Path) -> tuple[dict, list[Issue], dict]:
     """Return (tables, issues, sources). Raises BuildError if a source is unusable."""
     admin, offices, links, claims, issues, sources = [], [], [], set(), [], {}
+    has_dop = False
     for path, m in load_manifests(manifest_dir):
+        if m.get("deferred"):  # kept for provenance, not built (e.g. India Post, ADR-0004)
+            sources[m["id"]] = {"manifest": path.name, "deferred": m["deferred"]}
+            continue
+        has_dop |= m["entity"] == "post_office"
         rows = read_source(m, raw_dir)
         sources[m["id"]] = {"manifest": path.name, "license": m["license"], **m["snapshot"]}
         if m["entity"] == "admin_unit":
@@ -383,7 +458,8 @@ def build(manifest_dir: Path, raw_dir: Path) -> tuple[dict, list[Issue], dict]:
     issues += found
     issues += _check_admin(admin, claims) + _check_offices(offices) + _check_coordinates(offices)
     pincodes, found = _pincodes(offices)
-    issues += found + _check_links(links, {p["pincode"] for p in pincodes})
+    dop_pincodes = {p["pincode"] for p in pincodes} if has_dop else None
+    issues += found + _check_links(links, dop_pincodes)
     tables = {
         "admin_unit": admin,
         "post_office": offices,

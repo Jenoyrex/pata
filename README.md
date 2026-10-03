@@ -25,9 +25,10 @@ experiment.
 Current milestone, **M0 "Know the data"**:
 
 - [x] Repository, tooling, CI, data/privacy policy
-- [ ] All-India reference gazetteer (with quality audit). The build pipeline, schema and
-      manifests are done ([docs/gazetteer.md](docs/gazetteer.md)). Source snapshots
-      still have to be downloaded and pinned.
+- [ ] All-India reference gazetteer (with quality audit). The LGD administrative
+      hierarchy and village → PIN mapping are pinned and build cleanly
+      ([docs/gazetteer.md](docs/gazetteer.md)). The India Post directory and urban
+      PIN mapping are deferred.
 - [ ] Annotation schema v0.1 and pilot annotation (with inter-annotator agreement)
 - [ ] Evaluation harness and trivial baselines
 

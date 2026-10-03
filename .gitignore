@@ -15,3 +15,6 @@ dist/
 # Data: never commit data files. Only provenance manifests are tracked (ADR-0001).
 data/*
 !data/manifests/
+
+# Manually downloaded source reports awaiting placement under data/raw/ (ADR-0004)
+/report data/

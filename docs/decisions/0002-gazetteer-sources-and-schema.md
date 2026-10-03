@@ -6,6 +6,7 @@
 - **Corrected:** 2026-10-02, after a provenance verification pass. Factual context
   only: GODL-India terms verified from the official text, LGD portal reuse terms,
   PIN directory freshness, attribution format. The decisions are unchanged.
+- **Amended by:** ADR-0004 (LGD portal sources; XLSX reader)
 
 ## Context
 

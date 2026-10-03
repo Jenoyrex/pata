@@ -1,46 +1,39 @@
-# Provenance manifest (ADR-0001 section 5). Data file itself is never committed.
+# Provenance manifest (ADR-0001 section 5; source per ADR-0004). Data file itself is never committed.
 id = "lgd_districts"
-name = "Local Government Directory (LGD) - Districts"
+name = "Local Government Directory (LGD) - All Districts of India"
 publisher = "Ministry of Panchayati Raj, Government of India (Local Government Directory)"
-dataset_url = "https://www.data.gov.in/resource/local-government-directory-lgd-districts"
-resource_id = "37231365-78ba-44d5-ac22-3deec40b9197"
-distributor = "Open Government Data (OGD) Platform India, data.gov.in (NIC, MeitY)"
-license = "GODL-India"  # Government Open Data License - India; no SPDX identifier exists
-license_url = "https://www.data.gov.in/Godl"
-# Licence verified 2026-10-02 from the official GODL-India text served by data.gov.in
-# (/Godl) and the site-wide notice that content on data.gov.in is licensed under it (the
-# resource-level licence field is empty). Conditions: attribution in the GODL section 5
-# format, non-endorsement, no warranty; section 6 exempts personal information.
-# Resource dates as shown in data.gov.in metadata on metadata_checked. They describe the
-# publisher's resource, not Pata's copy: snapshot.retrieved is when we downloaded it.
-resource_published = "2022-07-22"
-resource_last_updated = "2026-09-25"
-metadata_checked = "2026-10-02"
-redistribution = "permitted with attribution under GODL-India; Pata does not redistribute it (raw data stays out of git)"
-# GODL section 5 template: Provider, Year of Publication, Name of Data, Repository,
-# Version/Date of Publication, URL. Published under Licence: URL. Year = resource_published;
-# date = resource_last_updated. Re-check both against the resource when pinning a snapshot.
-attribution = "Ministry of Panchayati Raj, Government of India (Local Government Directory), 2022, Local Government Directory (LGD) - Districts, Open Government Data (OGD) Platform India, 25/09/2026, https://www.data.gov.in/resource/local-government-directory-lgd-districts. Published under Government Open Data License - India: https://www.data.gov.in/Godl."
+dataset_url = "https://lgdirectory.gov.in/downloadDirectory.do"
+distributor = "Local Government Directory portal, lgdirectory.gov.in (designed, hosted and maintained by NIC)"
+report = "All Districts of India"  # portal Download Directory entity
+report_generated = "2026-10-03T19:55:41+05:30"  # portal timestamp in the downloaded file name
+license = "LGD Copyright Policy"  # no SPDX identifier exists; not GODL-India
+license_url = "https://lgdirectory.gov.in/copyRightPolicy.do"
+# Read 2026-10-03: "Material featured on this site may be reproduced free of charge in any
+# format or media without requiring specific permission", if reproduced accurately, not used in
+# a derogatory manner or misleading context, and the source is prominently acknowledged when
+# published or issued to others. Interim acknowledgement wording: ADR-0004 section 2.
+redistribution = "reproduction permitted free of charge with prominent acknowledgement (LGD Copyright Policy); Pata does not redistribute it (raw data stays out of git)"
+attribution = 'Source: Local Government Directory (LGD), Ministry of Panchayati Raj, Government of India, https://lgdirectory.gov.in/. Report "All Districts of India", generated 2026-10-03 19:55:41 IST, retrieved 2026-10-03. Reproduced under the LGD Copyright Policy (https://lgdirectory.gov.in/copyRightPolicy.do).'
 retrieval = """
-Manual. Open https://www.data.gov.in/resource/local-government-directory-lgd-districts, use Download (CSV). Direct
-file links returned HTTP 403/301 to scripts on 2026-10-02; the site flow may ask for a form or login.
-Save as data/raw/data.gov.in/lgd_districts.csv. API alternative (untested by Pata, needs a personal data.gov.in
-API key): https://api.data.gov.in/resource/37231365-78ba-44d5-ac22-3deec40b9197?format=csv&api-key=YOUR_KEY
-Then run: uv run scripts/build_gazetteer.py --snapshot-info  and pin [snapshot] below.
+Manual (CAPTCHA). Open https://lgdirectory.gov.in/downloadDirectory.do, choose the entity
+"All Districts of India", report format Xls, solve the CAPTCHA and download. Keep the portal file
+name and save it under data/raw/lgdirectory.gov.in/. Do not edit or re-save the file.
+Then run: uv run scripts/build_gazetteer.py --snapshot-info  and compare with [snapshot] below.
 """
 entity = "admin_unit"
 level = "district"
-raw_file = "data.gov.in/lgd_districts.csv"
+raw_file = "lgdirectory.gov.in/All_Districtof_India_2026-10-03_19-55-41.xlsx"
+# Exact row 1 and row 2 of the workbook; the build refuses a file whose title or header differs.
+title = "All Districts of India"
+header = ["S.No.", "State Code", "State Name (In English)", "District Code", "District Name(In English)", "Census 2001 Code", "Census 2011 Code"]
 
 [snapshot]  # pinned after retrieval; build refuses files that do not match
-retrieved = ""
-sha256 = ""
-rows = 0
+retrieved = "2026-10-03"
+sha256 = "59bb5756c9c4666da232edd1a5484c9e397f48c32d62ef1fab69021ddc06dc83"
+rows = 784  # data rows, excluding title and header
 
-[columns]  # canonical name = source header
-# UNMAPPED: data.gov.in publishes no field list for this resource. Fill these from the
-# real header (--snapshot-info prints it). Do not guess: e.g. LGD code vs Census code columns.
-code = ""
-name = ""
-name_local = ""
-parent_code = ""
+[columns]  # canonical name = source header (exact)
+code = "District Code"
+name = "District Name(In English)"
+name_local = ""  # the file has no local-name column
+parent_code = "State Code"

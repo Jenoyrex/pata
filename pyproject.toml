@@ -9,7 +9,9 @@ authors = [
     { name = "Jenoy REX", email = "jenoyrex95@gmail.com" }
 ]
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+    "openpyxl>=3.1,<4",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.13,<0.13.0"]

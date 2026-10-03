@@ -2,14 +2,18 @@
 
 import csv
 import hashlib
+import json
 from pathlib import Path
 
 import pytest
+from openpyxl import Workbook
 
 from pata import gazetteer
 from pata.gazetteer import BuildError, load_manifests, run
 
-REPO_MANIFESTS = Path(__file__).resolve().parents[1] / "data" / "manifests"
+ROOT = Path(__file__).resolve().parents[1]
+REPO_MANIFESTS = ROOT / "data" / "manifests"
+LGD_CORE = ("lgd_states", "lgd_districts", "lgd_subdistricts", "lgd_villages_pincode")
 
 V = dict(state_code="91", state_name="Testland", district_code="9101", district_name="North Test")
 
@@ -92,19 +96,40 @@ def fixture_sources():
     }
 
 
-def write_sources(root: Path, sources: dict) -> tuple[Path, Path]:
+def _xlsx_value(col: str, v: str):
+    """Store codes and PINs as numeric cells, as the LGD portal does (35 -> 35.0)."""
+    if not v:
+        return None
+    return float(v) if col.endswith("code") or col == "pincode" else v
+
+
+def write_sources(root: Path, sources: dict, xlsx=()) -> tuple[Path, Path]:
+    """Write fixture raw files and manifests. Sources named in xlsx are LGD-style workbooks."""
     mdir, rdir = root / "manifests", root / "raw"
     mdir.mkdir(parents=True)
     rdir.mkdir()
     for sid, (entity, level, rows) in sources.items():
-        raw = rdir / f"{sid}.csv"
-        with raw.open("w", encoding="utf-8", newline="") as f:
-            w = csv.DictWriter(f, list(rows[0]), lineterminator="\n")
-            w.writeheader()
-            w.writerows(rows)
+        header = list(rows[0])
+        if sid in xlsx:
+            raw = rdir / f"{sid}.xlsx"
+            wb = Workbook()
+            ws = wb.active
+            ws.append([f"Fixture {sid}"])  # row 1: report title
+            ws.append(header)  # row 2: header
+            for r in rows:
+                ws.append([_xlsx_value(c, r[c]) for c in header])
+            wb.save(raw)
+        else:
+            raw = rdir / f"{sid}.csv"
+            with raw.open("w", encoding="utf-8", newline="") as f:
+                w = csv.DictWriter(f, header, lineterminator="\n")
+                w.writeheader()
+                w.writerows(rows)
         lines = [f'{k} = "fixture"' for k in gazetteer.MANIFEST_KEYS[1:10]]
-        lines += [f'id = "{sid}"', f'entity = "{entity}"', f'raw_file = "{sid}.csv"']
+        lines += [f'id = "{sid}"', f'entity = "{entity}"', f'raw_file = "{raw.name}"']
         lines += [f'level = "{level}"'] if level else []
+        if sid in xlsx:
+            lines += [f'title = "Fixture {sid}"', f"header = {json.dumps(header)}"]
         lines += [
             "[snapshot]",
             'retrieved = "2026-01-01"',
@@ -220,15 +245,92 @@ def test_invalid_codes_are_errors(tmp_path):
     assert {"invalid_pincode", "invalid_lgd_code"} <= codes(tmp_path / "out")
 
 
+def edit(path: Path, old: str, new: str) -> None:
+    text = path.read_text(encoding="utf-8")
+    assert old in text
+    path.write_text(text.replace(old, new), encoding="utf-8")
+
+
+LGD_XLSX = ("states", "districts", "subdistricts", "villages")
+
+
+def test_xlsx_sources_are_decoded(tmp_path):
+    src = fixture_sources()
+    for r in src["villages"][2][:2]:  # both PIN rows of village 9100001
+        r["village_name"] = " Rampur Test  "  # stored text is kept as is
+    mdir, rdir = write_sources(tmp_path, src, xlsx=LGD_XLSX)
+    assert run(mdir, rdir, tmp_path / "out") == 0
+    units = {u["id"]: u for u in read(tmp_path / "out" / "admin_unit.csv")}
+    assert units["lgd:district:9101"]["lgd_code"] == "9101"  # numeric cell 9101.0 -> "9101"
+    assert units["lgd:district:9101"]["parent_id"] == "lgd:state:91"
+    assert units["lgd:village:9100001"]["name"] == " Rampur Test  "
+    links = read(tmp_path / "out" / "village_pincode.csv")
+    assert {lk["pincode"] for lk in links} == {"990001", "990002"}
+
+
+def test_xlsx_non_integral_number_is_rejected(tmp_path):
+    src = fixture_sources()
+    src["villages"][2][0]["pincode"] = "990001.5"
+    mdir, rdir = write_sources(tmp_path, src, xlsx=LGD_XLSX)
+    with pytest.raises(BuildError, match="never rounded"):
+        run(mdir, rdir, tmp_path / "out")
+
+
+def test_xlsx_title_must_match_manifest(tmp_path):
+    mdir, rdir = write_sources(tmp_path, fixture_sources(), xlsx=LGD_XLSX)
+    edit(mdir / "states.toml", 'title = "Fixture states"', 'title = "All States"')
+    with pytest.raises(BuildError, match="row 1"):
+        run(mdir, rdir, tmp_path / "out")
+
+
+def test_xlsx_header_must_match_manifest(tmp_path):
+    mdir, rdir = write_sources(tmp_path, fixture_sources(), xlsx=LGD_XLSX)
+    edit(mdir / "districts.toml", '"parent_code"]', '"parent code"]')
+    with pytest.raises(BuildError, match="row 2 header"):
+        run(mdir, rdir, tmp_path / "out")
+
+
+def test_deferred_source_is_skipped(tmp_path):
+    src = fixture_sources()
+    src["villages"][2][0]["pincode"] = "990009"  # not an India Post PIN in the fixture
+    mdir, rdir = write_sources(tmp_path, src)
+    p = mdir / "offices.toml"
+    p.write_text('deferred = "not built"\n' + p.read_text(encoding="utf-8"), encoding="utf-8")
+    (rdir / "offices.csv").unlink()  # a deferred source needs no raw file
+    assert run(mdir, rdir, tmp_path / "out") == 0
+    assert read(tmp_path / "out" / "post_office.csv") == []
+    assert "pincode_not_in_dop" not in codes(tmp_path / "out")  # no DoP list to compare with
+    info = json.loads((tmp_path / "out" / "build_info.json").read_text(encoding="utf-8"))
+    assert info["sources"]["offices"]["deferred"] == "not built"
+
+
 def test_repo_manifests_are_complete():
-    manifests = load_manifests(REPO_MANIFESTS)
-    assert {m["id"] for _, m in manifests} == {
-        "dop_pincode_directory",
-        "lgd_states",
-        "lgd_districts",
-        "lgd_subdistricts",
-        "lgd_villages_pincode",
-    }
-    for _, m in manifests:
+    manifests = {m["id"]: m for _, m in load_manifests(REPO_MANIFESTS)}
+    assert set(manifests) == {"dop_pincode_directory", *LGD_CORE}
+    for m in manifests.values():
         assert m["license"] and m["license_url"] and m["publisher"] and m["attribution"]
-        assert m["dataset_url"].startswith("https://www.data.gov.in/")
+    assert manifests["dop_pincode_directory"]["deferred"]  # India Post deferred (ADR-0004)
+    for sid in LGD_CORE:
+        m = manifests[sid]
+        assert m["dataset_url"] == "https://lgdirectory.gov.in/downloadDirectory.do"
+        assert m["license_url"] == "https://lgdirectory.gov.in/copyRightPolicy.do"
+        assert m["raw_file"].startswith("lgdirectory.gov.in/") and m["raw_file"].endswith(".xlsx")
+        assert m["report"] and m["report_generated"] and m["snapshot"]["sha256"]
+        assert "deferred" not in m
+
+
+REAL_RAW = ROOT / "data" / "raw"
+REAL_FILES = [REAL_RAW / m["raw_file"] for _, m in load_manifests(REPO_MANIFESTS)
+              if m["id"] in LGD_CORE]  # fmt: skip
+
+
+@pytest.mark.skipif(
+    not all(f.is_file() for f in REAL_FILES), reason="pinned LGD snapshots not in data/raw"
+)
+def test_real_lgd_snapshots_build(tmp_path):
+    """Full build against the real pinned LGD files (slow; skipped when they are absent)."""
+    assert run(REPO_MANIFESTS, REAL_RAW, tmp_path) == 0
+    info = json.loads((tmp_path / "build_info.json").read_text(encoding="utf-8"))
+    assert info["rows"]["admin_unit"] == 36 + 784 + 7092 + 672619
+    assert info["rows"]["village_pincode"] == 672619
+    assert not [k for k in info["issues"] if k.startswith("error:")]
