@@ -3,11 +3,13 @@
 - **Status:** Proposed. Not accepted until the decisions in section 21.1 are
   approved by the maintainer.
 - **Date:** 2026-10-04
-- **Revision:** 3. Revision 2 followed a read-only design review on 2026-10-04
+- **Revision:** 4. Revision 2 followed a read-only design review on 2026-10-04
   that found circular split assignment, PIN circularity, an insufficient Layer D
   vocabulary and gaps in candidate reproducibility. Revision 3 (2026-10-04)
   narrows Layer D `deferred_coverage` to `pending_level`, fixes the
-  pre-annotation boundary and removes remaining contradictions.
+  pre-annotation boundary and removes remaining contradictions. Revision 4
+  (2026-10-04), from the ADR-0007 review: P6 is answered from ingestion-time
+  statistics, and cross-release split stability is recorded as open (L5).
 - **Deciders:** Project maintainer
 - **Relates to:** ADR-0001 (data, privacy, licensing, scope), ADR-0002 and ADR-0004
   (gazetteer sources and IDs), ADR-0005 (`gazetteer_version`)
@@ -744,8 +746,11 @@ annotators.
   - the share of test gold `entity_id`s that also appear in train
 
   The audit is reported. It never moves records after the split is frozen.
-- Unresolved groups can be large. The pilot measures how many records end up
-  unresolved (P6).
+- Unresolved groups can be large. How many records end up unresolved is counted
+  at ingestion, before the split is first computed (P6).
+- Adding sources or records in a later release can merge groups (step 4) and so
+  change the `group_key`, and the split, of records already assigned. How
+  assignments carry over between releases is open (section 21.3, L5).
 - Before the freeze, the split may be recomputed **only** to fix a bug in the
   procedure, as a new `split_version`, and never using gold.
 
@@ -850,7 +855,11 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
 | F12 | new | `source_context` allowlist and screening. Only structured comment codes are released. | Privacy. |
 | F13 | new | No pre-annotation (section 13): until independent labels are frozen, no generated candidate recommendations or lists, ranked candidates, suggested entities, model labels or prior annotations of the same layer are presented. Complete generated candidate lists become available only after the independent C labels are stored and frozen, and are then shown in C reconciliation and the adjudication that follows it, so that the derivation of `final_set` can be audited. Annotators are blinded to each other. The adjudicator is blinded to annotator identities. | Protects the gold against confirmation bias. |
 
-#### 21.2 Deferred until the pilot (needs data; not to be decided without it)
+#### 21.2 Deferred until data exists (not to be decided without it)
+
+P1 to P5 and P7 are answered by the pilot. P6 is answered from ingestion-time
+aggregate statistics before the split is first computed, never from pilot
+annotations.
 
 | # | Was | Question |
 |---|---|---|
@@ -859,7 +868,7 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
 | P3 | new | Merging or removing `premise_name`, `country`, `unit`; whether the two-role precedence order works; how often `place_unspecified` is used. |
 | P4 | new | The contents of the normalization table; whether Layer B is a v0 evaluation task. |
 | P5 | new | Rules for labelling a bare name as `state` or `district` from the reference list when the same name is also a village or other place. |
-| P6 | U13 (rest) | Split ratios; acceptable share of unresolved groups; whether `test_source_holdout` is feasible with the approved sources. |
+| P6 | U13 (rest) | Split ratios; acceptable share of unresolved groups; whether `test_source_holdout` is feasible, and with which publishers of the approved sources. Answered from ingestion-time aggregate statistics before the split is first computed, never from pilot annotations, because pilot records come from the dev split. |
 | P7 | new | The closed list of pruning reasons. |
 
 #### 21.3 Deferred to another ADR or document
@@ -870,6 +879,7 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
 | L2 | new | Task and metric definitions; whether an "open" track exists | A task-definition document |
 | L3 | U18 (rest) | LGD sub-district semantics per selected state; whether to enable `block`; verifying cue-table entries | Together with the focus-state ADR |
 | L4 | U4 | Annotator recruitment, consent, compensation. Consent is required either way. | An annotation-protocol document |
+| L5 | new | How split assignments carry over between releases when new sources or records change duplicate merges (section 17, step 4). Unresolved; no policy is chosen here. Must be decided before any second release, or any change to the source set after a split is first computed. | An ADR amending section 17 (or a revision of this ADR while it is Proposed) |
 
 #### 21.4 Removed from ADR-0006
 
@@ -903,9 +913,10 @@ U17 (`settlement_context`) is not removed: it is replaced by F11.
   2. `docs/schema.md`
   3. the reference list, cue table and normalization table procedures
   4. the candidate and resolution procedures
-  5. the split key procedure
+  5. the split key procedure, with P6 answered from ingestion-time statistics
+     before the split is first computed
   6. the guidelines
   7. the validator
-  8. the pilot (P1 to P7)
+  8. the pilot (P1 to P5, P7)
 
   None of this produces results until real admitted records exist.
