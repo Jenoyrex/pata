@@ -3,7 +3,11 @@
 - **Status:** Accepted
 - **Date:** 2026-10-03
 - **Deciders:** Project maintainer
-- **Amends:** ADR-0002 (decision 1 for the four LGD sources; decision 7, standard library only)
+- **Amends:** ADR-0002 (decision 1 for the four LGD sources; decision 7, standard library only).
+  ADR-0005 records that it also amends ADR-0002 decisions 5 and 8 for these sources.
+- **Corrected:** 2026-10-04 (ADR-0005). Wording only: section 3 and the Consequences
+  described the ingestion change as pending although it landed in the same commit
+  (e8a6420). The decisions are unchanged.
 
 ## Context
 
@@ -121,8 +125,8 @@ portal report name, its generation timestamp (from the filename) and the title t
 in row 1. The build refuses a file whose checksum, row count, row-1 title or row-2
 header differs.
 
-The raw files keep their original portal filenames. They will live under
-`data/raw/lgdirectory.gov.in/` once the ingestion change lands.
+The raw files keep their original portal filenames and live under
+`data/raw/lgdirectory.gov.in/`.
 
 ### 4. Reading XLSX: decoding, not normalization
 
@@ -187,13 +191,15 @@ scope (ADR-0002), and a Census code of `0` means "none".
 ## Consequences
 
 - The four LGD manifests, the gazetteer loader, `docs/gazetteer.md` and the tests
-  change together in one follow-up ingestion change, not in this ADR. Until then
-  the manifests and `docs/gazetteer.md` still describe the data.gov.in sources.
+  were changed to these sources in the same commit as this ADR (e8a6420).
 - Refreshing a snapshot is a manual browser download followed by an explicit
   manifest diff. Pata cannot fetch these reports unattended.
 - Quality output expected from these snapshots:
   - about 11,260 `name_key_collision` warnings (distinct villages that share a
-    name within one sub-district, which LGD allows).
+    name within one sub-district, which LGD allows). This was an approximate
+    expectation, kept here as history. The first build (e8a6420) measured 11,382
+    groups. ADR-0005 explains the difference, splits the warning into two codes
+    and gives the current counts.
   - village names with an undocumented trailing `*` (113), census-style suffixes
     such as `(Ct)` and `(Og)`, and non-ASCII punctuation, kept as published.
   - very large PIN fan-outs (e.g. 834001 → 1,308 villages), reported, not corrected.

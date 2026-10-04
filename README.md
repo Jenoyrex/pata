@@ -26,9 +26,15 @@ Current milestone, **M0 "Know the data"**:
 
 - [x] Repository, tooling, CI, data/privacy policy
 - [ ] All-India reference gazetteer (with quality audit). The LGD administrative
-      hierarchy and village → PIN mapping are pinned and build cleanly
-      ([docs/gazetteer.md](docs/gazetteer.md)). The India Post directory and urban
-      PIN mapping are deferred.
+      hierarchy and village → PIN mapping are pinned and build with no errors.
+      It reports 11,390 warning records, all about same-named villages under one
+      sub-district: 11,258 `same_name_siblings` (identical names, which LGD allows)
+      and 132 `variant_name_siblings` (spellings that differ only in case,
+      punctuation, spacing or Unicode form; the source can't say whether they are
+      distinct villages). They cover 11,382 name collision groups; 8 groups hold
+      both an identical pair and a variant spelling, hence 8 more records than
+      groups ([docs/gazetteer.md](docs/gazetteer.md)). The India Post directory and
+      urban PIN mapping are deferred.
 - [ ] Annotation schema v0.1 and pilot annotation (with inter-annotator agreement)
 - [ ] Evaluation harness and trivial baselines
 

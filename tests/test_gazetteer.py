@@ -3,6 +3,7 @@
 import csv
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -163,6 +164,58 @@ def test_build_succeeds(tmp_path):
     # India Post labels are kept raw, never resolved to LGD units.
     assert offices["dop:po:990001:rampur-test-b-o"]["district_name"] == "NORTH TEST"
     assert codes(tmp_path / "out") == {"unparseable_coordinate", "village_row_without_pincode"}
+
+
+def test_build_info_provenance(tmp_path):
+    mdir, rdir = write_sources(tmp_path, fixture_sources())
+    run(mdir, rdir, tmp_path / "out")
+    info = json.loads((tmp_path / "out" / "build_info.json").read_text(encoding="utf-8"))
+    shas = sorted(m["snapshot"]["sha256"] for _, m in load_manifests(mdir))
+    expected = hashlib.sha256("\n".join(shas).encode()).hexdigest()
+    assert info["gazetteer_version"] == expected
+    assert info["git_dirty"] in (True, False, None)
+    tables = {f"{t}.csv" for t in gazetteer.TABLES} | {"issues.csv"}
+    assert set(info["outputs"]) == tables
+    for name, digest in info["outputs"].items():
+        assert hashlib.sha256((tmp_path / "out" / name).read_bytes()).hexdigest() == digest
+
+
+def test_gazetteer_version_follows_source_snapshots(tmp_path):
+    src = {"a": {"sha256": "1" * 64}, "b": {"sha256": "2" * 64}, "d": {"deferred": "x"}}
+    v = gazetteer.gazetteer_version(src)
+    assert v == gazetteer.gazetteer_version(dict(reversed(src.items())))  # order-free
+    assert v != gazetteer.gazetteer_version({**src, "b": {"sha256": "3" * 64}})
+
+
+def test_git_state_reports_dirty_tree(tmp_path):
+    assert gazetteer.git_state(tmp_path) == ("unknown", None)  # not a git repository
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    assert gazetteer.git_state(tmp_path) == ("unknown", False)  # empty repo, nothing changed
+    (tmp_path / "new.txt").write_text("x", encoding="utf-8")
+    assert gazetteer.git_state(tmp_path)[1] is True  # untracked file: code != any commit
+
+
+def test_same_and_variant_name_siblings(tmp_path):
+    src = fixture_sources()
+    base = src["villages"][2][0]
+    src["villages"][2].extend([
+        {**base, "village_code": "9100003", "pincode": "990001"},  # same raw name, same parent
+        {**base, "village_code": "9100004", "village_name": "RAMPUR-TEST"},  # variant spelling
+        {**base, "village_code": "9100005", "subdistrict_code": "910102",
+         "subdistrict_name": "Beta Tehsil"},  # same name, other parent: not a sibling
+    ])  # fmt: skip
+    mdir, rdir = write_sources(tmp_path, src)
+    assert run(mdir, rdir, tmp_path / "out") == 0
+    found = {
+        i["code"]: i["entity_id"]
+        for i in read(tmp_path / "out" / "issues.csv")
+        if i["code"].endswith("_siblings")
+    }
+    assert found == {
+        "same_name_siblings": "lgd:village:9100001|lgd:village:9100003",
+        "variant_name_siblings": "lgd:village:9100001|lgd:village:9100003|lgd:village:9100004",
+    }
+    assert "name_key_collision" not in codes(tmp_path / "out")
 
 
 def test_build_is_deterministic(tmp_path):
@@ -333,4 +386,12 @@ def test_real_lgd_snapshots_build(tmp_path):
     info = json.loads((tmp_path / "build_info.json").read_text(encoding="utf-8"))
     assert info["rows"]["admin_unit"] == 36 + 784 + 7092 + 672619
     assert info["rows"]["village_pincode"] == 672619
-    assert not [k for k in info["issues"] if k.startswith("error:")]
+    # Exact findings of the pinned snapshots (ADR-0005): 11,250 groups of identical
+    # sibling names, 132 spelling-variant groups, 8 of which also hold an identical pair.
+    assert info["issues"] == {
+        "warning:same_name_siblings": 11258,
+        "warning:variant_name_siblings": 132,
+    }
+    assert info["gazetteer_version"] == (
+        "bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78"
+    )

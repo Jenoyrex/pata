@@ -4,7 +4,9 @@ The gazetteer is Pata's reference data for administrative and postal geography.
 Parsers, resolvers and benchmarks are checked against it. Sources and the reasons
 for each choice are in [ADR-0002](decisions/0002-gazetteer-sources-and-schema.md),
 amended by [ADR-0004](decisions/0004-lgd-portal-xlsx-snapshots.md) for the LGD
-sources. The data policy is in [ADR-0001](decisions/0001-data-privacy-licensing-scope.md).
+sources. Build provenance and warning codes are in
+[ADR-0005](decisions/0005-gazetteer-version-and-warning-taxonomy.md). The data
+policy is in [ADR-0001](decisions/0001-data-privacy-licensing-scope.md).
 
 ## Sources
 
@@ -122,8 +124,17 @@ produces the same bytes. Empty string means "not provided by the source".
 
 **`issues.csv`**: every quality finding (`severity`, `code`, `entity_id`, `message`).
 
-**`build_info.json`**: build status, pata version, git commit, source snapshots
-(checksum, rows, retrieval date, licence), table row counts and issue counts.
+**`build_info.json`** (ADR-0005):
+- `status`, `pata_version`, table row counts and issue counts
+- `sources`: each source snapshot's checksum, rows, retrieval date and licence
+- `gazetteer_version`: SHA-256 of the sorted SHA-256s of the built source
+  snapshots. It identifies the exact input snapshots, independent of code and
+  build time. Cite it whenever data is derived from the gazetteer.
+- `git_commit` and `git_dirty`: the code that ran. `git_dirty` is `true` when the
+  tree has uncommitted changes or untracked, non-ignored files, so the tables
+  can't be attributed to `git_commit` alone. It is `null` when git state can't be
+  read. A dirty or unknown state also prints a warning.
+- `outputs`: the SHA-256 of every file written in this build
 
 ## Quality checks
 
@@ -138,7 +149,8 @@ produces the same bytes. Empty string means "not provided by the source".
 | `unknown_admin_unit` | error | The village file names a state, district or sub-district that is missing from its level file |
 | `hierarchy_mismatch` | error | The village file and a level file disagree about a unit's parent |
 | `exact_duplicate_row` | warning | Identical row repeated; one copy is kept |
-| `name_key_collision` (admin) | warning | Sibling units have the same normalized name. This can be legitimate. |
+| `same_name_siblings` | warning | Sibling units (same level, same parent) have byte-identical published names. LGD allows this. One warning per repeated name. |
+| `variant_name_siblings` | warning | Sibling units whose published names differ but share one `name_key` (e.g. `Haripura` / `Haripura.`). They may be distinct units or one unit entered twice; the source can't tell. One warning per group. |
 | `cross_source_name_mismatch` | warning | The same LGD code is named differently in two LGD files |
 | `unparseable_coordinate` | warning | Coordinate couldn't be parsed and was blanked |
 | `coordinate_outside_india_bbox` | warning | Point lies outside a rough lat/lon box around India (not a boundary) |
@@ -161,7 +173,7 @@ Checks that happen before any tables are built (exit code 2):
 
 It is script-agnostic, and Indic combining marks are preserved. It does no
 abbreviation expansion, transliteration or spelling correction. The key is used
-only for duplicate and collision detection and for post-office IDs. Published names
+only for duplicate and sibling-name detection and for post-office IDs. Published names
 are never overwritten.
 
 ## Known limitations
@@ -185,13 +197,24 @@ are never overwritten.
 ## v0 snapshot quality (2026-10-03)
 
 The build of the pinned snapshots exits `0` with no errors.
+`gazetteer_version` is `bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78`.
 
 - `admin_unit`: 680,531 rows (36 states, 784 districts, 7,092 sub-districts,
   672,619 villages). `village_pincode`: 672,619 rows. Every village has exactly one
   PIN in this snapshot.
-- 11,382 `name_key_collision` warnings, all at village level: distinct village
-  codes with the same normalized name under one sub-district. LGD allows this. The
-  names are not changed.
+- 11,390 warning records, all at village level, all about siblings under one
+  sub-district. No errors. The names are not changed.
+  - 11,258 `same_name_siblings` records: one per name shared by distinct
+    village codes under one sub-district. LGD allows this.
+  - 132 `variant_name_siblings` records: one per group whose spellings differ
+    only in case, punctuation, spacing or Unicode form.
+  - The records cover 11,382 distinct name collision groups (equal `name_key`
+    under one parent). 8 groups contain both an identical pair and a variant
+    spelling, so they get one record of each code: 11,390 − 11,382 = 8 (ADR-0005).
+  - ADR-0004's "about 11,260" was a pre-build estimate. It is historical and not
+    a measured result.
+- Processed tables built before ADR-0005 lack `gazetteer_version`, `git_dirty`
+  and `outputs`, and use the old warning code. Rebuild them from a clean checkout.
 - Not flagged by a check, but visible in the data:
   - one PIN can cover many villages (median 19, maximum 1,308 for 834001)
   - 1,889 PINs span more than one district and 27 span two states

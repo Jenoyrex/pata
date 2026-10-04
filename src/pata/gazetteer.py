@@ -14,6 +14,7 @@ import json
 import math
 import re
 import subprocess
+import sys
 import tomllib
 import warnings
 from collections import Counter, defaultdict
@@ -363,12 +364,22 @@ def _check_admin(units: list[dict], claims: set) -> list[Issue]:
                 issues.append(Issue("error", "missing_required", uid, "parent code is empty"))
             elif u["parent_id"] not in by_id:
                 issues.append(Issue("error", "broken_parent", uid, f"{u['parent_id']} not found"))
-        siblings[(u["parent_id"], u["level"], name_key(u["name"]))].append(uid)
-    for ids in siblings.values():
-        if len(ids) > 1:
-            issues.append(
-                Issue("warning", "name_key_collision", "|".join(sorted(ids)), "same parent")
-            )
+        siblings[(u["parent_id"], u["level"], name_key(u["name"]))].append(u)
+    for (parent, _, _), group in siblings.items():
+        if len(group) < 2:
+            continue
+        under = parent or "(no parent)"
+        by_name = defaultdict(list)  # exact published name -> ids
+        for u in group:
+            by_name[u["name"]].append(u["id"])
+        for name, ids in by_name.items():
+            if len(ids) > 1:
+                msg = f"{len(ids)} units named {name!r} under {under}"
+                issues.append(Issue("warning", "same_name_siblings", "|".join(sorted(ids)), msg))
+        if len(by_name) > 1:
+            ids = "|".join(sorted(u["id"] for u in group))
+            msg = f"names {sorted(by_name)} under {under} share one name_key"
+            issues.append(Issue("warning", "variant_name_siblings", ids, msg))
     for cid, parent, name in sorted(claims):
         u = by_id.get(cid)
         if u is None:
@@ -477,18 +488,32 @@ def _write_csv(path: Path, fields: tuple, rows: list[dict]) -> None:
         w.writerows(rows)
 
 
-def _git_commit() -> str:
+def _git(cwd: Path, *args: str) -> str | None:
     try:
-        out = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            cwd=Path(__file__).parent,
-            check=False,
-        )
+        out = subprocess.run(["git", *args], capture_output=True, text=True, cwd=cwd, check=False)
     except OSError:
-        return "unknown"
-    return out.stdout.strip() or "unknown"
+        return None
+    return out.stdout if out.returncode == 0 else None
+
+
+def git_state(cwd: Path = Path(__file__).parent) -> tuple[str, bool | None]:
+    """(HEAD commit or "unknown", dirty). dirty is None when git state cannot be read.
+
+    Dirty means tracked changes or untracked, non-ignored files: the code that ran
+    is then not exactly the recorded commit.
+    """
+    commit = (_git(cwd, "rev-parse", "HEAD") or "").strip() or "unknown"
+    status = _git(cwd, "status", "--porcelain")
+    return commit, None if status is None else bool(status.strip())
+
+
+def gazetteer_version(sources: dict) -> str:
+    """SHA-256 over the sorted SHA-256s of the built (non-deferred) source snapshots.
+
+    Same pinned snapshots -> same version, whatever the code commit or build time.
+    """
+    shas = sorted(s["sha256"] for s in sources.values() if "sha256" in s)
+    return hashlib.sha256("\n".join(shas).encode("ascii")).hexdigest()
 
 
 def run(manifest_dir: Path, raw_dir: Path, out_dir: Path) -> int:
@@ -496,17 +521,27 @@ def run(manifest_dir: Path, raw_dir: Path, out_dir: Path) -> int:
     tables, issues, sources = build(manifest_dir, raw_dir)
     ok = not any(i.severity == "error" for i in issues)
     out_dir.mkdir(parents=True, exist_ok=True)
+    written = []
     for name, rows in tables.items():
         path = out_dir / f"{name}.csv"
         if ok:
             _write_csv(path, TABLES[name], rows)
+            written.append(path)
         else:
             path.unlink(missing_ok=True)  # never leave a stale table next to a failed build
     _write_csv(out_dir / "issues.csv", ISSUE_FIELDS, [asdict(i) for i in issues])
+    written.append(out_dir / "issues.csv")
+    commit, dirty = git_state()
+    if dirty is not False:
+        state = "has uncommitted changes" if dirty else "could not be read"
+        print(f"warning: git tree {state}; build_info records git_dirty={dirty}", file=sys.stderr)
     info = {
         "status": "ok" if ok else "failed",
         "pata_version": __version__,
-        "git_commit": _git_commit(),
+        "gazetteer_version": gazetteer_version(sources),
+        "git_commit": commit,
+        "git_dirty": dirty,
+        "outputs": {p.name: sha256_file(p) for p in written},
         "sources": sources,
         "rows": {name: len(rows) for name, rows in tables.items()},
         "issues": dict(sorted(Counter(f"{i.severity}:{i.code}" for i in issues).items())),

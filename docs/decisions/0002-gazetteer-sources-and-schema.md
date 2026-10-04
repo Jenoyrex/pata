@@ -6,7 +6,12 @@
 - **Corrected:** 2026-10-02, after a provenance verification pass. Factual context
   only: GODL-India terms verified from the official text, LGD portal reuse terms,
   PIN directory freshness, attribution format. The decisions are unchanged.
-- **Amended by:** ADR-0004 (LGD portal sources; XLSX reader)
+- **Amended by:** ADR-0004 (LGD portal sources; XLSX reader). For the four LGD
+  sources this also covers decision 5 (their column mappings are now filled from
+  the real files) and decision 8 (their manifests carry the LGD Copyright Policy
+  acknowledgement and portal report timestamps instead of a GODL attribution and
+  data.gov.in resource dates), and makes the first Consequence moot. Recorded by
+  ADR-0005; decision 8 still applies to the deferred India Post manifest.
 
 ## Context
 

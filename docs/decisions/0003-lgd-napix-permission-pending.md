@@ -3,6 +3,12 @@
 - **Status:** Proposed. **PERMISSION PENDING**
 - **Date:** 2026-10-03
 - **Deciders:** Project maintainer
+- **Superseded in part by:** ADR-0004, for acquiring the v0 LGD snapshots: they come
+  from the LGD portal, so the Consequences below no longer block the gazetteer, and
+  ADR-0004 amends ADR-0002 (this ADR forbids that only for a switch to NAPIX). The
+  NAPIX request itself is unchanged and still unanswered; NAPIX is not an approved
+  source and no NAPIX data, credentials or calls exist (status note dated 2026-10-04,
+  ADR-0005).
 
 ## Context
 
