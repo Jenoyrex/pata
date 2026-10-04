@@ -1,0 +1,911 @@
+# ADR-0006: PataBench v0 annotation scope and schema
+
+- **Status:** Proposed. Not accepted until the decisions in section 21.1 are
+  approved by the maintainer.
+- **Date:** 2026-10-04
+- **Revision:** 3. Revision 2 followed a read-only design review on 2026-10-04
+  that found circular split assignment, PIN circularity, an insufficient Layer D
+  vocabulary and gaps in candidate reproducibility. Revision 3 (2026-10-04)
+  narrows Layer D `deferred_coverage` to `pending_level`, fixes the
+  pre-annotation boundary and removes remaining contradictions.
+- **Deciders:** Project maintainer
+- **Relates to:** ADR-0001 (data, privacy, licensing, scope), ADR-0002 and ADR-0004
+  (gazetteer sources and IDs), ADR-0005 (`gazetteer_version`)
+
+This ADR decides **what** is annotated, **how** labels are represented, **what
+annotators and systems may see**, and **how splits and releases are built**. It
+creates no tooling, collects no data and writes no `docs/schema.md`. No
+annotation, corpus or result exists. Every number that depends on data (pilot
+size, agreement thresholds, split ratios) is left open on purpose (section 21).
+
+## Context
+
+PataBench needs gold data for four research questions:
+- where the components of an address are
+- how they are written canonically
+- which real-world unit each one refers to
+- where the address as a whole points
+
+Merging these into one label would hide which step a system got wrong.
+
+Constraints already in force:
+
+- **ADR-0001.**
+  - Only public, non-personal sources and clearly flagged synthetic data. No
+    scraped personal or user addresses.
+  - Personal data is removed at ingestion. Residential-looking records are
+    excluded, not anonymized.
+  - Labels are on character offsets. Every record has a script and a language
+    field.
+  - Synthetic data is never a headline result.
+  - Focus states are chosen in a later ADR, and nothing may assume a fixed set of
+    states.
+  - No UI, API server or deployment infrastructure.
+- **Gazetteer (ADR-0002, ADR-0004, ADR-0005, `docs/gazetteer.md`).**
+  - Linkable units are LGD units `lgd:{level}:{lgd_code}`, at the levels `state`,
+    `district`, `subdistrict` and `village`.
+  - Each build is identified by `gazetteer_version`. The current one is
+    `bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78`.
+  - There are no urban local bodies or localities. India Post is deferred. There
+    is no PIN entity table: PINs exist only as values in `village_pincode`.
+    `name_local` is empty. LGD history is not modelled.
+- **The gazetteer is ambiguous by nature.**
+  - 11,258 `same_name_siblings` records: identical village names under one
+    sub-district.
+  - One PIN covers a median of 19 villages, and 1,889 PINs span more than one
+    district.
+  - Census-town suffixes such as `(Ct)` appear in village names.
+- **The meaning of LGD's sub-district level varies by state.**
+  - In the pinned snapshot, 115 sub-district names contain "Circle".
+  - West Bengal has 346 sub-districts, Bihar 537 and Jharkhand 264.
+  - These counts alone do not establish which local tier (tehsil, circle, block,
+    or another) LGD records as the sub-district in a given state. That has to be
+    verified per state, not assumed (section 4).
+
+## Decision
+
+### 1. Four layers, three of them human-judged
+
+| Layer | Question | How the gold is produced |
+|---|---|---|
+| **A. Extraction** | Which character spans are address components, in which roles? | Human annotation of `raw_text` |
+| **B. Normalization** | What is each span's canonical written form? | **Generated** by a versioned procedure. Humans decide only the ambiguous cases the procedure flags (section 6). |
+| **C. Entity linking** | Which gazetteer unit does each span role denote? | Deterministic candidate generation, plus a human decision that is recorded in structured form (section 7) |
+| **D. Address resolution** | Which unit does the record point to, at each LGD level? | **Derived** by a versioned procedure from gold A and C and the pinned gazetteer (section 8). Not annotated. |
+
+- Each layer has its own fields and provenance. No label encodes two layers.
+- **Staged gold.** A is adjudicated first. B and C work on the gold spans, and D
+  is derived from gold A and C. So a boundary disagreement cannot appear as a
+  linking disagreement.
+- Each layer can be evaluated on its own:
+  - A on `raw_text`
+  - B and C with gold spans (oracle) or end to end
+  - D end to end
+- D is derived rather than annotated, so its gold can be reproduced exactly from
+  gold A and C. Its reliability is measured by deriving D from each annotator's
+  independent A and C and comparing the results (section 14).
+
+### 2. The record
+
+A **record** is one address string for one place or institution, exactly as one
+admissible source published it (section 12). Records are created by ingestion
+under a source manifest, never typed in by annotators.
+
+**`record_id` rules.** Every source manifest must declare one of two scopes:
+
+- **`native`**: the source publishes a stable identifier for the place or
+  institution.
+  - `record_id` is `rec:` + the first 32 hex characters of SHA-256 over
+    `native\n{source_id}\n{native_id}`.
+  - It persists across snapshots for as long as the publisher keeps the
+    identifier.
+  - The text may change between snapshots. Annotations are bound to
+    `raw_text_sha256`, so annotations made on old text are detected as stale and
+    are never reused silently.
+- **`snapshot`**: no stable identifier exists, only a row reference.
+  - `record_id` is `rec:` + the first 32 hex characters of SHA-256 over
+    `snapshot\n{source_id}\n{source_snapshot_sha256}\n{row_ref}`.
+  - It is valid **only within that snapshot**. A refresh creates new IDs.
+  - Carrying annotations to a new snapshot would need a separately versioned
+    matching procedure. None is defined in v0, and snapshot-scoped IDs are never
+    described as persistent.
+
+| Field | Required | Allowed values / format | Purpose and scientific use |
+|---|---|---|---|
+| `record_id` | yes | as above | Identity. Its stability is explicit, not assumed. |
+| `record_id_scope` | yes | `native` or `snapshot` | Says how far the identity can be trusted across refreshes. |
+| `source_id` | yes | an `id` from `data/manifests/` | Provenance and licence (ADR-0001 §5). Used for source holdout (section 17). |
+| `source_snapshot_sha256` | yes | 64 hex | The pinned snapshot the text came from, so the corpus can be rebuilt. |
+| `source_record_ref` | yes | the native identifier, or the row reference inside the snapshot | Lets anyone find the record in the source again. |
+| `source_type` | yes | `real` (the only allowed value in v0; section 21.1, F6) | ADR-0001 §3 source classification. Kept so that any synthetic data added later stays separable. |
+| `raw_text` | yes | Unicode string exactly as published. No trimming, Unicode normalization, case change or redaction. | The only text input to annotators and systems. All offsets refer to it. |
+| `raw_text_sha256` | yes | SHA-256 of the UTF-8 bytes of `raw_text` | Integrity check. Binds annotations to one text. Supports stand-off distribution (section 21.3, L1). |
+| `scripts` | yes, derived | sorted ISO 15924 codes from the Unicode Script property of letters | ADR-0001 §6 script field. Computed, so it is reproducible. |
+| `source_context` | optional | object whose keys come only from the manifest's `context_columns` allowlist (section 12) | Used only to compute split keys and for audits. Never gold. Never shown to annotators or systems. |
+| `admission.screen_version` | yes | version of the written privacy screen | Screening can be reproduced. |
+| `admission.screened_by` | yes | pseudonymous annotator ID or `rule:{name}` | Accountability for the privacy decision. |
+
+Removed from revision 1: `synthetic_generator` (synthetic data is excluded from v0)
+and `admission.result` (it was always `admitted`).
+
+### 3. Visibility and the outside-knowledge rule
+
+**Annotators must not use personal or world knowledge in any layer.** That
+includes knowing the place, maps, web search and memory of district names. They
+may use only:
+
+| Pass | Annotators see | Never shown |
+|---|---|---|
+| A (independent) | `raw_text`, the guidelines, the **reference name list**, the **cue table** | `source_context`, `source_id`, split membership, other annotators' work, system output, model labels and any other generated suggestion (section 13) |
+| B (ambiguity decisions) | `raw_text`, gold spans, the cases the procedure flagged with their listed expansions (none preselected, in an order that does not depend on the record), the normalization table | same as A |
+| C (independent) | `raw_text`, gold spans, the cue table, **lookups they start themselves** in the pinned gazetteer (section 13) | same as A, including generated candidate lists |
+| C (reconciliation, after the independent C labels are frozen) | everything in C (independent), plus the complete generated candidate lists | `source_context`, `source_id`, split membership, other annotators' work, system output, model labels |
+| Adjudication (after reconciliation) | `raw_text`, gold spans (for B and C), the independent and reconciliation annotations shown without annotator identities, the complete generated candidate lists | `source_context`, `source_id`, split membership, system output, model labels |
+
+- **Reference name list.** All `state` and `district` names in `admin_unit.csv` of
+  the pinned `gazetteer_version`, produced by a versioned procedure
+  (`reference_list_version`).
+  - This replaces revision 1's "general knowledge of state and district names".
+  - Village and sub-district names are not in the list. Recognizing them requires
+    a designator from the cue table, or the span is labelled `place_unspecified`.
+- **Cue table.** A versioned table (`cue_table_version`) of designators and
+  relational cue words. Each designator carries:
+  - the LGD level it indicates, **only where that mapping is verified** for the
+    state concerned
+  - a reference to where the verification is recorded
+
+  Unverified designators, such as "Block" or "Sub-division" before verification,
+  indicate no level (section 4). An unverified designator's entry may name a
+  **`pending_level`**: the single LGD level whose mapping to that designator is
+  pending verification. `pending_level` must not drive annotation, candidate
+  generation, ranking or linking. It is used only by the derived Layer D status
+  `deferred_coverage` (section 8). This ADR does not define the table's
+  contents. They come from dev-pool observation and LGD documentation.
+
+Everything an annotator may use is also available to systems (section 16). So the
+gold never relies on information systems cannot have.
+
+### 4. Span labels (v0)
+
+Labels name the **role a span plays as written**, decided by the rules in
+section 3.
+
+| Label | Covers | Default Layer C status |
+|---|---|---|
+| `organization` | The institution or facility that occupies the address | `not_applicable` |
+| `premise_name` | The name of a building, complex or campus as a physical structure | `not_applicable` |
+| `premise_number` | House, door, plot, shop, survey or building number | `not_applicable` |
+| `unit` | A part inside a building: floor, flat, room, wing, or a lettered or numbered building "block" | `not_applicable` |
+| `street` | Road, street, lane, cross, main, marg | `not_in_gazetteer` / `entity_type_not_modelled` |
+| `landmark` | Another place used as a reference ("near X"), without the cue word | `not_in_gazetteer` / `entity_type_not_modelled` |
+| `locality` | Colony, nagar, sector, ward, mohalla, area, layout | `not_in_gazetteer` / `entity_type_not_modelled` |
+| `village` | A place marked as a village by a verified designator from the cue table | linkable (`lgd:village:`) |
+| `post_office` | A place marked as a post office ("P.O.", "Post") | `not_in_gazetteer` / `source_deferred` |
+| `subdistrict` | A place marked by a designator whose mapping to LGD's sub-district level is **verified for that state** in the cue table | linkable (`lgd:subdistrict:`) |
+| `city` | A place marked as a city, town or urban local body | `not_in_gazetteer` / `urban_deferred` |
+| `district` | A place marked as a district, or a bare name matching the reference name list (rules: section 21.2, P5) | linkable (`lgd:district:`) |
+| `state` | A state or union territory: designator or reference-list match | linkable (`lgd:state:`) |
+| `pincode` | A Postal Index Number as written | `not_in_gazetteer` / `entity_type_not_modelled` |
+| `country` | A country name | `not_applicable` |
+| `place_unspecified` | A named place whose level the text does not reveal under these rules, including places with an unverified designator ("Block X", "Sub-division X") | linkable at the levels its designator allows. With an unverified designator: `not_in_gazetteer` / `level_mapping_unverified`. |
+
+**Overlapping labels and how they are told apart.** Whether any of these should be
+merged is a pilot question (section 21.2, P3).
+
+| Pair | Distinguishing test |
+|---|---|
+| `organization` / `premise_name` | `organization` names who occupies the address. `premise_name` names the structure. Test: would the name change if the occupant moved out? If yes, it is `organization`. Government buildings named after their function ("Collectorate") are the hard case the pilot must measure. |
+| `organization` / `landmark` | `organization` is the occupant of **this** address. `landmark` is another place, introduced by a relational cue. |
+| `unit` / `premise_number` | `unit` is inside a building. `premise_number` identifies the building or plot. |
+| `locality` / `village` / `city` / `place_unspecified` | Decided only by designators and cue words. Without one, the label is `place_unspecified`. The pilot measures whether `place_unspecified` takes over most of the label distribution. |
+| `street` / `locality` | Decided by the designator: "Road" and "Lane" mean `street`; "Nagar" and "Colony" mean `locality`. |
+
+**Candidates for removal**, kept in v0 pending pilot evidence:
+- `premise_name`: merge into `organization` if they can't be told apart reliably
+- `country`: trivial while scope is India
+- `unit`: drop if rare in admissible sources
+
+**`block` is not a v0 label.** Revision 1 had it. It is withdrawn because whether
+LGD's sub-district level corresponds to development blocks, revenue circles,
+tehsils or something else must be checked for each selected state before the label
+can be defined (section 21.3, L3). Revision 1 also listed "sub-division" under
+`subdistrict`. That was wrong: a sub-division may be a separate tier, so it too
+counts as an unverified designator. Text that names a block or sub-division is
+labelled `place_unspecified` and left unlinked (`level_mapping_unverified`).
+
+### 5. Spans, offsets and spans with two roles (Layer A)
+
+**Offsets:**
+- 0-based and half-open (`[start, end)`), counted in Unicode **code points** of
+  `raw_text` (Python `str` indexing).
+- Not bytes, not UTF-16 code units, not grapheme clusters.
+- `raw_text[start:end]` must equal the span's `text`.
+
+**Boundary rules**, all checkable with the standard library:
+- A span starts and ends on a non-whitespace character.
+- No boundary falls before a combining mark (`Mn`, `Mc`, `Me`), on either side of
+  U+200C or U+200D, or directly after a virama (canonical combining class 9).
+- Spans are contiguous, flat and non-overlapping.
+- Relational cue words from the cue table are **outside** spans and unlabelled.
+- Whether a designator attached to a name is inside the span ("Gonda Dist.") is
+  deferred to the pilot (section 21.2, P2). The draft guidelines put it inside.
+
+**Spans with two roles.** Sometimes one stretch of text explicitly carries two
+roles, signalled by two designators: "Vill & PO Rampur" or "Distt. & Tehsil Gonda".
+Such a span is annotated **once**:
+- `label` is its primary role: the first applicable entry in this order: `village`,
+  `subdistrict`, `district`, `state`, `city`, `post_office`, `locality`, `street`,
+  `landmark`, `premise_name`, `organization`, `premise_number`, `unit`, `pincode`,
+  `country`.
+- `also_labels` lists the other roles.
+- Two roles are recorded only when the text states both. They are never inferred.
+- Layer C links each role separately (section 7).
+
+This keeps spans flat. Nested spans are not needed for this case. Whether the
+precedence order works in practice is checked in the pilot (section 21.2, P3).
+
+| Field | Required | Allowed values / format | Purpose and scientific use |
+|---|---|---|---|
+| `span_id` | yes | `"{start}:{end}"` | Deterministic and independent of tooling. Spans are flat, so offsets identify them. |
+| `start`, `end` | yes | integers, `0 ≤ start < end ≤ len(raw_text)` | Character-offset labels (ADR-0001 §6). |
+| `text` | yes | equals `raw_text[start:end]` | Catches offset and encoding errors. |
+| `label` | yes | one label from section 4 | The primary extraction target. Single-label metrics use it. |
+| `also_labels` | optional | non-empty list of other labels from section 4, excluding `place_unspecified` | Lets a span carry two stated roles without nested spans. Scored as its own extraction sub-task. |
+
+Record-level fields set in pass A:
+
+| Field | Required | Allowed values / format | Purpose and scientific use |
+|---|---|---|---|
+| `scope` | yes | `in_scope`, `not_an_address`, `multiple_addresses`, `outside_india`, `unreadable` | Out-of-scope records are counted and excluded from metrics, never silently dropped. Layers B to D apply only to `in_scope`. |
+| `languages` | yes | BCP 47 tags with a script subtag for romanized text (`hi-Latn`). `und` is allowed. | ADR-0001 §6 language field. Used to stratify results. |
+| `code_mixed` | derived | `true` if `languages` has more than one language other than `und` | Code-mixed stratum. |
+
+### 6. Normalization (Layer B): generated, with human decisions only where it is ambiguous
+
+Layer B is produced by a **versioned normalization procedure** using a **versioned
+normalization table** (`normalization_table_version`). The table lists generic
+address abbreviations and their expansions. This ADR defines **none** of its
+entries: they come from dev-pool observation, never from guesses.
+
+What the procedure does:
+- It is deterministic: separators inside digit sequences are removed, digits are
+  converted to ASCII, and table entries with **one** expansion are expanded.
+- When a match is ambiguous, it **flags** it instead of choosing. A match is
+  ambiguous when its table entry lists several expansions, or when the entry is
+  marked as also usable inside proper names.
+- It never corrects the spelling of proper names, transliterates or translates.
+
+**The only human decision in Layer B:** for each flagged match, choose one of the
+listed expansions or `not_an_abbreviation`.
+
+| Field | Required | Allowed values / format | Purpose and scientific use |
+|---|---|---|---|
+| `span_id` | yes | an existing gold `span_id` | Joins B to A. |
+| `normalized` | generated | string, or `null` when `status` is `not_normalizable` | The normalization gold. |
+| `status` | generated | `normalized`, `unchanged`, `not_normalizable` | Separates "nothing to change" from "cannot be made canonical" (e.g. a `pincode` span that is not six digits after normalization). |
+| `ops` | generated | subset of `separator_removed`, `digits_ascii`, `abbreviation_expanded` | Error analysis by kind of operation. |
+| `decisions` | if any match was flagged | list of `{start, end, choice}`. `choice` is one of the listed expansions or `not_an_abbreviation`. | The only part of B that is judged by a person. Agreement is measured on it (section 14). |
+
+Whether Layer B is a **v0 evaluation task** or only a convenience field depends on
+how often ambiguous matches occur. That is deferred to the pilot (section 21.2, P4).
+
+### 7. Entity linking (Layer C)
+
+There is one entry per (`span_id`, role) for every role of every gold span: the
+`label` and each of the `also_labels`.
+
+**Statuses:**
+
+| `status` | Meaning | Invariants |
+|---|---|---|
+| `linked` | The final candidate set has exactly one unit, and the text supports it | `entity_id` equals the only member of `final_set` |
+| `ambiguous` | The final candidate set has two or more units, and the text can't decide between them | `final_set` has at least 2 members. No `entity_id`. |
+| `not_in_gazetteer` | The role denotes a geographic unit that the pinned gazetteer can't represent, or no candidate is supported | `reason` is given. `final_set` is empty, or absent for roles that are not linkable. No `entity_id`. |
+| `not_applicable` | The role never denotes a geographic unit (section 4) | Has no candidates, `entity_id` or `reason` |
+
+`reason` takes one of these values:
+- `entity_type_not_modelled`
+- `urban_deferred`
+- `source_deferred`
+- `level_mapping_unverified`
+- `no_match_in_snapshot`: name generation found nothing
+- `no_supported_match`: candidates existed, but each was pruned as not supported by
+  the text
+
+**Deterministic candidate generation**, versioned as
+`candidate_procedure_version` and uses only `raw_text`, gold spans, the cue table
+and the pinned gazetteer. It runs for linkable roles in level order: state,
+district, sub-district, village, then `place_unspecified`.
+
+A role whose designator is unverified in the cue table never enters generation.
+Its status is `not_in_gazetteer` / `level_mapping_unverified` (section 4).
+
+1. **Name stage.**
+   - Strip the cue-table designators from the span text.
+   - Collect every unit whose `name_key` equals the `name_key` of the remainder, at
+     the role's level. For `place_unspecified`, use the levels the designator
+     allows (all four if there is no designator).
+   - Output: `candidates.name`.
+2. **Hierarchy stage.**
+   - If a higher-level role in the record has exactly one candidate after its own
+     stages, keep only that unit's descendants.
+   - Skip this stage if the filter would leave nothing, and record
+     `hierarchy_conflict`.
+   - Output: `candidates.hierarchy`.
+3. **PIN stage** (village-level candidates only).
+   - If a `pincode` span normalizes to a valid PIN, keep only the villages
+     `village_pincode` lists under that PIN.
+   - Skip this stage if the filter would leave nothing, and record
+     `pincode_conflict`.
+   - Output: `candidates.pincode`.
+
+**Human decision.**
+1. Annotators first link **independently**, using only lookups they start
+   themselves (section 13).
+2. In **reconciliation** they see the generated lists and record, in structured
+   form, every difference between their decision and the last generated stage:
+   - an **addition**: `{entity_id, reason: spelling_variant, evidence_span_id}`, for
+     a unit that name matching missed.
+   - a **pruning**: `{entity_id, reason, evidence_span_id, guideline_section}`.
+     `reason` comes from a closed, versioned list in the guidelines (section 21.2,
+     P7). It includes `outside_annotated_ancestor` (an ancestor the annotator
+     linked as a spelling variant excludes this unit) and
+     `text_does_not_support`.
+3. `final_set` is the last generated stage, plus additions, minus prunings. It is
+   derived, never typed in.
+
+| Field | Required | Allowed values / format | Purpose and scientific use |
+|---|---|---|---|
+| `span_id`, `role` | yes | gold `span_id`. `role` is the label or one of the `also_labels`. | One link per stated role. |
+| `status` | yes | the four statuses above | Systems are scored on correct abstention, not only on choosing an ID. |
+| `entity_id` | if `linked` | `lgd:{level}:{code}`, present in the pinned `admin_unit.csv` at the role's level (or an allowed level) | The linking target. |
+| `candidates.name`, `candidates.hierarchy`, `candidates.pincode` | for linkable roles | complete sorted lists of `entity_id`s. `null` if the stage did not run. Stage flags `hierarchy_conflict` and `pincode_conflict`. | Every candidate set can be reproduced from the pinned gazetteer. Nothing is truncated. |
+| `additions`, `prunings` | if any | structured lists as above | Every human change to a generated set is recorded and can be audited. |
+| `final_set` | derived | sorted list | The decision set, reproducible from the stages plus additions and prunings. |
+| `reason` | if `not_in_gazetteer` | the reason values above | Says why the role can't be linked, and marks which spans to re-link when coverage grows. |
+| `pincode_role` | derived | `not_applicable`, `not_used`, `narrowing`, `decisive`, `conflict` (section 9) | Separates links that the PIN decided from links that are independent of it. |
+
+Revision 1's candidate cap K, `candidate_count` and `candidate_query` are removed.
+`candidate_query` could not express the PIN constraint, several ancestor
+constraints, or `place_unspecified` across levels. Complete lists can express all
+of these.
+
+### 8. Address resolution (Layer D): its own status vocabulary, derived
+
+Layer D is computed for each in-scope record and each level `L` (state, district,
+sub-district, village) by a **versioned resolution procedure**
+(`resolution_procedure_version`). Its inputs are gold A, gold C, the cue table
+and the pinned gazetteer. It is not annotated.
+
+A **role at `L`** is a role whose label is `L`'s label (`state`, `district`,
+`subdistrict`, `village`), or a `place_unspecified` role that is linked to a unit at
+`L`, whose `final_set` lies entirely at `L`, or whose verified designator allows
+only `L`. Roles with no LGD level (`city`, `post_office`, `locality`,
+`street`, `landmark`, `pincode` and the `not_applicable` labels) are never roles at
+any `L`. Their Layer C status and reason (section 7) already record that the
+gazetteer cannot represent them, and they do not change any Layer D status.
+
+**Layer D statuses, checked in this order (the first that applies wins):**
+
+| `status` | Meaning |
+|---|---|
+| `conflicting` | The units supported at `L` disagree. They come from linked roles at `L`, ancestors of linked units below `L`, or both. `candidates` lists them. A source error is recorded, not repaired. |
+| `linked` | Exactly one unit at `L` is supported. `basis` says how (see below). |
+| `ambiguous` | Units at `L` come only from an `ambiguous` role at `L`, there are two or more after keeping descendants of linked ancestors, and no `basis` gives a single unit. `candidates` lists them. |
+| `not_in_gazetteer` | A role at `L` is `not_in_gazetteer` with reason `no_match_in_snapshot` or `no_supported_match`. |
+| `deferred_coverage` | The record has a role that is `not_in_gazetteer` / `level_mapping_unverified` whose designator's cue-table entry names `L` as its `pending_level` (section 3; this is the only use of `pending_level`). `reason` is `level_mapping_unverified`. It never fires because of a `city` or other role with no LGD level. A level for which the record has no such role is never `deferred_coverage`. |
+| `no_such_level` | The pinned gazetteer has no units at `L` below the deepest linked ancestor. This is computed, and is relative to the gazetteer version. |
+| `not_specified` | Nothing in the record constrains `L` beyond its ancestors. This includes records whose only other place roles have no LGD level, such as `city`. |
+
+**`basis`** is required when the status is `linked`:
+- `stated`: a role at `L` is linked.
+- `inferred_from_descendant`: `L` is an ancestor of a linked unit below it.
+- `inferred_from_descendant_candidates`: every unit in an `ambiguous` set below `L`
+  shares this one ancestor at `L`.
+- `inferred_from_pincode`: `L` is `state`, `district` or `subdistrict`, and the
+  record's valid PIN maps, in `village_pincode`, only to villages under one unit
+  at `L`, consistent with the linked ancestors. This basis is never used at
+  village level, because picking a village from a PIN alone would be downward
+  inference, and never to produce an `ambiguous` status.
+
+Inference only goes **upward**. Choosing a unit because it is the only plausible
+child is not allowed.
+
+| Field | Required | Allowed values / format | Purpose and scientific use |
+|---|---|---|---|
+| `levels.<L>.status` | derived | the seven statuses above | Per-level gold that keeps "not stated", "not covered", "doesn't exist in this gazetteer" and "contradictory source" apart. |
+| `levels.<L>.entity_id` | if `linked` | `lgd:` ID at level `L` | Target of hierarchical resolution. |
+| `levels.<L>.candidates` | if `ambiguous` or `conflicting` | complete sorted list | Set-based scoring. Conflict auditing. |
+| `levels.<L>.basis` | if `linked` | the four values above | Separates what the record states from what is inferred, and which inference was used. |
+| `levels.<L>.reason` | if `not_in_gazetteer` or `deferred_coverage` | as in section 7 | Targets for re-resolution when coverage grows. |
+| `settlement_signal` | derived | `rural_signal` (a village-level role is `linked` or `ambiguous`, and no `city` role), `urban_signal` (a `city` role, and no village-level role), `mixed_signal`, `no_signal` | Used **only to stratify results**. It is computed from the text's roles, so it is not a subjective judgment, and it never affects gold. It replaces revision 1's annotated `settlement_context`. |
+
+**Evaluation semantics for D**, fixed now. Metric formulas belong to the
+task-definition document (section 21.3, L2).
+- **Primary per-level score:** over levels whose gold is `linked` with basis
+  `stated` or `inferred_from_descendant`.
+- **Reported separately:**
+  - basis `inferred_from_descendant_candidates`
+  - basis `inferred_from_pincode`
+  - `ambiguous` (scored against the set)
+  - `conflicting`
+  - abstention correctness for `not_in_gazetteer`, `deferred_coverage`,
+    `no_such_level` and `not_specified`
+
+### 9. PIN as evidence versus PIN consistency
+
+A PIN plays two roles that must not be mixed: **evidence** that helps choose a
+village, and an **independent check** of the source against LGD.
+
+**`pincode_role`** is derived for each village-level link in Layer C:
+- `not_applicable`: the record has no valid PIN, or the role is not village-level.
+- `not_used`: the PIN stage did not change the candidate list.
+- `narrowing`: the PIN stage shrank the list, but two or more remain.
+- `decisive`: the last stage that ran before the PIN stage (hierarchy, or name if
+  hierarchy did not run) had two or more candidates, and the PIN stage left
+  exactly the linked unit.
+- `conflict`: the PIN stage would have left nothing, so it was skipped.
+
+**`pincode_consistency`** is derived for each in-scope record:
+- `consistent` or `inconsistent`: the village level is `linked` (its basis is
+  always `stated`; section 8), `pincode_role` is not `decisive`, and the stated
+  PIN is, or is not, listed for that village in `village_pincode`. A `conflict`
+  always gives `inconsistent`.
+- `not_independent`: the PIN decided the village (`pincode_role` is `decisive`).
+  Agreement between the PIN and the village is then true by construction, so it
+  is **excluded**.
+- `not_checkable`: there is no valid stated PIN, or the village level is not
+  `linked`.
+
+**Evaluation semantics:**
+- The source-versus-LGD PIN disagreement rate is `inconsistent / (consistent +
+  inconsistent)`. It is never computed over `not_independent`.
+- Linking results (C) are reported separately for each `pincode_role`.
+- In D, `inferred_from_pincode` levels are kept out of the primary score
+  (section 8).
+
+### 10. Pinning the gazetteer version
+
+- Layer C entries and the derived Layer D record `gazetteer_version`. A gold
+  release has exactly one.
+- A validator, to be built later, rejects:
+  - an `entity_id` that is missing or at the wrong level
+  - candidate stages that don't reproduce from the gazetteer
+  - a `final_set` that doesn't follow from the stages, additions and prunings
+- **Moving to a new gazetteer version is a migration, not an edit.**
+  1. Candidates are generated again and D is derived again.
+  2. Changed links are reviewed.
+  3. A new gold release is produced (section 18). The old release is kept.
+
+### 11. Raw text versus normalized text
+
+- `raw_text` is immutable and is the only text input.
+- No Unicode normalization is applied before offsets are computed.
+- Normalized forms exist only in Layer B and never replace `raw_text`.
+- `name_key` is used only for matching (candidate generation, duplicate
+  detection). It is not stored as gold.
+
+### 12. Admissible sources and privacy
+
+A record is admitted only if **all** of these hold under the written, versioned
+screen, checked before anything reaches `data/processed/`:
+
+1. Its source has a manifest whose licence permits the intended use (ADR-0001 §1,
+   §5).
+2. It is the address of an institution, facility or public place, published by its
+   operator or a government body.
+3. It contains no identifier of a natural person: names of addressees or occupants
+   ("c/o", "s/o", "w/o", "d/o" plus a name), phone numbers, email addresses or
+   government ID numbers.
+4. It is not residential-looking.
+5. It is not personal data under ADR-0001 by any other route, for example a
+   beneficiary list.
+
+**Failure handling:**
+- A record that fails is **excluded whole, never redacted**. Redaction would
+  change the published text and teach models the placeholders.
+- Excluded records are not stored. Only aggregate counts per rule are kept.
+- Names that honour public figures ("Mahatma Gandhi Road") are admissible.
+- Businesses named after a private person are excluded.
+- **When in doubt, the record is excluded** (section 21.1, F1).
+
+**`source_context` allowlist:**
+- A source's manifest lists its approved `context_columns`. Nothing outside the
+  list is ingested.
+- Only administrative-geography and facility-category columns can be approved,
+  such as state, district, sub-district, village, PIN and facility type.
+- Columns holding names of people, phone numbers, email addresses, identifiers of
+  people or free-text remarks are never approved.
+- `source_context` values pass **the same screen** as `raw_text`. If any value
+  fails, the whole record is excluded.
+
+**Annotator notes:**
+- Released data contains only `comment_codes` from a closed list:
+  `guideline_gap`, `privacy_flag`, `unreadable`, `boundary_uncertain`,
+  `other_see_internal`.
+- Any free-text `internal_note` stays internal and is **never released**.
+
+**Withdrawal before release.** An annotator who finds personal data the screen
+missed sets `privacy_flag`. The record and all its annotations are then deleted
+from the working data. Only the count of withdrawals is logged, because
+`record_id` is derived from source data.
+
+**Withdrawal after release** is covered in section 18.
+
+### 13. Annotation protocol: no pre-annotation, blinding, provenance
+
+**No pre-annotation (a hard v0 rule).** Until an annotator's independent labels for
+a layer are stored and frozen (the `independent` annotation document is immutable;
+nothing is overwritten), the tool and every other system must not present:
+- generated candidate recommendations or generated candidate lists
+- ranked candidates
+- suggested entities, spans or labels, from a gazetteer or any other source
+- labels generated by a model, and any other system output
+- prior annotations of the same layer: other annotators' work, or labels carried
+  over from earlier rounds
+
+Adjudicated gold of an earlier layer (gold spans in passes B and C) is an input,
+not a prior annotation. Complete generated candidate lists appear only after the
+independent C labels are stored and frozen. They are then shown in the
+reconciliation round and in the adjudication that follows it, because the
+adjudicator must be able to audit how `final_set` was derived (section 3). Both
+rounds come after the freeze, so this is within the no-pre-annotation rule, not
+an exception to it.
+
+*Why:* a person who is shown a suggestion tends to accept it (anchoring and
+confirmation bias). The gold would then measure agreement with the suggesting
+system, inherit its errors, and favour systems like it in evaluation. Independent
+labels made first are also the only valid input for agreement statistics.
+
+*What does not count as pre-annotation:* in pass C, a **lookup the annotator
+starts** in the pinned gazetteer (searching for a name they typed, or browsing the
+hierarchy) is a reference, not a suggestion. It must not be started or prefilled
+automatically from the span, and it must not rank, preselect or highlight results.
+Results are shown in an order that does not depend on the record (section 21.1,
+F2 and F13).
+
+**Blinding:**
+- Independent annotators don't see each other's work or know whether a record is
+  annotated twice.
+- No one in passes A to C knows a record's split.
+- The adjudicator sees the independent annotations (and, for C, the
+  reconciliation annotations) without annotator identities.
+
+**Annotation documents:** one per record, per layer (A, B decisions, C), per
+annotator, per round.
+
+| Field | Required | Allowed values / format | Purpose and scientific use |
+|---|---|---|---|
+| `annotation_id` | yes | `ann:` + UUID | Unique handle. Nothing is overwritten. |
+| `record_id`, `raw_text_sha256` | yes | as in section 2 | Binds the work to one exact text. |
+| `layer` | yes | `A`, `B`, `C` | Keeps layers apart. D is derived. |
+| `round` | yes | `independent`, `reconciliation` (C only), `adjudication`, `review` | Agreement statistics use only `independent`. |
+| `annotator_id` | yes | pseudonym `annotator:{nn}`. The key to real identities is private to the maintainer. | Per-annotator analysis without personal data. |
+| `role` | yes | `annotator`, `adjudicator` | Separates labelling from deciding. |
+| `schema_version`, `guidelines_version` | yes | version strings | Traceability. |
+| `reference_list_version`, `cue_table_version` | yes for A and C | version strings | Pass A and C decisions depend on them. |
+| `normalization_table_version` | for B | version string | B decisions depend on it. |
+| `gazetteer_version` | for C | as in section 10 | Section 10. |
+| `visible_inputs` | yes | subset of `raw_text`, `guidelines`, `reference_name_list`, `cue_table`, `normalization_table`, `gold_spans`, `annotator_lookup`, `generated_candidates`, `blinded_independent_annotations`, `blinded_reconciliation_annotations` | Checks that the section 3 visibility rules were followed. |
+| `tool`, `tool_version` | yes | strings | Effects of the tool can be traced. |
+| `created_at` | yes | ISO 8601, UTC | Ordering and auditing. Not released (section 18). |
+| `comment_codes` | optional | the closed list in section 12 | Structured, releasable notes. |
+| `internal_note` | optional | free text, never released | Working notes. |
+
+Adjudicated gold documents also record `source_annotation_ids` and, for each
+disputed item, a `decision` (`accept:{annotation_id}`, `merge`, `replace`) and a
+`rationale` that names a guideline section.
+
+Deferred out of v0: `annotator_profile` and `time_spent_seconds`. They are
+personal data about a very small group of annotators and are not needed for v0
+evaluation.
+
+### 14. Guidelines and agreement
+
+The guidelines are versioned and frozen before gold annotation starts. They need
+these sections:
+
+1. scope tests
+2. the privacy screen and flagging
+3. a definition of each label, with examples from admitted records or clearly
+   marked as invented
+4. how to use the cue table and the reference name list
+5. boundary rules, with Indic-script examples
+6. spans with two roles
+7. language and script tags
+8. the procedure for normalization decisions
+9. the linking procedure, including reconciliation, additions and the pruning
+   reason list
+10. adjudication and rationale codes
+
+**Agreement is measured for every decision a person makes**, on the dev pool:
+
+| Human decision | Agreement measure |
+|---|---|
+| Privacy screen (if done by a person) | percentage agreement and kappa on admit/exclude, computed at screening time as counts only, because excluded records are not kept. Every exclusion stands, whichever screener made it. |
+| A: `scope` | kappa |
+| A: spans and `label` | pairwise span F1, exact and overlap; kappa on labels of matched spans |
+| A: `also_labels` | F1 on the role sets of matched spans |
+| A: `languages` | exact set agreement and Jaccard |
+| B: `decisions` | kappa on the choices for flagged matches |
+| C: independent `status` and `entity_id` | kappa on status; agreement on `entity_id` where both annotators linked |
+| C: reconciliation prunings and additions | agreement on the resulting `final_set` (Jaccard) |
+| D | not annotated. Derive D from each annotator's independent A and C and report per-level agreement, which shows how A and C disagreement carries through. |
+
+Thresholds for freezing the guidelines come from the pilot (section 21.2, P1).
+After the freeze, any change creates a new `guidelines_version` together with an
+assessment of which labels it affects.
+
+**Pilot records** are taken from the dev pool. If they later become gold, they are
+annotated again under the frozen guidelines.
+
+### 15. Ambiguity and adjudication
+
+- **Referential ambiguity is gold.** A record that doesn't identify one unit gets
+  `ambiguous`. Disagreement between annotators goes to adjudication. A guideline
+  gap is recorded as `rationale: guideline_gap` and fixed in a later guideline
+  version.
+- **Who annotates what:**
+  - Records in `dev`, `test` and `test_source_holdout` are annotated
+    independently by two annotators, layer by layer.
+  - Records in train get one annotator plus a sampled review. The rate is set in
+    the pilot (P1).
+  - The record's split is known before annotation starts (section 17), so this can
+    be applied.
+- **Adjudication.** The adjudicator works blinded (section 13), chooses, merges or
+  replaces, and never records a guess as `linked`. If neither link is supported by
+  the text, the result is `ambiguous` or `not_in_gazetteer` / `no_supported_match`.
+- Independent annotations are kept unchanged.
+
+### 16. What systems receive
+
+| Evaluated layer | System receives | Notes |
+|---|---|---|
+| A | `raw_text` | — |
+| B | `raw_text`; gold spans (oracle setting) or its own spans | — |
+| C | `raw_text`; gold spans (oracle setting) or its own spans | — |
+| D | `raw_text` | — |
+
+For every layer a system may also use the **pinned gazetteer** (`admin_unit.csv`
+and `village_pincode.csv` at the release's `gazetteer_version`), the published
+**reference name list**, **cue table** and **normalization table**, and the
+**train** split with its gold.
+
+Systems **never** receive:
+- `source_context`, `source_id` or other source metadata (no metadata is approved
+  for systems in v0)
+- split keys
+- dev or test gold
+- anything else not listed above
+
+Adding any input requires a schema version change that updates **both** this table
+and the annotator visibility rules in section 3.
+
+The visibility rules are aligned: everything annotators may use is available to
+systems, so the gold never depends on information systems lack. Systems evaluated
+on Layer A may use the whole pinned gazetteer, while pass-A annotators had only
+the reference list.
+That gives systems more, not less, and does not leak gold. The generated
+candidate lists that annotators see after the independent C freeze (section 13)
+are not a separate input: they are reproducible from the pinned gazetteer, the
+cue table and the spans that systems already receive (section 7).
+
+Whether there is also an "open" track allowing external resources and pretrained
+models, and how its results are labelled, is decided by the task-definition
+document (section 21.3, L2). The contract above defines the **closed** setting.
+
+### 17. Train, dev and test splits
+
+The split is computed **at ingestion, before any annotation**. It never uses gold
+labels. It decides which records get double annotation (section 15). It is
+versioned (`split_version`) and **frozen before any model experiment**.
+
+**Split key procedure**, versioned as `split_key_procedure_version`, uses only
+allowlisted `source_context`, the source manifest, `raw_text` and the pinned
+gazetteer. Neither the resulting key nor `source_context` is ever shown to
+annotators.
+
+1. **State.**
+   - Take the state from an allowlisted state column, or from the manifest if the
+     whole source covers one state.
+   - Match it to an LGD state by exact `name_key`. If nothing matches, the state is
+     unknown.
+2. **District.** Use the first rule that gives exactly one LGD district:
+   1. An allowlisted district column, matched by exact `name_key` within the known
+      state (or across India, if the match is unique).
+   2. District names from the reference list that appear as whole-token sequences
+      in `name_key(raw_text)`, within the known state if there is one.
+3. **Group key.** `lgd:district:{code}` if a district was found. Otherwise
+   `unresolved:lgd:state:{code}`, or `unresolved:unknown`. The source is **not** part
+   of the key. In revision 1 it was, which let the same place, published by two
+   sources, end up in different groups.
+4. **Duplicate merge.**
+   - Records whose `name_key(raw_text)` values are equal, across all sources, are
+     merged into one group (union-find).
+   - The merged group's key is the lexicographically smallest member key.
+5. **Assignment.**
+   - Sources designated as held out, and any merged group containing their
+     records, go to `test_source_holdout`.
+   - Every other group goes to `train`, `dev` or `test` by SHA-256 of
+     `group_key + "\n" + split_salt`, mapped to ratios.
+   - The ratios are deferred (section 21.2, P6).
+
+**Split names:**
+- `test` holds out **whole groups**. It is **not** an i.i.d. sample. Revision 1's
+  "in-distribution test" was wrong.
+- `test_source_holdout` holds out whole sources, to measure template effects.
+
+**Known limits, measured rather than assumed:**
+- A key derived from source columns or text matching can be wrong. After gold
+  exists, a **leakage audit** reports:
+  - the share of test records whose gold Layer D district differs from their split
+    key
+  - the share of test records whose gold district also appears in train
+  - the share of test gold `entity_id`s that also appear in train
+
+  The audit is reported. It never moves records after the split is frozen.
+- Unresolved groups can be large. The pilot measures how many records end up
+  unresolved (P6).
+- Before the freeze, the split may be recomputed **only** to fix a bug in the
+  procedure, as a new `split_version`, and never using gold.
+
+| Split-file field | Required | Allowed values / format | Purpose and scientific use |
+|---|---|---|---|
+| `record_id` | yes | as in section 2 | Joins the split to the record. |
+| `split` | yes | `train`, `dev`, `test`, `test_source_holdout` | Evaluation partition. |
+| `group_key` | yes | as in step 3, after merging | Leakage audit: no key appears in two splits. |
+| `split_version` | yes | version string | Reproducibility, and protection against silent re-splitting. |
+
+### 18. Release manifest and withdrawal after publication
+
+Every gold release has a **release manifest**. A release is immutable. Any change
+makes a new release.
+
+| Field | Purpose |
+|---|---|
+| `benchmark_version` | Identity of the release (semantic versioning). |
+| `release_date` | When it was published. |
+| `schema_version`, `guidelines_version` | The rules the labels follow. |
+| `gazetteer_version` and the SHA-256 of `admin_unit.csv` and `village_pincode.csv` | The exact reference data. |
+| `sources`: `source_id` and snapshot SHA-256 for each source | The exact input snapshots. |
+| `screen_version` | The privacy rules applied. |
+| `reference_list_version`, `cue_table_version`, `normalization_table_version` | Tables that annotation and generation depend on. |
+| `candidate_procedure_version`, `resolution_procedure_version`, `split_key_procedure_version` | Procedures that generate or derive gold and splits. |
+| `split_version`, `split_salt` | The salt is published with the release, so splits can be regenerated. |
+| `files`: path and SHA-256 for each file | Integrity of every file in the release. |
+| `errata` | References to errata entries that affect this release. |
+| `licence`, `attribution` | Deferred to the release ADR (section 21.3, L1). |
+
+Not released: `annotator_id` mappings, `internal_note`, `created_at` and other
+timing data.
+
+**Withdrawal after publication.** A copy that has been published cannot be
+recalled. When personal data, or any other reason for withdrawal, is found in a
+release:
+
+1. A new release is made without the affected records.
+2. An **errata entry** is published. It contains the date, the affected release
+   versions, a reason category and the number of records removed. It never
+   contains the record's text, `record_id` or hashes.
+3. Pata stops distributing the affected releases wherever it controls
+   distribution.
+4. Scores on different releases are marked as not directly comparable.
+
+Stand-off distribution (L1) reduces this exposure, because the text stays with
+its source.
+
+### 19. Urban coverage
+
+Urban addresses are in scope for A and B, and for C wherever a role is linkable
+(for example state and district). How urban coverage appears in each layer:
+- `city` roles: `not_in_gazetteer` / `urban_deferred`.
+- `locality`: always `entity_type_not_modelled`, because LGD has no locality level
+  at all.
+- Layer D: a `city` role is not a role at any LGD level, so it changes no Layer D
+  status. A level the record does not otherwise state stays `not_specified`.
+  `deferred_coverage` is used only for a role with an unverified designator whose
+  cue-table `pending_level` (section 3) is that level, and `no_such_level` only
+  where the gazetteer has no units below the deepest linked ancestor (section 8).
+- Results: always reported by `settlement_signal`. A headline linking number must
+  state which share of roles was linkable.
+- Census towns that LGD lists as villages (`(Ct)`) are linked as villages when the
+  text marks them with a village designator.
+
+### 20. Extending the schema beyond v0
+
+- **`schema_version` uses semantic versioning.**
+  - Minor: new labels, reasons, statuses, optional fields, ID namespaces or
+    approved inputs (updating sections 3 and 16 together).
+  - Major: splitting, merging or redefining a label, or changing offsets. Existing
+    gold is migrated, not edited.
+  - A label's meaning is never reused.
+- **New gazetteer content uses new ID namespaces:** `lgd:localbody:` (local-body
+  codes overlap village codes), `dop:po:`, `pin:`.
+- **Reasons mark what to re-link when coverage grows:**
+  `urban_deferred`, `source_deferred`, `level_mapping_unverified`.
+- **`block`** can be added once LGD semantics are verified for the selected
+  geography (L3).
+- **Nested spans** can be added with an optional `parent_span_id` if a case
+  appears that two roles on one span can't express.
+- **Synthetic data** needs `source_type: synthetic` plus generator fields in a
+  minor version, and must follow the ADR-0001 §3 reporting rules.
+
+### 21. Decisions
+
+#### 21.1 To approve with this ADR (freeze now)
+
+| # | Was | Proposal | Why it must be frozen before any annotation |
+|---|---|---|---|
+| F1 | U7 | Exclude whole records, never redact. Names honouring public figures are allowed. Businesses named after private persons are excluded. When in doubt, exclude. | Decides what may enter `data/processed/` at all. |
+| F2 | U8 | No personal or world knowledge in any layer. Only the inputs in the section 3 visibility table: the reference name list and cue table and, in pass C, gazetteer lookups the annotator starts themselves (not prefilled, ranked or preselected). Independent passes never include generated candidates (F13). | Defines what the gold measures and how the visibility rules match the system inputs. |
+| F3 | U9 | PIN semantics as in section 9: `pincode_role`, exclusion of `not_independent`, D strata, and `inferred_from_pincode` only above village level. | The PIN circularity would otherwise corrupt both linking gold and the consistency statistic. |
+| F4 | U10 | A city named like its district does not imply that district. | Upward-only inference; changes district-level gold. |
+| F5 | U13 (principle) | The split is computed at ingestion from the split key procedure in section 17, never from gold, and frozen before experiments. | Double annotation and pilot sampling depend on the split. |
+| F6 | U14 | No synthetic records in v0. `source_type` is kept and is always `real`. | Scope, and ADR-0001 §3 reporting. |
+| F7 | U15 | Flat spans, with spans carrying two stated roles via `also_labels`. | Representation. Changing it later is a major version. |
+| F8 | U16 | `record_id` scopes as in section 2. | Identity. Revision 1's stability claim was false for row references. |
+| F9 | new | Layer D is derived, with its own seven-status vocabulary and `basis` values. `deferred_coverage` fires only through an unverified designator's cue-table `pending_level` (the single LGD level whose mapping is pending verification), never because of a `city` or other role with no LGD level. `pending_level` drives no annotation, candidate generation, ranking or linking. Layer B is generated, with human decisions only for flagged matches. | Gold that can be reproduced; no subjective D labels. |
+| F10 | U18 | No `block` label in v0. Block and sub-division designators count as unverified, and those spans are unlinked (`level_mapping_unverified`). | Avoids assuming LGD semantics that haven't been verified. |
+| F11 | U17 (replaced) | `settlement_signal` is derived and used only for stratification. | Removes a subjective field that drove gold. |
+| F12 | new | `source_context` allowlist and screening. Only structured comment codes are released. | Privacy. |
+| F13 | new | No pre-annotation (section 13): until independent labels are frozen, no generated candidate recommendations or lists, ranked candidates, suggested entities, model labels or prior annotations of the same layer are presented. Complete generated candidate lists become available only after the independent C labels are stored and frozen, and are then shown in C reconciliation and the adjudication that follows it, so that the derivation of `final_set` can be audited. Annotators are blinded to each other. The adjudicator is blinded to annotator identities. | Protects the gold against confirmation bias. |
+
+#### 21.2 Deferred until the pilot (needs data; not to be decided without it)
+
+| # | Was | Question |
+|---|---|---|
+| P1 | U5 | Pilot size, train review rate, agreement thresholds for freezing the guidelines. |
+| P2 | U12 | Whether designators sit inside spans or outside. |
+| P3 | new | Merging or removing `premise_name`, `country`, `unit`; whether the two-role precedence order works; how often `place_unspecified` is used. |
+| P4 | new | The contents of the normalization table; whether Layer B is a v0 evaluation task. |
+| P5 | new | Rules for labelling a bare name as `state` or `district` from the reference list when the same name is also a village or other place. |
+| P6 | U13 (rest) | Split ratios; acceptable share of unresolved groups; whether `test_source_holdout` is feasible with the approved sources. |
+| P7 | new | The closed list of pruning reasons. |
+
+#### 21.3 Deferred to another ADR or document
+
+| # | Was | Question | Where |
+|---|---|---|---|
+| L1 | U3 | Licence of the annotations; shipping `raw_text` or stand-off | A release ADR, before the first publication |
+| L2 | new | Task and metric definitions; whether an "open" track exists | A task-definition document |
+| L3 | U18 (rest) | LGD sub-district semantics per selected state; whether to enable `block`; verifying cue-table entries | Together with the focus-state ADR |
+| L4 | U4 | Annotator recruitment, consent, compensation. Consent is required either way. | An annotation-protocol document |
+
+#### 21.4 Removed from ADR-0006
+
+- **U1** (focus states): ADR-0001 §7 gives this its own ADR.
+- **U2** (sources): source ADRs and manifests. Section 12 sets the admission rules.
+- **U6** (annotation tool): protocol. The tool must follow ADR-0001 §8 and
+  section 13.
+- **U11** (candidate cap K): eliminated, because complete candidate lists replace
+  it.
+
+U17 (`settlement_context`) is not removed: it is replaced by F11.
+
+## Consequences
+
+- Each layer has gold that can be evaluated alone. B is mostly generated and D is
+  fully derived, so most of the gold can be reproduced from human decisions that
+  are few and explicitly recorded.
+- Ambiguity, conflicts, gaps in coverage and missing levels are distinct, labelled
+  outcomes. Systems are scored on abstaining correctly.
+- PIN-based decisions can be traced, and the PIN consistency statistic excludes
+  cases that are true by construction.
+- Splits exist before annotation and are never derived from gold. Leakage that the
+  ingestion-time split key misses is measured and reported, not hidden.
+- The rules are conservative: unverified designators, no `block`, no world
+  knowledge, exclusion when in doubt. More records stay unlinked or out of the
+  corpus. That is accepted in exchange for gold that doesn't rest on assumptions.
+- Generated candidates and derived D need versioned procedures before annotation
+  starts. They are part of the follow-up work.
+- Follow-up work after acceptance, in this order:
+  1. the focus-state and source ADRs (with L3)
+  2. `docs/schema.md`
+  3. the reference list, cue table and normalization table procedures
+  4. the candidate and resolution procedures
+  5. the split key procedure
+  6. the guidelines
+  7. the validator
+  8. the pilot (P1 to P7)
+
+  None of this produces results until real admitted records exist.
