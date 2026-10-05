@@ -3,20 +3,31 @@
 - **Kind:** Research working notes; not a decision record and not yet sufficient
   for source acceptance. Input to ADR-0007 O1 (focus states) and O2 (address
   sources). Nothing here selects a state, accepts a source or writes a manifest.
-- **Gathered:** 2026-10-04, by web search, page fetches and one local computation
-  on the pinned gazetteer (`gazetteer_version`
-  `bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78`).
+- **Gathered:** 2026-10-04. First pass: web search, page fetches and one local
+  computation on the pinned gazetteer (`gazetteer_version`
+  `bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78`). Second
+  pass: publisher pages and publisher-platform metadata APIs retrieved with
+  `curl` and inspected directly (see "Licence and header verification").
 - **Not exhaustive.** Only the sources and categories listed below were looked
   at. Categories identified but not researched are listed separately.
+- **Two passes.** The sections up to "Candidate-state evidence" record the first
+  pass. "Licence and header verification" records a second pass on C1–C6. Where
+  they differ, the second pass is the current evidence; the first-pass text is
+  kept as the record of what was known then.
 
 ## How the evidence was gathered
 
-- **Two tools were used.** A web search tool returned a list of result links plus
-  a model-generated summary of those results. A page-fetch tool retrieved a single
-  page and returned a model-generated summary of it. No page text was saved, and
-  no page was read directly by a person. Every external claim below therefore
-  rests on one of these summaries, and none is a directly inspected quotation.
-  Other claims rest on this repository's ADRs [ADR] or on the local gazetteer
+- **First pass: two tools were used.** A web search tool returned a list of
+  result links plus a model-generated summary of those results. A page-fetch tool
+  retrieved a single page and returned a model-generated summary of it. No page
+  text was saved, and no page was read directly by a person. Every first-pass
+  external claim therefore rests on one of these summaries, and none is a directly
+  inspected quotation.
+- **Second pass:** publisher pages and publisher-platform metadata APIs were
+  retrieved with `curl` and the responses inspected directly. Those claims carry
+  the label [PUBD]; the method is described under "Licence and header
+  verification".
+- Other claims rest on this repository's ADRs [ADR] or on the local gazetteer
   computation [CALC].
 - **Page fetches** were made with an instruction to report only metadata,
   licence and terms, and column names, and not to reproduce records. **Web
@@ -113,7 +124,7 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
    [MIR, R1]. The OSM page names MoHFW, Department of Health and Family Welfare,
    NIHFW [COMM, R6]. Exact publisher string [U].
 2. R13, R14 (403); mirror R1.
-3. `government_published`.
+3. `government_published` (first-pass reading; classification open, G4).
 4. State-wise list of hospitals with location, category, systems of medicine,
    contact details, PIN, email, website, specialities [SRCH]. An ownership
    (government/private) attribute [MIR, R1].
@@ -131,7 +142,7 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
    title says "updated till last month". Unresolved metadata conflict.
 10. data.gov.in site-wide GODL-India statement [ADR, ADR-0002, checked
     2026-10-02]; licence label "GODL" [MIR, R1]. Per-resource licence [U].
-    data.gov.in blocked from this machine [ADR, ADR-0004].
+    data.gov.in blocked the first-pass fetch tool [ADR, ADR-0004]; see G5.
 11. Institutional facilities. Among the attributes the OSM import **kept**, R6
     lists `Mobile_Number` and `Hospital_Primary_Email_Id`. Among those it
     **excluded**, R6 lists a field described as "personal information" [COMM].
@@ -148,7 +159,7 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
 
 1. MoHFW, Department of Health and Family Welfare [MIR, R2].
 2. R15 (403); mirror R2.
-3. `government_published`.
+3. `government_published` (first-pass reading; classification open, G4).
 4. Sub-centres, PHCs, CHCs, district and state hospitals [MIR, R2].
 5. All India [MIR, R2].
 6. State, district, sub-district, facility name, address, coordinates [MIR, R2].
@@ -167,7 +178,7 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
 
 1. Central Government Health Scheme, MoHFW [MIR, R3].
 2. Mirror R3; data.gov.in original URL [U].
-3. `government_published`.
+3. `government_published` (first-pass reading; classification open, G4).
 4. Hospitals, diagnostic centres and eye-care facilities empanelled under CGHS
    [MIR, R3].
 5. CGHS cities [MIR, R3]. Which cities [U].
@@ -184,7 +195,7 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
 1. Telangana Health, Medical and Family Welfare Department, via Open Data
    Telangana [MIR, R4].
 2. R11 (portal title only); mirror R4.
-3. `government_published`.
+3. `government_published` (first-pass reading; classification open, G4).
 4. Health centres with facility type, ownership (government, private, NGO) and
    operational status [MIR, R4].
 5. Telangana [MIR, R4].
@@ -203,7 +214,7 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
 1. Office of the Chief Electoral Officer of each state.
 2. Tamil Nadu: per-constituency PDFs on `elections.tn.gov.in` (R21, not opened);
    Dindigul district page (R20). Karnataka: R22.
-3. `government_published`.
+3. `government_published` (first-pass reading; classification open, G4).
 4. Tamil Nadu: polling-station number, building, locality, polling areas, and
    whether a station serves all voters [SRCH]. This came from a search summary
    that was probably generated from the PDFs or pages describing them; no PDF
@@ -233,7 +244,7 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
 
 1. Kendriya Vidyalaya Sangathan [PUB, R10].
 2. R10 (directory and "Know Your School" search).
-3. `government_published`.
+3. `government_published` (first-pass reading; classification open, G4).
 4. Kendriya Vidyalaya schools. The page summary reports **1,367** schools,
    listing Moscow, Tehran and Kathmandu (one each) alongside India [PUB, R10].
    If those three are included in 1,367, the India count would be 1,364 [CALC];
@@ -293,7 +304,7 @@ This is input for later selection records, not a ranking.
 | Telangana (`lgd:state:36`) | C4 [MIR, R4] | [U] | Not yet verified | C4 includes urban health centres as a facility type [MIR, R4]; gazetteer: 3 sub-districts without villages [CALC] | Portal terms not obtained (R11); mirror lists the dataset; not yet verified |
 | Tamil Nadu (`lgd:state:33`) | C5 lists on the CEO site [SRCH, R20, R21] | Tamil and English [SRCH, R20] | Not yet verified | Not yet verified | PDFs; licence unknown; not yet verified |
 | Karnataka (`lgd:state:29`) | One district-level page only [SRCH, R22]; statewide coverage unknown | [U] | Not yet verified | Not yet verified | Not yet verified |
-| All other states | Only national sources C1–C3, C6; per-state coverage [U] | [U] | Not yet verified | Gazetteer gaps in the table below [CALC] | C1–C3 via data.gov.in, blocked from this machine [ADR]; not yet verified |
+| All other states | Only national sources C1–C3, C6; per-state coverage [U] | [U] | Not yet verified | Gazetteer gaps in the table below [CALC] | C1–C3 via data.gov.in; first-pass fetches blocked [ADR], second-pass metadata retrieved (G5); not yet verified |
 
 The gazetteer has no urban units, so it cannot show urban coverage. It only shows
 where villages are missing ("Districts/Sub-districts w/o villages" below).
@@ -349,37 +360,269 @@ also map villages in another state.
 These counts describe the gazetteer, not address sources. They are not evidence
 of what LGD's sub-district tier means in any state (ADR-0007 §8).
 
+## Licence and header verification (second pass, 2026-10-04)
+
+Evidence status only. **No source is accepted** and no manifest is written.
+
+### Method
+
+- Publisher pages and publisher-platform metadata APIs were retrieved with
+  `curl` from the development machine and the saved responses were read
+  directly. This differs from the first pass, which relied on model summaries.
+  New label: **[PUBD]** = publisher page or publisher-platform API, retrieved
+  directly and inspected.
+- Only metadata was requested:
+  - data.gov.in: catalog and resource metadata (`backend/dmspublic/v1`) and API
+    descriptors with field lists (`backend/dataapi/v1/lists`). Neither returns
+    data rows.
+  - Telangana portal (DKAN): dataset metadata and a datastore query with
+    `limit=0&results=false&schema=true`, which returns the schema and a row
+    count but no rows.
+- **No data file was downloaded, no PDF was opened and no address record was
+  retrieved.** Saved responses are in a scratch directory outside the
+  repository and are not committed.
+- data.gov.in pages, which returned 403 to the first pass's fetch tool, returned
+  200 to `curl`.
+- A field list from a platform API is the publisher's schema for the resource.
+  It is not byte-for-byte the downloadable file's header row: data.gov.in adds
+  `document_id` and `resource_uuid`, and file headers were not read.
+
+### Sources for this pass
+
+All retrieved on **2026-10-04**.
+
+| # | URL | Kind | Supports |
+|---|---|---|---|
+| R26 | https://www.data.gov.in/catalog/hospital-directory-national-health-portal | [PUBD] | C1 catalog metadata; data.gov.in footer licence text |
+| R27 | https://data.gov.in/catalog/all-india-health-centres-directory | [PUBD] | C2 catalog page; same footer |
+| R28 | https://www.data.gov.in/backend/dmspublic/v1/catalogs?filters[node_alias]=/catalog/hospital-directory-national-health-portal (and the same query for `/catalog/all-india-health-centres-directory`) | [PUBD] | C1 and C2 catalog metadata |
+| R29 | https://www.data.gov.in/backend/dmspublic/v1/resources?filters[catalog_reference]=323881 | [PUBD] | C1 resource metadata |
+| R30 | https://www.data.gov.in/backend/dmspublic/v1/resources?filters[catalog_reference]=3786581 | [PUBD] | C2 resource metadata |
+| R31 | https://www.data.gov.in/backend/dmspublic/v1/resources?filters[node_alias]=/resource/list-hospitals-empaneled-under-cghs-all-over-india | [PUBD] | C3 resource metadata |
+| R32 | https://www.data.gov.in/backend/dataapi/v1/lists?format=json&filters[catalog_uuid]=e48a8bcf-ff56-4f39-839d-095827ba2a18 | [PUBD] | C1 field lists |
+| R33 | https://www.data.gov.in/backend/dataapi/v1/lists?format=json&filters[catalog_uuid]=09ef97dd-3b9f-4b2c-bd3d-c24a0e084463 | [PUBD] | C2 field list |
+| R34 | https://www.data.gov.in/backend/dataapi/v1/lists?format=json&filters[catalog_uuid]=624753e6-6052-4ef0-8a25-631f22739ebb | [PUBD] | C3 field list |
+| R35 | https://data.telangana.gov.in/api/1/search?fulltext=health%20centres | [PUBD] | C4 dataset identified; per-dataset licence labels |
+| R36 | https://data.telangana.gov.in/api/1/metastore/schemas/dataset/items/44935575-631b-4116-b278-41f4c507b95b | [PUBD] | C4 metadata and licence |
+| R37 | https://data.telangana.gov.in/api/1/datastore/query/44935575-631b-4116-b278-41f4c507b95b/0?limit=0&results=false&schema=true&count=true | [PUBD] | C4 schema and row count |
+| R38 | https://www.elections.tn.gov.in/ | [PUBD] | C5 Tamil Nadu: footer and links |
+| R39 | https://dindigul.nic.in/website-policies/ | [PUBD] | C5: Dindigul district copyright policy |
+| R40 | https://chikkaballapur.nic.in/en/website-policies/ | [PUBD] | C5: Chikkaballapur district copyright policy |
+| R41 | http://kvsangathan.nic.in/ (HTTPS timed out; HTTP answered) | [PUBD] | C6: school counter, footer |
+| R42 | http://kvsangathan.nic.in/वेबसाइट-नीतियां/ (percent-encoded in the site's link) | [PUBD] | C6: copyright policy |
+| R43 | http://kvsangathan.nic.in/के-वि-की-निर्देशिका/ (percent-encoded in the site's link) | [PUBD] | C6: directory page structure |
+
+### Licence findings
+
+Categories: (a) explicit reuse licence for the dataset; (b) site-wide licence;
+(c) copyright statement without reuse permission, or reuse only on request;
+(d) terms of use; (e) unknown.
+
+- **data.gov.in (C1, C2, C3).** Category **(b)**. Three separate facts:
+  - **(i) Licence basis, previously verified.** data.gov.in's site-wide
+    statement that its content is "licensed under the Government Open Data
+    License - India", and the GODL-India text, were verified on 2026-10-02 and
+    recorded in ADR-0002 [ADR]. This remains the licence basis for C1–C3.
+  - **(ii) No resource-level licence.** The current resource metadata has no
+    licence field (R29, R30, R31) [PUBD]. Nothing at resource level confirms or
+    contradicts (i). The catalog pages for C1 and C2 also say "Released Under:
+    National Data Sharing and Accessibility Policy (NDSAP)" [PUBD, R26, R27].
+  - **(iii) Unresolved sandbox notice.** The footer served on 2026-10-04 at R26
+    and R27 repeats the site-wide GODL-India statement, and adds "All rights
+    reserved except published datasets/resources and metadata." It also says
+    "This is a sandbox environment created for testing and demonstration
+    purposes only. The content, data, and functionality may be incomplete or
+    inaccurate." [PUBD, R26, R27]. Whether the pages retrieved were the
+    production site is unverified, so **this pass's re-check of (i) is
+    inconclusive**. It neither confirms nor withdraws the ADR-0002 finding.
+- **Telangana portal (C4).** Category **(a)** by publisher label only: the
+  dataset names a licence, but the licence text itself has not been verified, so
+  this does not yet meet (a) in substance.
+  - **Verified:** the dataset's `license` field reads "Government Open Data
+    License - India" [PUBD, R36]. Other health datasets on the portal read
+    "License Not Specified" [PUBD, R35], so the field varies by dataset.
+  - **Not verified:** the metadata gives no URL or text for that licence, so
+    which licence text applies, and whether it is the same instrument as the
+    GODL-India text verified for data.gov.in in ADR-0002, is not independently
+    verified [U].
+- **CEO Tamil Nadu (C5).** Category **(c)**.
+  - Footer: "© 2021 Public (Elections) Department, Tamil Nadu. All rights
+    reserved." [PUBD, R38]. No copyright, terms or policy page is linked from
+    the homepage [PUBD, R38].
+- **District sites (C5 district evidence).** Category **(c)**, reuse on request.
+  - Dindigul and Chikkaballapur both state: "Material featured on this website
+    may be reproduced free of charge after taking proper permission by sending a
+    mail to us." [PUBD, R39, R40]. These are district administrations, not the
+    CEO.
+- **KVS (C6).** Category **(c)**, reuse on request.
+  - Copyright policy (Hindi): "इस पोर्टल पर प्रदर्शित सामग्री को हमें एक मेल भेजकर
+    उचित अनुमति लेने के बाद नि:शुल्क पुन: प्रस्तुत किया जा सकता है।" [PUBD, R42].
+    Translation by this inventory: material on the portal may be reproduced free
+    of charge after obtaining proper permission by sending a mail. The same page
+    disallows loading its pages in frames.
+
+### Header and schema findings
+
+| Candidate | Resource verified | Fields (exact names from the publisher's schema) | Single address string | Components | Identifier field | Language/script field | Person or contact fields |
+|---|---|---|---|---|---|---|---|
+| C1a | "National Hospital Directory with Geo Code and additional parameters (updated till last month)" [PUBD, R29, R32] | Sr_No, Location_Coordinates, Location, Hospital_Name, Hospital_Category, Hospital_Care_Type, Discipline_Systems_of_Medicine, Address_Original_First_Line, State, District, Subdistrict, Pincode, Telephone, Mobile_Number, Emergency_Num, Ambulance_Phone_No, Bloodbank_Phone_No, Foreign_pcare, Tollfree, Helpline, Hospital_Fax, Hospital_Primary_Email_Id, Hospital_Secondary_Email_Id, Website, Specialties, Facilities, Accreditation, Hospital_Regis_Number, Registeration_Number_Scan, Nodal_Person_Info, Nodal_Person_Tele, Nodal_Person_Email_Id, Town, Subtown, Village, Establised_Year, Ayush, Miscellaneous_Facilities, Number_Doctor, Num_Mediconsultant_or_Expert, Total_Num_Beds, Number_Private_Wards, Num_Bed_for_Eco_Weaker_Sec, Empanelment_or_Collaboration_with, Emergency_Services, Tariff_Range, State_ID, District_ID | `Address_Original_First_Line` (named a first line; whether it holds a full address [U]) | Location, Town, Subtown, Village, State, District, Subdistrict, Pincode | Hospital_Regis_Number, Sr_No; stability [U]. State_ID and District_ID scheme [U] | None | **Nodal_Person_Info, Nodal_Person_Tele, Nodal_Person_Email_Id** (named as a person's details); Mobile_Number, Telephone and email fields (whose numbers is not documented) |
+| C1b | "NIN Health Faclities with Geo Code and additional parameters (updated till last month)" [PUBD, R29, R32] | SrNo, Health Facility Name, Address, street, landmark, locality, pincode, landline_number, latitude, longitude, altitude, Facility Type, State_Name, District_Name, Taluka_Name, Block_Name | `Address` | street, landmark, locality, pincode, State_Name, District_Name, Taluka_Name, Block_Name | None in the schema, although the resource note defines "NIN: National Identification Number" [PUBD, R29] | None | landline_number |
+| C2 | "All India Health Centres Directory as on 7th October, 2016" [PUBD, R30, R33] | State Name, District Name, Subdistrict Name, Facility Type, Facility Name, Facility Address, Latitude, Longitude, ActiveFlag_C, NOTIONAL_PHYSICAL, Location Type, Type Of Facility, Nin_N | `Facility Address` | State Name, District Name, Subdistrict Name | `Nin_N`; stability [U] | None | None |
+| C3 | "List of Hospitals empaneled under CGHS all over India" [PUBD, R31, R34] | DiagnosticCentreName, DiagnosticCentreAddress, CityName | `DiagnosticCentreAddress` | CityName only; **no state or district field** | None | None | None |
+| C4 | "Details of Health centres latitude and longitude in Telangana" [PUBD, R36, R37] | State, District, Taluka, Facility Name, Facility Type, Latitude, Longitude, Street, Landmark, Locality, Region Indicator, Operational Status, Ownership Authority | **None** | Street, Landmark, Locality, Taluka, District, State | None | None | None |
+| C5 | CEO Tamil Nadu lists; Karnataka district evidence | **[U].** The lists are PDFs (R21). Reading their columns means opening a file that contains records, which this pass did not do. | [U] | [U] | [U] | [U] | [U] |
+| C6 | KVS directory [PUBD, R43] | **[U].** The directory is a search form filtered by state (राज्य) and region (संभाग); no table or field names are in the page's HTML. Results load only on search. | [U] | [U] | [U] | [U] | [U] |
+
+Notes:
+- **C1** catalog: contributor "Ministry of Health and Family Welfare; Department
+  of Health and Family Welfare; National Institute of Health and Family Welfare
+  (NIHFW), New Delhi"; published 2015-08-13 [PUBD, R26]. The catalog holds six
+  resources, including dated 2015 and 2016 snapshots and a dispensaries
+  directory [PUBD, R32]. C1a has frequency "One-time" and granularity "Monthly";
+  C1b has frequency "Monthly" and its data file is hosted at `info.nhp.gov.in`
+  [PUBD, R29]. Both resource nodes were last changed 2026-08-11 [PUBD, R29];
+  whether the data changed then [U]. Field names keep the publisher's spelling
+  ("Faclities", "Establised", "Registeration").
+- **C2**: frequency "Monthly", granularity "Others", file 20,967,450 bytes,
+  resource published 2017-09-20 [PUBD, R30], while the title fixes the data at
+  7 October 2016. The first-pass conflict stands.
+- **C3**: catalog "Central Government Health Scheme", resource frequency "Half
+  yearly", file 80,196 bytes, resource last changed 2026-07-31 [PUBD, R31].
+  The hospital resource's fields are named `DiagnosticCentre…`, the same as the
+  diagnostics-centre resource in that catalog [PUBD, R34]. Whether they are
+  mislabelled [U].
+- **C4**: publisher "Health and Medical and Family Welfare", author "The Health,
+  Medical & Family Welfare", contact "Telangana Open Data Unit"; modified
+  2023-02-15 [PUBD, R36]. Its description says "Data available As on 8th
+  February 2023" while its distribution title says "as on 8th November 2022"
+  [PUBD, R36]: unresolved. Datastore row count **7,001** (source-reported)
+  [PUBD, R37]. The column set matches the AIKosh record R4, but that R4 is this
+  dataset is not verified (titles and dates differ). Meaning of `Region
+  Indicator` [U].
+
+### Publisher identity (ADR-0007 §5, §6)
+
+Recorded as the publisher states it. Whether each counts as "a government body"
+for `source_family`, and how `publisher` strings are normalized for holdout,
+stays open (G4).
+
+| Candidate | Publisher as stated | Note |
+|---|---|---|
+| C1 | Ministry of Health and Family Welfare / Department of Health and Family Welfare / National Institute of Health and Family Welfare (NIHFW), New Delhi [PUBD, R26, R29] | Three-level string |
+| C2 | Ministry of Health and Family Welfare / Department of Health and Family Welfare [PUBD, R30] | Shares two levels with C1 |
+| C3 | Ministry of Health and Family Welfare / Department of Health and Family Welfare / Central Government Health Scheme (CGHS) [PUBD, R31] | Shares two levels with C1 |
+| C4 | "Health and Medical and Family Welfare" on the Telangana Open Data portal [PUBD, R36] | A state department |
+| C5 | "Public (Elections) Department, Tamil Nadu" in the CEO site footer [PUBD, R38]; district pages are published by district administrations [PUBD, R39, R40] | CEO versus district publisher is unresolved |
+| C6 | "केन्द्रीय विद्यालय संगठन" (Kendriya Vidyalaya Sangathan) as content owner; the page title adds "भारत सरकार" (Government of India) [PUBD, R41] | Legal status not verified here; classification open. The first pass's `government_published` for C6 is therefore not confirmed. |
+
+### Other second-pass facts
+
+- **C5:** the CEO Tamil Nadu homepage links to an `ElectoralRolls.aspx` page and
+  to `voters.eci.gov.in/download-eroll` [PUBD, R38]. Neither was opened. This
+  confirms the first pass's flag: retrieval from this site must be limited to
+  polling-station lists.
+- **C6:** the homepage counter reads "1,367", labelled "भारत और दुनिया भर में
+  के. वि." (KVs in India and around the world), with "मास्को - 01, तेहरान - 01,
+  काठमांडू - 01" [PUBD, R41]. The 1,367 therefore includes the three abroad, and
+  1,364 are in India [CALC]. This settles the first pass's open point.
+
+### Evidence status per candidate
+
+Evidence status only, **not source acceptance**.
+
+| Candidate | Licence | Schema | Status | What blocks further progress |
+|---|---|---|---|---|
+| C1a, C1b | (b) Basis: site-wide GODL-India, verified 2026-10-02 (ADR-0002). This pass: no resource-level field; re-check inconclusive (sandbox notice) | Verified (platform schema) | **licence_unverified in this pass**; ADR-0002 basis stands, pending the sandbox question | Sandbox notice; person fields `Nodal_Person_*` must stay out of `context_columns`; `Address_Original_First_Line` completeness [U] |
+| C2 | (b) as C1 | Verified (platform schema) | **licence_unverified in this pass**; ADR-0002 basis stands, pending the sandbox question | Sandbox notice; 2016 data; frequency conflict |
+| C3 | (b) as C1 | Verified (platform schema) | **licence_unverified in this pass**; ADR-0002 basis stands, pending the sandbox question | Sandbox notice; no state or district field; field naming [U] |
+| C4 | (a) publisher licence label "Government Open Data License - India"; no licence text or URL | Verified (datastore schema) | **licence_unverified**: publisher licence label verified; applicable licence text not independently verified. Not rejected. | Licence text; no single address string (G2); date conflict; identity with R4 [U] |
+| C5 | (c) all rights reserved (CEO TN); reuse on request (district sites) | Not verified | **both_unverified** | No reuse licence found; schema needs opening record-bearing PDFs |
+| C6 | (c) reuse on request by email | Not verified | **both_unverified** | No reuse licence without a request; no static schema |
+
+### Still unresolved after the second pass
+
+- Whether the data.gov.in sandbox notice applies to the production site.
+- The licence text behind C4's "Government Open Data License - India" label.
+- Whether C1a's `Address_Original_First_Line` holds a full address; what
+  `State_ID`, `District_ID`, `Region Indicator`, `Location Type` and
+  `NOTIONAL_PHYSICAL` mean.
+- Stability of `Hospital_Regis_Number` and `Nin_N`.
+- Any language or script information: no schema has such a field.
+- C5 and C6 schemas, and whether either publisher would grant permission.
+- Whether concatenated components can serve as `raw_text` (G2). Not decided
+  here.
+
 ## Evidence status
 
-- **Checked at the publisher (fetch summary, not directly inspected):** RBI
-  terms (R7, R8); KVS homepage facts (R10).
-- **Official metadata only (mirror):** everything about C1–C4 and AISHE except
-  the data.gov.in site-wide licence, which ADR-0002 checked on 2026-10-02.
-- **Search-derived only:** C1 content description; all C5 facts; UDISE+
-  (aggregates, API); PMJAY; ABDM; oil outlets; bank locators.
+- **Publisher or publisher-platform, retrieved and inspected directly (second
+  pass) [PUBD]:** C1–C3 catalog and resource metadata, field lists, publisher
+  strings and the data.gov.in footer (R26–R34); C4 metadata, licence label,
+  schema and row count (R35–R37); C5 CEO Tamil Nadu footer and electoral-roll
+  links, and the Dindigul and Chikkaballapur copyright policies (R38–R40); C6
+  homepage counter, footer, copyright policy and directory page (R41–R43).
+- **Checked at the publisher (first-pass fetch summary, not directly
+  inspected):** RBI terms (R7, R8). The first-pass KVS facts (R10) are
+  superseded by R41–R43.
+- **Official metadata only (mirror, first pass):** AISHE (R5). The first-pass
+  mirror records R1–R4 for C1–C4 are superseded by the [PUBD] evidence above
+  where they differ.
+- **Search-derived only:** C1 content description; the C5 list structure,
+  languages, polling-station numbering, Tamil Nadu list locations (R20, R21) and
+  Karnataka district evidence (R22); UDISE+ (aggregates, API); PMJAY; ABDM; oil
+  outlets; bank locators.
 - **Community or third-party:** C1 attribute names and quality notes (R6);
   IFSC compilation (R9); PMJAY guide (R23).
 - **Calculated:** the gazetteer table, and the KVS India count of 1,364
-  (conditional).
-- **Still needs publisher or header verification before any source ADR:**
-  every licence except the data.gov.in site-wide statement; every header row;
-  C1 and C2 publisher strings and currency; C5 licence and statewide coverage;
-  the AISHE `Location` field; the UDISE+ API terms; and the RBI disclaimer text.
+  [CALC], derived from the source-reported 1,367 "in India and around the
+  world" minus one school each in Moscow, Tehran and Kathmandu [PUBD, R41].
+- **Still needs verification before any source ADR:**
+  - the data.gov.in sandbox question, before relying on this pass for C1–C3;
+  - the licence text behind C4's label;
+  - C5 licence (all rights reserved at CEO Tamil Nadu, R38; district sites allow
+    reuse on request, R39, R40) and schema;
+  - C6 licence (reuse on request, R42) and schema;
+  - downloadable file header rows for C1–C4 (only platform schemas were read);
+  - C1 and C2 currency;
+  - CEO versus district publisher for C5;
+  - C5 statewide coverage;
+  - the AISHE `Location` field, the UDISE+ API terms and the RBI disclaimer text.
 
 ## Evidence gaps
 
-- **G1. Licences.** Known only for data.gov.in site-wide (C1–C3, via ADR-0002) and
-  as mirror labels (C4, AISHE). C5 and C6 have none found; RBI grants none.
-- **G2. `raw_text`.** C4 documents components only; C1 is unknown. Whether a
-  concatenation counts as published `raw_text` under ADR-0006 is not decided.
-- **G3. Headers.** No header row has been seen for any source.
+- **G1. Licences.**
+  - C1–C3: ADR-0002 verified data.gov.in's site-wide GODL-India statement on
+    2026-10-02. This pass's re-check is inconclusive because of the unresolved
+    sandbox notice, and no resource-level licence field exists.
+  - C4: the publisher's dataset label "Government Open Data License - India" was
+    verified directly [PUBD, R36]; the applicable licence text is not verified.
+  - AISHE: mirror label only [MIR, R5].
+  - C5: all rights reserved at CEO Tamil Nadu (R38); district sites allow reuse
+    on request (R39, R40).
+  - C6: reuse on request (R42).
+  - C5 and C6: no reuse licence found. RBI grants none.
+- **G2. `raw_text`.** C1a has `Address_Original_First_Line`, C1b has `Address`,
+  C2 has `Facility Address` and C3 has `DiagnosticCentreAddress`. Whether these
+  are complete enough to serve as `raw_text` is unverified (C1a's field is named
+  a first line). C4 publishes components only. Whether a concatenation counts as
+  published `raw_text` under ADR-0006 is not decided.
+- **G3. Headers.** Publisher/platform schema fields for C1–C4 were inspected
+  directly [PUBD, R32–R34, R37]. No downloadable file was opened, so actual file
+  header rows remain unverified. C5 and C6 record-bearing schemas are
+  unresolved.
 - **G4. Publisher identity.** C1–C3 all sit under MoHFW (NIHFW, DoHFW, CGHS).
   Whether they are one `publisher` for ADR-0007 §6 is open. So is whether
   autonomous and statutory bodies (KVS, NIHFW, NHA, RBI) and public-sector
   companies count as "a government body" for `source_family`.
-- **G5. Retrieval.** data.gov.in is blocked from this machine (ADR-0004).
-- **G6. Currency.** C1 ("Static" against "updated till last month") and C2
-  ("Monthly" against a 2016 snapshot) have conflicting metadata.
+- **G5. Retrieval.** The first pass's fetch tool got HTTP 403 from data.gov.in,
+  consistent with the bot challenge recorded in ADR-0004. In the second pass,
+  `curl` got HTTP 200 for the catalog pages and metadata APIs (R26–R34). File
+  downloads were not attempted, so whether data files are retrievable is
+  untested.
+- **G6. Currency.** C1a's frequency is "One-time" (granularity "Monthly") while
+  its title says "updated till last month"; C1b's is "Monthly" [PUBD, R29].
+  Whether either file is actually refreshed is unknown. C2 ("Monthly" against a
+  2016 snapshot) and C4 (8 February 2023 against 8 November 2022) also have
+  conflicting metadata.
 - **G7. Per-state counts.** No ingestion-time aggregates exist (ADR-0007 §4
   step 3).
 - **G8. Language.** Only C5 in Tamil Nadu has any language evidence, and it is
