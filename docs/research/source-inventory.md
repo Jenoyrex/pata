@@ -7,13 +7,15 @@
   computation on the pinned gazetteer (`gazetteer_version`
   `bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78`). Second
   pass: publisher pages and publisher-platform metadata APIs retrieved with
-  `curl` and inspected directly (see "Licence and header verification").
+  `curl` and inspected directly (see "Licence and header verification"). Third
+  pass, 2026-10-05: data.gov.in host and licence re-check for C1–C3 only.
 - **Not exhaustive.** Only the sources and categories listed below were looked
   at. Categories identified but not researched are listed separately.
-- **Two passes.** The sections up to "Candidate-state evidence" record the first
-  pass. "Licence and header verification" records a second pass on C1–C6. Where
-  they differ, the second pass is the current evidence; the first-pass text is
-  kept as the record of what was known then.
+- **Three passes.** The sections up to "Candidate-state evidence" record the
+  first pass. "Licence and header verification" records a second pass on C1–C6.
+  "data.gov.in host and licence re-check" records a third pass on the C1–C3
+  licence only. Where they differ, the later pass is the current evidence; the
+  earlier text is kept as the record of what was known then.
 
 ## How the evidence was gathered
 
@@ -27,6 +29,8 @@
   retrieved with `curl` and the responses inspected directly. Those claims carry
   the label [PUBD]; the method is described under "Licence and header
   verification".
+- **Third pass:** the same method, on data.gov.in pages, site scripts and
+  metadata only; described under "data.gov.in host and licence re-check".
 - Other claims rest on this repository's ADRs [ADR] or on the local gazetteer
   computation [CALC].
 - **Page fetches** were made with an instruction to report only metadata,
@@ -539,9 +543,13 @@ Evidence status only, **not source acceptance**.
 | C5 | (c) all rights reserved (CEO TN); reuse on request (district sites) | Not verified | **both_unverified** | No reuse licence found; schema needs opening record-bearing PDFs |
 | C6 | (c) reuse on request by email | Not verified | **both_unverified** | No reuse licence without a request; no static schema |
 
+This table records the second pass. For C1–C3, the sandbox question in it is
+answered by the third pass ("data.gov.in host and licence re-check").
+
 ### Still unresolved after the second pass
 
 - Whether the data.gov.in sandbox notice applies to the production site.
+  (Answered by the third pass, 2026-10-05.)
 - The licence text behind C4's "Government Open Data License - India" label.
 - Whether C1a's `Address_Original_First_Line` holds a full address; what
   `State_ID`, `District_ID`, `Region Indicator`, `Location Type` and
@@ -552,6 +560,112 @@ Evidence status only, **not source acceptance**.
 - Whether concatenated components can serve as `raw_text` (G2). Not decided
   here.
 
+## data.gov.in host and licence re-check (third pass, 2026-10-05)
+
+Evidence status only. **No source is accepted** and no manifest is written. This
+pass addresses only the second pass's sandbox question for C1–C3.
+
+### Method
+
+- Pages, site scripts and metadata APIs were retrieved with `curl` on
+  2026-10-05 (from 14:04 UTC) and the saved responses were read directly [PUBD].
+- No data file was downloaded and no dataset record was retrieved. The metadata
+  APIs are the same `backend/dmspublic/v1` endpoints as R28–R31.
+- The licence body on `/Godl` is not in the server-rendered HTML. The page loads
+  it from a route script (R47), and the text was read from that script, not from
+  a rendered browser page.
+- For comparison, copies saved locally during the ADR-0002 work on 2026-10-02
+  and during the second pass on 2026-10-04 were read. They are outside the
+  repository and are cited as local saved copies, not as publisher retrievals.
+
+### Sources for this pass
+
+| # | URL | Kind | SHA-256 of saved response | Supports |
+|---|---|---|---|---|
+| R44 | https://data.gov.in/ and https://www.data.gov.in/ | [PUBD] | `e8972bf1d36fed1745b5be80950424475f021e4bd2d6a773763001ebb19b2f0b` (www homepage) | Redirect; footer markup; canonical link |
+| R45 | https://www.data.gov.in/Godl | [PUBD] | `251aee4b5cadaacb48fde9d7de7d2e43f28cd23f88af0360729a778fc7323511` | Licence page; footer markup; scripts it loads |
+| R46 | https://www.data.gov.in/_nuxt/fabd03c.js | [PUBD] | `8da0ada885d65f8edee54a3d37f60ea6ce8d8c1bf5e172254705de53e849a493` | Site build configuration; sandbox-notice condition |
+| R47 | https://www.data.gov.in/_nuxt/36aab54.js | [PUBD] | `45fc26bc7b8d0b25fa746c168d1c37bd6be28dfae91b5e09b45f72ce2ad23458` | GODL-India licence text served by `/Godl` |
+| R48 | The R29, R30 and R31 resource queries, and the two R28 catalog queries | [PUBD] | not recorded here | C1–C3 resource and catalog metadata keys |
+
+### Findings
+
+- **Host.** `https://data.gov.in/` answers `301 Moved Permanently` with
+  `Location: https://www.data.gov.in/`. Every page in this pass was served by
+  `www.data.gov.in`. The homepage's canonical link is `https://data.gov.in`
+  [PUBD, R44].
+- **The sandbox notice is a hidden template element, not a statement about this
+  host.**
+  - In the HTML of R44 and R45, the sandbox sentence sits in
+    `<p style="display:none;">`, so it is not displayed [PUBD].
+  - The site script shows that paragraph only under the condition
+    `['sandbox.data.gov.in'].includes(DOMAIN_NAME)` [PUBD, R46].
+  - The same script's build configuration sets
+    `VUE_APP_DOMAIN_NAME: "www.data.gov.in"`, and its context sets
+    `isDev: false` [PUBD, R46].
+  - So the notice is displayed only on a host named `sandbox.data.gov.in`, and
+    on `www.data.gov.in` it is present in the markup but hidden.
+  - The local saved copies from 2026-10-02 (`/Godl`) and 2026-10-04 (C1 and C2
+    catalog pages) have the same hidden `display:none` paragraph.
+- **What this establishes about "production".** The site states no explicit
+  "production" label. What is established from the site itself:
+  - `www.data.gov.in` is the host `data.gov.in` redirects to.
+  - It is configured with its own domain name, not as the sandbox, and the
+    sandbox notice is inactive there.
+  - The second pass's pages came from this host.
+
+  An attempt to reach `https://sandbox.data.gov.in/` ended in a connection
+  reset, so nothing about that host is established.
+- **Licence statement.** The footer of R44 and R45 still states that "The
+  content published on data.gov.in is owned by the respective
+  Ministry/State/Department/Organization and licensed under the Government Open
+  Data License - India", linking to `/Godl` [PUBD].
+- **Licence text.** The `/Godl` route script (R47) contains the GODL-India text
+  [PUBD]. Every element ADR-0002 relied on is present:
+  - the worldwide, royalty-free, non-exclusive licence to use, adapt, publish,
+    translate, display, add value and create derivative works, for lawful
+    commercial and non-commercial purposes (section 3)
+  - attribution with DOI, URL or URI; a separate attribution page for multiple
+    data; non-endorsement; no warranty; continuity of provision (section 4)
+  - the attribution template (section 5)
+  - exemptions (section 6): personal information; data the provider is not
+    authorized to license; names, crests, logos and official symbols; data under
+    other IP rights; military insignia; identity documents; data that should not
+    have been disclosed under RTI Act section 8
+  - termination on breach, reinstated if cured within 30 days; the provider may
+    terminate the licence for a data set found to include section 6 data (section
+    7)
+- **Unchanged since 2026-10-02.** The licence text extracted from R47 is
+  identical to the text extracted from the copy of the then-current route script
+  saved on 2026-10-02 (`542bb31.js`, local saved copy). That script is still
+  served unchanged.
+- **Resource level (C1–C3).** The resource and catalog metadata keys (R48)
+  include no licence field of any name [PUBD]. The licence basis for C1–C3 is
+  therefore the site-wide footer statement, as ADR-0002 found for its own
+  data.gov.in resources. The resources show `is_priced` 0 and `field_public` 1
+  [PUBD, R48]. The second pass's "Released Under: NDSAP" on the catalog pages
+  (R26, R27) names the National Data Sharing and Accessibility Policy. The
+  licence's preamble presents GODL-India as the open licence for data sets
+  published under that policy [PUBD, R47]. No other licence is named for C1–C3.
+
+### Effect on the second pass
+
+- The second pass's sandbox question (Licence findings, (iii)) is answered: the
+  notice is hidden on `www.data.gov.in` and shown only on `sandbox.data.gov.in`.
+  It does not affect the ADR-0002 basis.
+- The current evidence for C1–C3 is a site-wide GODL-India statement on the
+  non-sandbox host with an unchanged licence text, and no resource-level
+  licence. This is licence evidence, **not source acceptance**.
+- Still open for C1–C3 after this pass:
+  - C1b's data file is hosted at `info.nhp.gov.in`. Whether that host's terms
+    differ from data.gov.in's [U].
+  - The GODL-India exemptions (section 6) exclude personal information and
+    identity documents from the licence. That bears on C1a's `Nodal_Person_*`
+    and contact fields, which the record-level screen and context-column rules
+    already exclude.
+  - Terms of use and automated retrieval (E5), header rows, G4 and the source
+    ADR itself.
+
 ## Evidence status
 
 - **Publisher or publisher-platform, retrieved and inspected directly (second
@@ -560,6 +674,9 @@ Evidence status only, **not source acceptance**.
   schema and row count (R35–R37); C5 CEO Tamil Nadu footer and electoral-roll
   links, and the Dindigul and Chikkaballapur copyright policies (R38–R40); C6
   homepage counter, footer, copyright policy and directory page (R41–R43).
+- **Publisher or publisher-platform, retrieved and inspected directly (third
+  pass) [PUBD]:** data.gov.in redirect, footer markup, site build configuration,
+  GODL-India text, and C1–C3 resource and catalog metadata keys (R44–R48).
 - **Checked at the publisher (first-pass fetch summary, not directly
   inspected):** RBI terms (R7, R8). The first-pass KVS facts (R10) are
   superseded by R41–R43.
@@ -576,7 +693,8 @@ Evidence status only, **not source acceptance**.
   [CALC], derived from the source-reported 1,367 "in India and around the
   world" minus one school each in Moscow, Tehran and Kathmandu [PUBD, R41].
 - **Still needs verification before any source ADR:**
-  - the data.gov.in sandbox question, before relying on this pass for C1–C3;
+  - for C1–C3, the remaining items listed under "Effect on the second pass"
+    (third pass); the sandbox question itself is answered there;
   - the licence text behind C4's label;
   - C5 licence (all rights reserved at CEO Tamil Nadu, R38; district sites allow
     reuse on request, R39, R40) and schema;
@@ -591,8 +709,10 @@ Evidence status only, **not source acceptance**.
 
 - **G1. Licences.**
   - C1–C3: ADR-0002 verified data.gov.in's site-wide GODL-India statement on
-    2026-10-02. This pass's re-check is inconclusive because of the unresolved
-    sandbox notice, and no resource-level licence field exists.
+    2026-10-02. The second pass's re-check was inconclusive because of the
+    sandbox notice. The third pass (2026-10-05) found that notice hidden on
+    `www.data.gov.in` and the licence text unchanged [PUBD, R44–R47]. No
+    resource-level licence field exists.
   - C4: the publisher's dataset label "Government Open Data License - India" was
     verified directly [PUBD, R36]; the applicable licence text is not verified.
   - AISHE: mirror label only [MIR, R5].

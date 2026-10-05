@@ -5,9 +5,11 @@
   selects a state, accepts or rejects a source, designates a held-out publisher or
   writes a manifest.
 - **Based on:** `docs/research/source-inventory.md` as committed in `a89f609`,
-  ADR-0001 to ADR-0007, and `docs/gazetteer.md`. No new retrieval or research was
-  done for these notes. Evidence labels ([PUBD], [MIR], [SRCH], [ADR], [CALC],
-  [U]) and source numbers (C1–C6, R#) are those of the inventory.
+  updated with its third pass (2026-10-05, data.gov.in host and licence
+  re-check), ADR-0001 to ADR-0007, and `docs/gazetteer.md`. No retrieval was
+  done for these notes beyond what the inventory records. Evidence labels
+  ([PUBD], [MIR], [SRCH], [ADR], [CALC], [U]) and source numbers (C1–C6, R#) are
+  those of the inventory.
 - **Gazetteer:** `gazetteer_version`
   `bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78`.
 
@@ -55,7 +57,7 @@ coverage statement.
 
 | Source | Publisher (as stated) | `source_family` | Declared coverage; state column | Single address string | Licence status | Identifier → likely `record_id_scope` | Status |
 |---|---|---|---|---|---|---|---|
-| C1a | MoHFW / DoHFW / NIHFW [PUBD] | `government_published` if NIHFW counts as a government body (G4) | All India [MIR, R1]; `State` | `Address_Original_First_Line`, completeness [U] | Basis: ADR-0002 (2026-10-02); this pass's re-check inconclusive (sandbox) | `Hospital_Regis_Number`, stability [U]; otherwise `snapshot` | Not assessable to acceptance |
+| C1a | MoHFW / DoHFW / NIHFW [PUBD] | `government_published` if NIHFW counts as a government body (G4) | All India [MIR, R1]; `State` | `Address_Original_First_Line`, completeness [U] | Basis: site-wide GODL-India, ADR-0002 (2026-10-02); third-pass re-check (2026-10-05): sandbox notice hidden on `www.data.gov.in`, licence text unchanged; no resource-level licence | `Hospital_Regis_Number`, stability [U]; otherwise `snapshot` | Not assessable to acceptance |
 | C1b | Same as C1a [PUBD] | As C1a | All India [MIR, R1]; `State_Name` | `Address` | As C1a; file hosted at `info.nhp.gov.in`, whose terms are [U] | None → `snapshot` | Not assessable to acceptance |
 | C2 | MoHFW / DoHFW [PUBD] | `government_published` (G4 open) | All India [MIR, R2]; `State Name` | `Facility Address` | As C1a | `Nin_N`, stability [U] | Not assessable to acceptance |
 | C3 | MoHFW / DoHFW / CGHS [PUBD] | `government_published` (G4 open) | CGHS cities, not listed by state [U]; **no state column** | `DiagnosticCentreAddress` | As C1a | None → `snapshot` | Not assessable to acceptance |
@@ -71,9 +73,12 @@ are recorded there as rejected. Nothing here changes those entries.
 
 **C1a, C1b (National Health Portal directories).**
 - *Licence.* ADR-0002 verified data.gov.in's site-wide GODL-India statement on
-  2026-10-02. The second-pass re-check is inconclusive because the footer served
-  on 2026-10-04 carries a sandbox notice. No resource-level licence field
-  exists. GODL-India exempts personal information from the licence (ADR-0002), so
+  2026-10-02. The second-pass re-check was inconclusive because the footer
+  markup served on 2026-10-04 contains a sandbox notice. The third pass
+  (2026-10-05) found that notice hidden on `www.data.gov.in`. The site's script
+  shows it only on `sandbox.data.gov.in`. The GODL-India text is unchanged since
+  2026-10-02 [PUBD, R44–R47]. No resource-level licence field exists [PUBD, R48].
+  GODL-India exempts personal information from the licence (ADR-0002), so
   any personal information in these files is outside the licence in any case.
 - *Terms and retrieval.* Whether automated retrieval is allowed is [U] (E5).
   ADR-0004 records a bot challenge on data.gov.in file URLs. The second pass
@@ -165,9 +170,12 @@ are recorded there as rejected. Nothing here changes those entries.
 ### O2 result
 
 **No source can be accepted now, and none is ready for a source ADR.**
-- **C1, C2 and C3** (rows C1a, C1b, C2, C3) share one **licence** blocker:
-  whether the data.gov.in sandbox notice affects the GODL-India basis recorded in
-  ADR-0002. Separately, they each still need:
+- **C1, C2 and C3** (rows C1a, C1b, C2, C3): the shared sandbox question (B2)
+  is resolved by the third pass. Their licence evidence is the site-wide
+  GODL-India statement on `www.data.gov.in`, the host `data.gov.in` redirects
+  to, with an unchanged licence text. This is
+  evidence, not acceptance. They each still need:
+  - for C1b, the terms of `info.nhp.gov.in`, where its file is hosted [U]
   - header rows (B6)
   - terms of use, including automated retrieval (B8)
   - their personal-data questions settled
@@ -233,7 +241,7 @@ Observations, none of them a selection criterion:
 | # | Blocker | Blocks | Owner / route |
 |---|---|---|---|
 | B1 | ADR-0006 and ADR-0007 are Proposed | Formal assessments, source ADR, selection records | Maintainer decision |
-| B2 | data.gov.in sandbox notice vs the ADR-0002 GODL-India basis | C1, C2 and C3 licence | Documentation retrieval (see next steps) |
+| B2 | **Resolved 2026-10-05.** The data.gov.in sandbox notice is hidden on `www.data.gov.in` and shown only on `sandbox.data.gov.in`; the GODL-India text is unchanged since ADR-0002 (inventory, third pass) | — | — |
 | B3 | Licence text behind C4's label | C4 licence | Telangana portal documentation or the Telangana Open Data Unit |
 | B4 | Whether permission or reuse on request can count as an acceptable licence basis (ADR-0001 §1, §4; ADR-0007 §5) | C5, C6 | Maintainer decision; it would be a new decision, not an assessment finding |
 | B5 | G2. **C4:** components only, so whether a concatenation can be `raw_text` "exactly as published". **C1a:** a single string is published, but whether `Address_Original_First_Line` is complete enough is unknown | C4; usefulness of C1a | Maintainer decision (C4); scripted aggregate statistics (C1a) |
@@ -256,18 +264,17 @@ The treatment of platform field lists as publisher documentation (see
 
 ## Recommended next evidence step
 
-1. **Resolve B2 first.** C1, C2 and C3 (three of the six numbered sources, four
-   of the seven inventory rows) share this licence blocker. C1 and C2 are also
-   the only sources with a documented licence basis that could cover several
-   states. C3 cannot, because it has no state attribution.
-   1. **Determine which host is production.** Check whether `www.data.gov.in` and
-      `data.gov.in`, as retrieved on 2026-10-04, are the production site or a
-      sandbox, and record the evidence and date.
-   2. Only then retrieve the GODL-India text (`/Godl`) and the footer from the
-      confirmed production host, on a recorded date.
-   3. Compare with ADR-0002.
+1. **B2: done (2026-10-05).** It affected C1, C2 and C3 (three of the six
+   numbered sources, four of the seven inventory rows). C1 and C2 are also the
+   only sources with a documented licence basis that could cover several
+   states; C3 cannot, because it has no state attribution. The steps were:
+   - determine the host: `data.gov.in` redirects to `www.data.gov.in`, which is
+     not configured as the sandbox;
+   - retrieve the GODL-India text from that host;
+   - compare it with ADR-0002.
 
-   This uses licence text and terms only, within the §5 evidence limit.
+   The inventory's third pass records the evidence. It used licence text, terms
+   and metadata only, within the §5 evidence limit.
 2. **B3 and B8** are the same kind of documentation retrieval, for C4 and the
    three hosts.
 3. **Then B6**, after maintainer approval: a script that downloads a candidate
