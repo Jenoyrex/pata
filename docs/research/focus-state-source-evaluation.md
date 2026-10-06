@@ -6,8 +6,9 @@
   writes a manifest.
 - **Based on:** `docs/research/source-inventory.md` as committed in `a89f609`,
   updated with its third pass (2026-10-05, data.gov.in host and licence
-  re-check) and fourth pass (2026-10-06, terms of use and retrieval conditions
-  for C1–C3), ADR-0001 to ADR-0007, and `docs/gazetteer.md`. No retrieval was
+  re-check), fourth pass (2026-10-06, terms of use and retrieval conditions
+  for C1–C3) and fifth pass (2026-10-06, B6 aggregate and schema inspection,
+  offline), ADR-0001 to ADR-0007, and `docs/gazetteer.md`. No retrieval was
   done for these notes beyond what the inventory records. Evidence labels
   ([PUBD], [ARCH], [MIR], [SRCH], [ADR], [CALC], [U]) and source numbers
   (C1–C6, R#) are those of the inventory.
@@ -159,6 +160,8 @@ are recorded there as rejected. Nothing here changes those entries.
 - C3 records would enter the annotation pool only if unknown-state records are
   retained (O4). If they are not, C3 contributes no records.
 - The fields are named `DiagnosticCentre…` in the hospital resource (unresolved).
+  The diagnostics-centre resource spells its fields `DiagnosticCenter…`, so the
+  two are not identically named (inventory, fifth pass) [PUBD, R34].
 
 **C4 (Telangana health centres).**
 - *Licence.* The publisher's dataset label "Government Open Data License - India"
@@ -174,6 +177,9 @@ are recorded there as rejected. Nothing here changes those entries.
   as a facility category is for the assessment.
 - The datastore reports 7,001 rows. It is a single publisher, distinct from the
   central ministry.
+- The datastore types all 13 columns as `text`. The `state` column's
+  description begins with a byte-order mark, which suggests the uploaded CSV
+  has one (inference; file not seen) [PUBD, R37].
 
 **C5 (polling-station lists).**
 - *Licence.* CEO Tamil Nadu: "All rights reserved", with no policy page linked
@@ -207,12 +213,38 @@ are recorded there as rejected. Nothing here changes those entries.
   - the data.gov.in Copyright Policy wording settled against the footer (B14)
   - for C1b, a licence basis for a file hosted only at `info.nhp.gov.in` (B15),
     and that host's terms [U]
-  - header rows (B6)
+  - header rows and file-level aggregate statistics (B6; schema-level part
+    gathered in the fifth pass, file-level part not)
   - their personal-data questions settled
 - **C4** depends on its licence text (B3) and on G2 (B5).
 - **C5 and C6:** no reuse licence was found, and the outcome depends on B4.
 - No `operator_published` source with a licence has been found, so that family
   is empty (ADR-0007 Consequences anticipates this).
+
+### B6 aggregate inspection (fifth pass, 2026-10-06)
+
+Structural evidence only. It changes no licence status and no outcome above. The
+detail is in the inventory, "B6 aggregate and schema inspection".
+
+- **Gathered, offline from saved responses** [PUBD, CALC]:
+  - platform field counts and types for C1a (48 fields), C1b (16), C2 (13) and
+    C3 (3);
+  - C4's 13 all-`text` datastore columns and its platform count of 7,001;
+  - the publisher's missing-value notes for C1–C3 ("NA/Blank: Not Available"
+    for C1a and C1b; "NA: Not Available" for C2 and C3);
+  - file sizes and hosting for C1–C3;
+  - a correction to the inventory's C3 field-name comparison.
+- **Not gathered:** file header rows; row counts for C1a, C1b, C2, C3, C5 and
+  C6; any empty-value rate; value distributions; per-state counts; language or
+  script.
+- **Why:** no candidate file is held locally, and no permitted scripted route
+  to one is established.
+  - data.gov.in: retrieval points to manual (B8), and B14 is open.
+  - C1b: the host was unreachable (B15).
+  - C4: the portal's terms (B3, B8) are unchecked.
+  - C5, C6: depend on B4.
+- **Not an ADR-0007 dimension.** How easy a source is to inspect is not one of
+  the §4 selection dimensions and is not used to rank states.
 
 ## O1: pre-candidate state evidence
 
@@ -276,7 +308,7 @@ Observations, none of them a selection criterion:
 | B3 | Licence text behind C4's label | C4 licence | Telangana portal documentation or the Telangana Open Data Unit |
 | B4 | Whether permission or reuse on request can count as an acceptable licence basis (ADR-0001 §1, §4; ADR-0007 §5) | C5, C6 | Maintainer decision; it would be a new decision, not an assessment finding |
 | B5 | G2. **C4:** components only, so whether a concatenation can be `raw_text` "exactly as published". **C1a:** a single string is published, but whether `Address_Original_First_Line` is complete enough is unknown | C4; usefulness of C1a | Maintainer decision (C4); scripted aggregate statistics (C1a) |
-| B6 | No header rows and no scripted aggregate statistics | §5 assessment items (personal-data risk, context-column approval) | A script within the §5 evidence limit. Per-state counts for §4 step 3 come later, from accepted source files. |
+| B6 | No header rows and no scripted aggregate statistics from files. **Fifth pass (2026-10-06):** schema-level part gathered offline (platform field types and counts, C4 platform count, missing-value notes); file-level part not done, as no candidate file is held and no permitted scripted route is established | §5 assessment items (personal-data risk, context-column approval) | A script within the §5 evidence limit, run on a file obtained through a permitted route. Per-state counts for §4 step 3 come later, from accepted source files. |
 | B7 | G4: publisher identity of C1–C3; whether NIHFW, CGHS and KVS count as "a government body" | `source_family`, publisher count, holdout unit | Publisher documentation; maintainer decision |
 | B9 | No versioned procedure for gazetteer properties (G10) | Selection records (§4 step 3) | Code, after approval |
 | B14 | data.gov.in Copyright Policy: "may be reproduced free of charge after taking proper permission by sending a mail to us" [PUBD, R52], against the footer's GODL-India statement and "All rights reserved except published datasets/resources and metadata" | Licence basis of C1a, C2, C3 (not withdrawn; unresolved) | data.gov.in (NIC) clarification; maintainer decision on how to read it |
@@ -314,9 +346,11 @@ The treatment of platform field lists as publisher documentation (see
      B14 and B15.
    - B8 for `info.nhp.gov.in`: blocked; the host was unreachable.
    - B8 for Telangana DKAN, and B3 (C4's licence text): not yet done.
-3. **Then B6**, after maintainer approval: a script that downloads a candidate
-   file to `data/raw/` (never committed) and checks it against a recorded
-   SHA-256.
+3. **Then B6, file-level part**, after maintainer approval. Its schema-level
+   part was gathered in the fifth pass (above). A candidate file is placed in
+   `data/raw/` (never committed) through a permitted route, and a script checks
+   it against a recorded SHA-256. For data.gov.in that route is a manual
+   download, as B8 points to manual retrieval.
    - It prints only the header row, the row count, per-column null rates and
      value-shape statistics (for example token-count distributions).
    - It prints no record text, and no person reads the file.

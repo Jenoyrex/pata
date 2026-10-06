@@ -10,14 +10,16 @@
   `curl` and inspected directly (see "Licence and header verification"). Third
   pass, 2026-10-05: data.gov.in host and licence re-check for C1–C3 only. Fourth
   pass, 2026-10-06: terms of use and retrieval conditions for C1–C3, including
-  C1b's file host `info.nhp.gov.in`.
+  C1b's file host `info.nhp.gov.in`. Fifth pass, 2026-10-06: B6 aggregate and
+  schema inspection for C1–C6, offline, from responses already saved.
 - **Not exhaustive.** Only the sources and categories listed below were looked
   at. Categories identified but not researched are listed separately.
-- **Four passes.** The sections up to "Candidate-state evidence" record the
+- **Five passes.** The sections up to "Candidate-state evidence" record the
   first pass. "Licence and header verification" records a second pass on C1–C6.
   "data.gov.in host and licence re-check" records a third pass on the C1–C3
   licence only. "Terms of use and retrieval conditions" records a fourth pass on
-  C1–C3 only. Where they differ, the later pass is the current evidence; the
+  C1–C3 only. "B6 aggregate and schema inspection" records a fifth pass on
+  C1–C6. Where they differ, the later pass is the current evidence; the
   earlier text is kept as the record of what was known then.
 
 ## How the evidence was gathered
@@ -38,6 +40,9 @@
   `robots.txt`, site scripts, metadata and response headers, plus one Internet
   Archive copy of a National Health Portal page [ARCH]; described under "Terms
   of use and retrieval conditions".
+- **Fifth pass:** no new retrieval. Responses saved by the second and fourth
+  passes were re-read offline; described under "B6 aggregate and schema
+  inspection".
 - Other claims rest on this repository's ADRs [ADR] or on the local gazetteer
   computation [CALC].
 - **Page fetches** were made with an instruction to report only metadata,
@@ -402,7 +407,8 @@ Evidence status only. **No source is accepted** and no manifest is written.
   200 to `curl`.
 - A field list from a platform API is the publisher's schema for the resource.
   It is not byte-for-byte the downloadable file's header row: data.gov.in adds
-  `document_id` and `resource_uuid`, and file headers were not read.
+  `document_id` and `resource_uuid`, and file headers were not read. (Fifth
+  pass: C3's list has neither field.)
 
 ### Sources for this pass
 
@@ -507,7 +513,8 @@ Notes:
   yearly", file 80,196 bytes, resource last changed 2026-07-31 [PUBD, R31].
   The hospital resource's fields are named `DiagnosticCentre…`, the same as the
   diagnostics-centre resource in that catalog [PUBD, R34]. Whether they are
-  mislabelled [U].
+  mislabelled [U]. (Fifth pass: "the same as" is corrected under "B6 aggregate
+  and schema inspection"; the two resources' field names differ in spelling.)
 - **C4**: publisher "Health and Medical and Family Welfare", author "The Health,
   Medical & Family Welfare", contact "Telangana Open Data Unit"; modified
   2023-02-15 [PUBD, R36]. Its description says "Data available As on 8th
@@ -937,6 +944,147 @@ Licence (legal permission) and retrieval (technical access) are kept apart.
 - **Not addressed in this pass:** C4's licence text and the Telangana portal's
   retrieval terms; header rows; G4.
 
+## B6 aggregate and schema inspection (fifth pass, 2026-10-06)
+
+Evidence status only. **No source is accepted, rejected or selected**, no state
+is selected, and no manifest or selection record is written. This pass collects
+the schema and aggregate evidence that can be had now without reading records.
+It is structural evidence. It says nothing about licences or terms, which stay
+as the earlier passes left them (B14, B15 and C4's B3/B8 open).
+
+### Method
+
+- **No new retrieval.** Every finding below comes from responses already saved
+  by the second pass (2026-10-04) and the fourth pass (2026-10-06), re-read
+  offline on 2026-10-06. No request was sent to any publisher or platform.
+- **No record content.** The saved responses are metadata: platform field
+  lists, resource and dataset metadata, and a datastore schema query that
+  returned a count and no rows (`limit=0`, `results=false`). The data.gov.in
+  field-list responses contain an array named `records`. Its entries are API
+  descriptors, one per resource, holding field lists, not data rows.
+- **No local candidate file.** `data/raw/data.gov.in/` is empty, and no C1–C6
+  file exists elsewhere in `data/`. So no header row was read, and no column
+  statistic was computed from a file.
+- **Why nothing new was retrieved.**
+  - data.gov.in: the Terms of Use are silent on automated access, so under
+    ADR-0007 §5 retrieval points to manual (fourth pass). Separately, as
+    technical conditions, `robots.txt` disallows all paths and downloads go
+    through a form with a CAPTCHA.
+  - C1b: `info.nhp.gov.in` was unreachable (fourth pass).
+  - C4: the Telangana portal's retrieval terms (B8) have not been checked, so
+    its datastore API was not queried again for column statistics. Whether it
+    supports such queries was not checked [U].
+  - C5, C6: no licence and no bulk mechanism was found.
+- **No per-state counts.** Under ADR-0007 §4 step 3, record counts per source
+  and per step-1 state come from accepted source files, in selection records.
+  None were computed.
+- New label: none. [PUBD] marks the saved publisher or platform responses;
+  [CALC] marks counts derived here from those responses (field counts and type
+  tallies), never from records.
+
+### Saved responses re-read
+
+The second pass did not record hashes. These are the hashes of the local saved
+copies re-read in this pass.
+
+| Ref | Saved response | Retrieved | SHA-256 of local saved copy |
+|---|---|---|---|
+| R32 | data.gov.in field lists, catalog "Hospital Directory (National Health Portal)" | 2026-10-04 | `6308ca533937b70a1a44cd13ddb5f42d32a6552af2309f25e4e31db592f8e50d` |
+| R33 | data.gov.in field list, catalog "All India Health Centres Directory" | 2026-10-04 | `14e90785c995c5959175bca1ba08711d5caf6760bc1cfd1915b4d01d6f43db71` |
+| R34 | data.gov.in field lists, catalog "Central Government Health Scheme" | 2026-10-04 | `7cdce8aaa44e9a85f833b96540d9b96be808534433781ec63b408d48dc986d57` |
+| R36 | Telangana portal dataset metadata (C4) | 2026-10-04 | `602efd63ba4748f10f121b3de88e934e7d9ed25d24d48beac54bc53b3a1f2a2e` |
+| R37 | Telangana datastore schema and count query (C4) | 2026-10-04 | `91f6ca720803446017cbfbc98f1dd2a790bdde03d179fa2d0fed7145ab690dc6` |
+| R55 | data.gov.in resource metadata, C1–C3 | 2026-10-06 | as listed under the fourth pass |
+
+### Aggregate and schema findings per source
+
+| Row | Publisher fields; platform type tally [CALC from PUBD] | Row count | Declared coverage; state field | Address fields | Missing-value convention | File structure |
+|---|---|---|---|---|---|---|
+| C1a | 48 (the platform list has 50, adding `document_id` and `resource_uuid`); 32 `keyword`, 16 `double` [R32] | **[U]**: no row count in resource metadata (R55), field lists (R32) or pages seen | "All India" from the first-pass mirror only [MIR, R1]; `State` field; no `lgd:state:` mapping | `Address_Original_First_Line` plus components `Location`, `Town`, `Subtown`, `Village`, `State`, `District`, `Subdistrict`, `Pincode` [R32] | Note: "NA/Blank: Not Available" [PUBD, R55] | CSV, 10,341,256 bytes, on data.gov.in's file store [PUBD, R55] |
+| C1b | 16 (platform 18); 10 `keyword`, 5 `double`, 1 `text` [R32] | **[U]** | As C1a [MIR, R1]; `State_Name` field | `Address` plus `street`, `landmark`, `locality`, `pincode`, `State_Name`, `District_Name`, `Taluka_Name`, `Block_Name` [R32] | Note: "NA/Blank: Not Available"; "NIN: National Identification Number" [PUBD, R55] | CSV, 26,644,508 bytes, hosted only at `info.nhp.gov.in` [PUBD, R55] |
+| C2 | 13 (platform 15); 12 `keyword`, 1 `double` [R33] | **[U]** | "All India" from the first-pass mirror only [MIR, R2]; `State Name` field | `Facility Address` plus `State Name`, `District Name`, `Subdistrict Name` [R33] | Note: "NA: Not Available" [PUBD, R55] | CSV, 20,967,450 bytes, on data.gov.in's file store [PUBD, R55] |
+| C3 | 3 (platform 3; no `document_id` or `resource_uuid`); 3 `keyword` [R34] | **[U]** | CGHS cities, not listed [U]; **no state field** | `DiagnosticCentreAddress`; `CityName` only as a component [R34] | Note: "NA: Not Available." [PUBD, R55] | CSV, 80,196 bytes, on data.gov.in's file store; metadata flag `field_from_api` is 1, meaning not documented [PUBD, R55] |
+| C4 | 13; all `text` in the datastore [R37] | **7,001**, the platform datastore's count (source-reported, not a file row count) [PUBD, R37] | Telangana (dataset title); `State` field; `lgd:state:36` mapping not made here | No single address string; components `Street`, `Landmark`, `Locality`, `Taluka`, `District`, `State` [R37] | Not documented [U] | One CSV distribution; no checksum given (`checksum` null) [PUBD, R36] |
+| C5 | **[U]**: lists are PDFs, not opened | [U] | Tamil Nadu per constituency [SRCH]; statewide [U] | [U] | [U] | PDFs per constituency [SRCH, R21] |
+| C6 | **[U]**: search form, no static schema | [U]; the homepage counter of 1,367 schools (1,364 in India [CALC]) counts institutions, not rows of any file | All India [PUB, R10]; state filter in the search form [PUBD, R43] | [U] | [U] | Search form; no bulk file found [PUBD, R43] |
+
+Field counts and type tallies are counted here from the platform's field lists
+[CALC]. They match the field names recorded in the second pass (48 for C1a, 16
+for C1b).
+
+### Observations from the platform field types
+
+These are types assigned by the platform's search index. How the platform
+assigns them is not documented, so **what a type implies about the values is
+[U].** They are recorded as signals for a later aggregate script to check, not
+as findings about the data.
+
+- **C1a.** The 16 `double` fields include two address components, `subtown`
+  and `village`, and also `hospital_regis_number`, `registeration_number_scan`,
+  `accreditation`, `miscellaneous_facilities`, `empanelment_or_collaboration_with`
+  and `tariff_range`. Fields named as text being typed numeric may mean they hold
+  only numbers or no values, but that is not established. In the May-2016
+  snapshot's index in the same catalog, the matching `_subtown`, `_village` and
+  `_hospital_regis_number` are `keyword` [PUBD, R32].
+- **C1b.** `pincode`, `latitude`, `longitude` and `altitude` are `double`;
+  `street` is `text`; `Address` is `keyword` [PUBD, R32].
+- **C2.** Only `nin_n` is `double`; `_latitude` and `_longitude` are `keyword`
+  [PUBD, R33].
+- **C3.** Its index has no `document_id` or `resource_uuid`, unlike C1 and C2.
+  So the second pass's note that data.gov.in adds those two fields does not
+  hold for C3 [PUBD, R34].
+- **C4.** All 13 datastore columns are `text`. The datastore description of
+  `state` begins with a byte-order mark (U+FEFF). That suggests the uploaded
+  CSV's header starts with a UTF-8 byte-order mark; the file itself has not
+  been seen, so this is an inference [PUBD, R37].
+
+### Corrections and other metadata
+
+- **C3 field names (corrects the second pass).** The hospital resource's fields
+  are `DiagnosticCentreName`, `DiagnosticCentreAddress`, `CityName`. The
+  diagnostics-centre resource in the same catalog has `DiagnosticCenterAddr`,
+  `DiagnosticCenterName`, `CityName` [PUBD, R34]. Both use a diagnostic-centre
+  prefix, but the names are spelt differently, so they are not "the same". Whether
+  the hospital resource is mislabelled stays [U].
+- **C4 dataset metadata** [PUBD, R36]: `accrualPeriodicity` is the code "3",
+  whose meaning the response does not give [U]; `granularity` "Area level";
+  `geospatial` "Yes"; `accessLevel` "public". The first pass's "annual" came
+  from the mirror [MIR, R4] and is not confirmed by this code.
+- **data.gov.in counts that are not row counts.** The field-list responses'
+  `total` and `count` (6, 1 and 6 for R32, R33 and R34) count API descriptors in
+  each catalog, not rows. The resource metadata's `download_count` and
+  `view_count` count downloads and views.
+
+### What B6 does not establish
+
+- No header row of any downloaded file (G3 stands).
+- No row count for C1a, C1b, C2, C3, C5 or C6. C4's 7,001 is a platform count,
+  not a count of rows in the downloadable file.
+- No empty-value or missing-value rate for any column of any source.
+- No value distribution, token count or address completeness (G2 stands).
+- No per-state or per-source record counts (ADR-0007 §4 step 3; G7 stands).
+- No language or script evidence (G8 stands).
+- Nothing on whether values contain people's names, phone numbers or emails
+  beyond what the field names already show.
+- Nothing on identifier stability (`Hospital_Regis_Number`, `Nin_N`).
+- Nothing about licences, terms or permission to retrieve.
+
+### Still unresolved after this pass
+
+- File-level aggregate statistics for every source. They need a file obtained
+  through a permitted route, then a script that prints only the header row, row
+  count, per-column empty rates and value-shape statistics.
+  - data.gov.in (C1a, C2, C3): manual download through the site's form, a
+    maintainer action. B14 stays open.
+  - C1b: the host must be reachable first, and B15 stays open.
+  - C4: B3 and B8 first; a datastore query for column statistics is an option
+    only if the datastore supports it [U] and the portal's terms allow it.
+  - C5, C6: no route without a licence decision (B4).
+- What the platform's `double` typing of C1a's `subtown`, `village` and
+  `hospital_regis_number` means.
+- The meaning of C4's `accrualPeriodicity` code "3".
+- Whether C3's hospital resource is mislabelled.
+
 ## Evidence status
 
 - **Publisher or publisher-platform, retrieved and inspected directly (second
@@ -953,6 +1101,10 @@ Licence (legal permission) and retrieval (technical access) are kept apart.
   API pages, download-form scripts, C1–C3 file locations, file-URL response
   headers, and reachability of `api.data.gov.in` and the National Health Portal
   hosts (R49–R57).
+- **Saved responses re-read offline (fifth pass):** platform field types and
+  counts for C1–C3 (R32–R34) and C4's datastore schema, count and dataset
+  metadata (R36, R37); C1–C3 resource-metadata notes and file facts (R55). No
+  new retrieval; no file or record read.
 - **Internet Archive copy, inspected directly (fourth pass) [ARCH]:** National
   Health Portal terms of use as captured 2023-04-04 (R58); archive index for
   `info.nhp.gov.in` (R59).
@@ -1015,7 +1167,8 @@ Licence (legal permission) and retrieval (technical access) are kept apart.
   published `raw_text` under ADR-0006 is not decided.
 - **G3. Headers.** Publisher/platform schema fields for C1–C4 were inspected
   directly [PUBD, R32–R34, R37]. No downloadable file was opened, so actual file
-  header rows remain unverified. C5 and C6 record-bearing schemas are
+  header rows remain unverified. The fifth pass (B6) added platform field types
+  and counts, not header rows. C5 and C6 record-bearing schemas are
   unresolved.
 - **G4. Publisher identity.** C1–C3 all sit under MoHFW (NIHFW, DoHFW, CGHS).
   Whether they are one `publisher` for ADR-0007 §6 is open. So is whether
