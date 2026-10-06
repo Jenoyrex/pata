@@ -6,10 +6,11 @@
   writes a manifest.
 - **Based on:** `docs/research/source-inventory.md` as committed in `a89f609`,
   updated with its third pass (2026-10-05, data.gov.in host and licence
-  re-check), ADR-0001 to ADR-0007, and `docs/gazetteer.md`. No retrieval was
+  re-check) and fourth pass (2026-10-06, terms of use and retrieval conditions
+  for C1–C3), ADR-0001 to ADR-0007, and `docs/gazetteer.md`. No retrieval was
   done for these notes beyond what the inventory records. Evidence labels
-  ([PUBD], [MIR], [SRCH], [ADR], [CALC], [U]) and source numbers (C1–C6, R#) are
-  those of the inventory.
+  ([PUBD], [ARCH], [MIR], [SRCH], [ADR], [CALC], [U]) and source numbers
+  (C1–C6, R#) are those of the inventory.
 - **Gazetteer:** `gazetteer_version`
   `bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78`.
 
@@ -57,8 +58,8 @@ coverage statement.
 
 | Source | Publisher (as stated) | `source_family` | Declared coverage; state column | Single address string | Licence status | Identifier → likely `record_id_scope` | Status |
 |---|---|---|---|---|---|---|---|
-| C1a | MoHFW / DoHFW / NIHFW [PUBD] | `government_published` if NIHFW counts as a government body (G4) | All India [MIR, R1]; `State` | `Address_Original_First_Line`, completeness [U] | Basis: site-wide GODL-India, ADR-0002 (2026-10-02); third-pass re-check (2026-10-05): sandbox notice hidden on `www.data.gov.in`, licence text unchanged; no resource-level licence | `Hospital_Regis_Number`, stability [U]; otherwise `snapshot` | Not assessable to acceptance |
-| C1b | Same as C1a [PUBD] | As C1a | All India [MIR, R1]; `State_Name` | `Address` | As C1a; file hosted at `info.nhp.gov.in`, whose terms are [U] | None → `snapshot` | Not assessable to acceptance |
+| C1a | MoHFW / DoHFW / NIHFW [PUBD] | `government_published` if NIHFW counts as a government body (G4) | All India [MIR, R1]; `State` | `Address_Original_First_Line`, completeness [U] | Basis: site-wide GODL-India, ADR-0002 (2026-10-02); third-pass re-check (2026-10-05): sandbox notice hidden on `www.data.gov.in`, licence text unchanged; no resource-level licence. Fourth pass (2026-10-06): Copyright Policy asks for permission "by sending a mail", unresolved against the footer (B14) | `Hospital_Regis_Number`, stability [U]; otherwise `snapshot` | Not assessable to acceptance |
+| C1b | Same as C1a [PUBD] | As C1a | All India [MIR, R1]; `State_Name` | `Address` | **Unresolved** (B15): file hosted only at `info.nhp.gov.in`, not on data.gov.in; host unreachable on 2026-10-06; only National Health Portal terms found (archived 2023, `www.nhp.gov.in`) reserve all rights [ARCH, R58] | None → `snapshot` | Not assessable to acceptance |
 | C2 | MoHFW / DoHFW [PUBD] | `government_published` (G4 open) | All India [MIR, R2]; `State Name` | `Facility Address` | As C1a | `Nin_N`, stability [U] | Not assessable to acceptance |
 | C3 | MoHFW / DoHFW / CGHS [PUBD] | `government_published` (G4 open) | CGHS cities, not listed by state [U]; **no state column** | `DiagnosticCentreAddress` | As C1a | None → `snapshot` | Not assessable to acceptance |
 | C4 | "Health and Medical and Family Welfare" on the Telangana Open Data portal [PUBD] | `government_published` (G4 open) | Telangana only; `State` | **None** (components only) | Publisher label only; licence text [U] | None → `snapshot` | Not assessable to acceptance |
@@ -80,10 +81,35 @@ are recorded there as rejected. Nothing here changes those entries.
   2026-10-02 [PUBD, R44–R47]. No resource-level licence field exists [PUBD, R48].
   GODL-India exempts personal information from the licence (ADR-0002), so
   any personal information in these files is outside the licence in any case.
-- *Terms and retrieval.* Whether automated retrieval is allowed is [U] (E5).
-  ADR-0004 records a bot challenge on data.gov.in file URLs. The second pass
-  retrieved metadata with HTTP 200 but attempted no file download. C1b's data file
-  is on `info.nhp.gov.in`, whose terms were not checked.
+  - Fourth pass (2026-10-06): the Terms of Use say catalogs and information are
+    available under the "license" metadata element of each record "except
+    where otherwise noted". The metadata has no such element [PUBD, R48, R50,
+    R55].
+  - The Copyright Policy says material "may be reproduced free of charge after
+    taking proper permission by sending a mail to us" [PUBD, R52]. Whether that
+    covers published datasets, against the GODL-India footer, is unresolved
+    (B14).
+  - **C1b differs from C1a.** Its only file location is `info.nhp.gov.in`, not
+    data.gov.in [PUBD, R55]. The footer licenses "the content published on
+    data.gov.in", and no inspected page says whether that reaches a file hosted
+    elsewhere. C1b's licence is therefore unresolved (B15).
+- *Terms and retrieval.* Licence permission and technical access are separate;
+  nothing below limits the licence.
+  - The data.gov.in Terms of Use are silent on automated access [PUBD, R50].
+    `robots.txt` disallows all paths for all user agents [PUBD, R49]. Downloads
+    go through a form asking name, e-mail, usage type and purpose, with an image
+    CAPTCHA [PUBD, R54]. `api.data.gov.in` refused connections [PUBD, R57].
+  - ADR-0007 §5: where the terms are silent, retrieval is manual. On
+    data.gov.in's terms as inspected, that rule points to manual retrieval for
+    C1a, C2 and C3. The answer is recorded in the source ADR (E5), not here.
+  - `HEAD` requests (no body) to the file URLs got `405`, or `200 text/csv` for
+    C1a's legacy path. No `GET` was sent, so ADR-0004's record of a bot
+    challenge on file URLs is neither confirmed nor contradicted [PUBD, R56].
+  - C1b: `info.nhp.gov.in` did not accept connections on 2026-10-06, and no
+    current terms could be read. The only National Health Portal terms found
+    (archived 2023, `www.nhp.gov.in`, a sibling host) say nothing on automated
+    access; they reserve all rights and describe the site as for individual
+    and professional, non-commercial use [ARCH, R58].
 - *Personal-data risk.* C1a's schema has `Nodal_Person_Info`,
   `Nodal_Person_Tele` and `Nodal_Person_Email_Id`, plus phone, mobile, fax and
   email fields. C1b has `landline_number`. Under ADR-0006 §12 none of these can be
@@ -112,7 +138,8 @@ are recorded there as rejected. Nothing here changes those entries.
   designation.
 
 **C2 (All India Health Centres Directory).**
-- Licence, terms and retrieval are as for C1.
+- Licence, terms and retrieval are as for C1a (not C1b, whose file is hosted
+  elsewhere).
 - `Facility Address` is a single address string. In the inspected schemas, C2
   and C3 show no person or contact fields.
 - Possible `context_columns`: `State Name`, `District Name`, `Subdistrict Name`,
@@ -123,7 +150,8 @@ are recorded there as rejected. Nothing here changes those entries.
 - The data is fixed at 7 October 2016, against a "Monthly" frequency (G6).
 
 **C3 (CGHS empanelled hospitals).**
-- Licence, terms and retrieval are as for C1.
+- Licence, terms and retrieval are as for C1a (not C1b, whose file is hosted
+  elsewhere).
 - **No state or district column, and it does not cover a single state**, so it
   cannot have a `coverage_state`. Every record's step-1 state is therefore
   unknown (ADR-0006 §17 step 1), and **no C3 record can currently be attributed
@@ -174,10 +202,12 @@ are recorded there as rejected. Nothing here changes those entries.
   is resolved by the third pass. Their licence evidence is the site-wide
   GODL-India statement on `www.data.gov.in`, the host `data.gov.in` redirects
   to, with an unchanged licence text. This is
-  evidence, not acceptance. They each still need:
-  - for C1b, the terms of `info.nhp.gov.in`, where its file is hosted [U]
+  evidence, not acceptance. The fourth pass (2026-10-06) gathered data.gov.in's
+  terms and retrieval conditions (B8, data.gov.in part). They each still need:
+  - the data.gov.in Copyright Policy wording settled against the footer (B14)
+  - for C1b, a licence basis for a file hosted only at `info.nhp.gov.in` (B15),
+    and that host's terms [U]
   - header rows (B6)
-  - terms of use, including automated retrieval (B8)
   - their personal-data questions settled
 - **C4** depends on its licence text (B3) and on G2 (B5).
 - **C5 and C6:** no reuse licence was found, and the outcome depends on B4.
@@ -209,7 +239,8 @@ Observations, none of them a selection criterion:
   - Ease of access is not one of the ADR-0007 §4 selection dimensions. Having
     state-specific evidence is not by itself a reason to prefer these states.
 - **What would create candidates.** Among sources with a documented licence
-  basis, C1 and C2 could potentially provide multi-state coverage.
+  basis, C1 (row C1a; C1b's licence is unresolved, B15) and C2 could
+  potentially provide multi-state coverage.
   - If C1 or C2 were accepted, that could meet the §4 step 2 source condition
     for whichever states its declared coverage maps to.
   - That mapping, from "All India" [MIR] to `lgd:state:` IDs at the pinned
@@ -248,6 +279,8 @@ Observations, none of them a selection criterion:
 | B6 | No header rows and no scripted aggregate statistics | §5 assessment items (personal-data risk, context-column approval) | A script within the §5 evidence limit. Per-state counts for §4 step 3 come later, from accepted source files. |
 | B7 | G4: publisher identity of C1–C3; whether NIHFW, CGHS and KVS count as "a government body" | `source_family`, publisher count, holdout unit | Publisher documentation; maintainer decision |
 | B9 | No versioned procedure for gazetteer properties (G10) | Selection records (§4 step 3) | Code, after approval |
+| B14 | data.gov.in Copyright Policy: "may be reproduced free of charge after taking proper permission by sending a mail to us" [PUBD, R52], against the footer's GODL-India statement and "All rights reserved except published datasets/resources and metadata" | Licence basis of C1a, C2, C3 (not withdrawn; unresolved) | data.gov.in (NIC) clarification; maintainer decision on how to read it |
+| B15 | C1b's file is hosted only at `info.nhp.gov.in`; whether GODL-India reaches it, and that host's terms. Host unreachable on 2026-10-06; only archived National Health Portal terms (2023) found, reserving all rights | C1b licence | National Health Portal / NIHFW documentation, if the host returns; otherwise C1b stays unresolved |
 
 The treatment of platform field lists as publisher documentation (see
 "Procedural position") also needs the maintainer's confirmation.
@@ -256,7 +289,7 @@ The treatment of platform field lists as publisher documentation (see
 
 | # | Item | Meaning |
 |---|---|---|
-| B8 | Whether automated retrieval is allowed: data.gov.in, `info.nhp.gov.in`, Telangana DKAN (E5) | Decides the retrieval method, not acceptance. Where terms are silent, retrieval is manual (ADR-0007 §5). |
+| B8 | Whether automated retrieval is allowed: data.gov.in, `info.nhp.gov.in`, Telangana DKAN (E5) | Decides the retrieval method, not acceptance. Where terms are silent, retrieval is manual (ADR-0007 §5). **data.gov.in, evidence gathered 2026-10-06:** Terms of Use silent; `robots.txt` disallows all paths; download form with image CAPTCHA; API host refused connections. **`info.nhp.gov.in`:** unreachable, terms [U]. **Telangana DKAN:** not checked. |
 | B10 | C3 has no state column | Dependency on O4 (retention of unknown-state records) |
 | B11 | No `operator_published` source with a licence | A recorded absence. Reported, not worked around (ADR-0007 Consequences). |
 | B12 | Sub-district semantics unverified for every state (§8) | Expected to be "unverified" at selection time (§4 step 3). Recorded in each selection record. |
@@ -277,6 +310,10 @@ The treatment of platform field lists as publisher documentation (see
    and metadata only, within the §5 evidence limit.
 2. **B3 and B8** are the same kind of documentation retrieval, for C4 and the
    three hosts.
+   - B8 for data.gov.in: evidence gathered (fourth pass, 2026-10-06). It found
+     B14 and B15.
+   - B8 for `info.nhp.gov.in`: blocked; the host was unreachable.
+   - B8 for Telangana DKAN, and B3 (C4's licence text): not yet done.
 3. **Then B6**, after maintainer approval: a script that downloads a candidate
    file to `data/raw/` (never committed) and checks it against a recorded
    SHA-256.
@@ -285,5 +322,6 @@ The treatment of platform field lists as publisher documentation (see
    - It prints no record text, and no person reads the file.
    - This is §5 assessment evidence. Per-state record counts for selection
      records are produced later (§4 step 3), from accepted source files.
-4. **B1, B4, B5 (for C4) and B7 are maintainer decisions,** as is the
-   platform-field-list interpretation. No further evidence resolves them.
+4. **B1, B4, B5 (for C4), B7 and the reading of B14 are maintainer
+   decisions,** as is the platform-field-list interpretation. No further
+   evidence resolves them.

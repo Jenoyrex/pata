@@ -8,13 +8,16 @@
   `bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78`). Second
   pass: publisher pages and publisher-platform metadata APIs retrieved with
   `curl` and inspected directly (see "Licence and header verification"). Third
-  pass, 2026-10-05: data.gov.in host and licence re-check for C1–C3 only.
+  pass, 2026-10-05: data.gov.in host and licence re-check for C1–C3 only. Fourth
+  pass, 2026-10-06: terms of use and retrieval conditions for C1–C3, including
+  C1b's file host `info.nhp.gov.in`.
 - **Not exhaustive.** Only the sources and categories listed below were looked
   at. Categories identified but not researched are listed separately.
-- **Three passes.** The sections up to "Candidate-state evidence" record the
+- **Four passes.** The sections up to "Candidate-state evidence" record the
   first pass. "Licence and header verification" records a second pass on C1–C6.
   "data.gov.in host and licence re-check" records a third pass on the C1–C3
-  licence only. Where they differ, the later pass is the current evidence; the
+  licence only. "Terms of use and retrieval conditions" records a fourth pass on
+  C1–C3 only. Where they differ, the later pass is the current evidence; the
   earlier text is kept as the record of what was known then.
 
 ## How the evidence was gathered
@@ -31,6 +34,10 @@
   verification".
 - **Third pass:** the same method, on data.gov.in pages, site scripts and
   metadata only; described under "data.gov.in host and licence re-check".
+- **Fourth pass:** the same method, on data.gov.in terms, policy pages,
+  `robots.txt`, site scripts, metadata and response headers, plus one Internet
+  Archive copy of a National Health Portal page [ARCH]; described under "Terms
+  of use and retrieval conditions".
 - Other claims rest on this repository's ADRs [ADR] or on the local gazetteer
   computation [CALC].
 - **Page fetches** were made with an instruction to report only metadata,
@@ -58,6 +65,12 @@
 | [ADR] | Already recorded in this repository's ADRs |
 | [CALC] | Calculated here |
 | [U] | Unknown or not yet verified |
+
+[PUBD] (publisher page or platform API, retrieved directly and inspected) is
+defined under "Licence and header verification". [ARCH] (Internet Archive copy
+of a publisher page, retrieved directly and inspected; evidence of the page on
+the capture date only) is defined under "Terms of use and retrieval
+conditions".
 
 Labels can combine, for example [SRCH, 3P].
 
@@ -544,7 +557,9 @@ Evidence status only, **not source acceptance**.
 | C6 | (c) reuse on request by email | Not verified | **both_unverified** | No reuse licence without a request; no static schema |
 
 This table records the second pass. For C1–C3, the sandbox question in it is
-answered by the third pass ("data.gov.in host and licence re-check").
+answered by the third pass ("data.gov.in host and licence re-check"). The
+fourth pass ("Terms of use and retrieval conditions") found C1b's file hosted
+outside data.gov.in, so C1b's licence is unresolved rather than "as C1a".
 
 ### Still unresolved after the second pass
 
@@ -658,13 +673,269 @@ pass addresses only the second pass's sandbox question for C1–C3.
   licence. This is licence evidence, **not source acceptance**.
 - Still open for C1–C3 after this pass:
   - C1b's data file is hosted at `info.nhp.gov.in`. Whether that host's terms
-    differ from data.gov.in's [U].
+    differ from data.gov.in's [U]. (Fourth pass: still [U]; see there.)
   - The GODL-India exemptions (section 6) exclude personal information and
     identity documents from the licence. That bears on C1a's `Nodal_Person_*`
     and contact fields, which the record-level screen and context-column rules
     already exclude.
   - Terms of use and automated retrieval (E5), header rows, G4 and the source
     ADR itself.
+
+  The first and third of these were taken up by the fourth pass (next section).
+
+## Terms of use and retrieval conditions (fourth pass, 2026-10-06)
+
+Evidence status only. **No source is accepted, rejected or selected**, and no
+manifest is written. This pass covers C1a, C1b, C2 and C3 only. It addresses the
+third pass's open items on `info.nhp.gov.in` and on terms of use and automated
+retrieval (E5). C4–C6 were not revisited.
+
+### Method
+
+- Pages, `robots.txt`, site scripts and metadata APIs were retrieved with `curl`
+  on 2026-10-06 between 14:48 and 15:05 UTC, and the saved responses were read
+  directly [PUBD]. The saved responses are in a scratch directory outside the
+  repository and are not committed.
+- data.gov.in renders most page text in the browser. Where the text was not in
+  the server-rendered HTML, it was read from the route script that carries it,
+  as in the third pass.
+- **Response headers only for file URLs.** HTTP `HEAD` requests, which return
+  headers and no body, were sent to the C1a, C2 and C3 file URLs on
+  `www.data.gov.in`, and to C1a's legacy `data.gov.in` path. No `GET` was sent
+  to any data-file URL, and no data file was downloaded or opened. The C3
+  `datafile_url` (an `api.data.gov.in` data query) was not requested.
+- `info.nhp.gov.in` and `nhp.gov.in` could not be reached (below). For the
+  National Health Portal's terms, one Internet Archive copy of a publisher page
+  was read. New label: **[ARCH]** = Internet Archive copy of a publisher page,
+  retrieved directly and inspected. It shows the page as captured on that date,
+  not the current terms, and is not a publisher retrieval.
+- **Disclosure.** `www.data.gov.in/robots.txt` (R49) disallows all paths for all
+  user agents. The second and third passes record no robots-exclusion check.
+  Those passes and this one made a small number of scripted requests, for
+  metadata, pages and scripts, to paths it covers.
+
+### Sources for this pass
+
+| # | URL | Kind | SHA-256 of saved response | Supports |
+|---|---|---|---|---|
+| R49 | https://www.data.gov.in/robots.txt (`https://data.gov.in/robots.txt` redirects here) | [PUBD] | `efdb5938a9736727f5cce2b60355588e4fa541d19d022d222d8a09b8efd5dcce` | Robots exclusion |
+| R50 | https://www.data.gov.in/terms-of-use | [PUBD] | `cf4a7695928d418aaef2bd3aaf65f0e7b8b7ec53f380187e85de359af686adb1` | Terms of Use, server-rendered |
+| R51 | https://www.data.gov.in/_nuxt/92f8eeb.js | [PUBD] | `562f14cbc4f2c0ab5cda0d560f6afbb9bcf82ac115a2bf617ccb98bf7480074b` | Terms of Use component source |
+| R52 | https://www.data.gov.in/policies | [PUBD] | `0e1ef1afd34980873c056e859b0350e13666f0a7a5e0809f3f958b0c1bf7d500` | Hyperlinking, Copyright and Privacy policies, server-rendered |
+| R53 | https://www.data.gov.in/help and https://www.data.gov.in/apis/ | [PUBD] | `a98c3590235a006d3ffcf1c52385a9bf08d850aabaf003fcc23ee9cfb6b1bfb4` (help); `3db255c151fa290dbab416ce05aaa7738d1e0b183aeb03e4e3e344262eea8774` (apis) | API key for registered users |
+| R54 | https://www.data.gov.in/_nuxt/d96b352.js and https://www.data.gov.in/_nuxt/6f8a3d9.js, loaded by the C2 resource page https://www.data.gov.in/resource/all-india-health-centres-directory-7th-october-2016 and its catalog page | [PUBD] | `ba21f2c841c3e6e6df34090c360086f942f7efb3501db6b4728ad1b1b72c022a` (d96b352); `e0b7500449581c51b2ea6525efa35df6a803d46b8c7292d78e01174578909077` (6f8a3d9); resource page `ba28bf6eaa5fb8236d9fa18c7207f34ce45d800954ee973d941037d6009684ba` | Download form and CAPTCHA |
+| R55 | The R29, R30 and R31 resource queries, re-retrieved | [PUBD] | `1450e9c8b5e4d391a2cbbc924833e1b0fc8f218146456f7b193004768dfe92ab` (C1); `37a900a4d8b3d3281300b42ade38a3181eb040d93a877f39b051c17d80d77d52` (C2); `0ab5f8139b12c498267bc4c697ed1f295f4a902c04ede009a664aa014e428547` (C3) | File locations per resource |
+| R56 | `HEAD` requests to the C1a, C2 and C3 file-store URLs on `www.data.gov.in`, and to C1a's legacy `data.gov.in` path (followed through its redirect), listed under "Retrieval conditions" | [PUBD] | headers only, not saved | File-URL response to a scripted request |
+| R57 | Connection attempts: `api.data.gov.in`, `info.nhp.gov.in`, `nhp.gov.in`, `www.nhp.gov.in` | [PUBD] | none | Reachability from the development machine |
+| R58 | https://web.archive.org/web/20230404002716/https://www.nhp.gov.in/terms-of-use_pg (raw capture) | [ARCH] | `7fd841fce7e81bae09f2be7ce9b8a3d41b0dd8f268476c3f8a80f075406a6275` | National Health Portal terms of use, as captured 2023-04-04 |
+| R59 | https://web.archive.org/cdx/search/cdx?url=info.nhp.gov.in&matchType=host | [ARCH] | not saved | Index of archived `info.nhp.gov.in` URLs; no capture opened |
+
+### File locations (C1–C3)
+
+From the resource metadata (R55) [PUBD]:
+
+| Row | `datafile` (file on data.gov.in) | `datafile_url` | `reference_url` |
+|---|---|---|---|
+| C1a | `https://www.data.gov.in/files/ogdpv2dms/s3fs-public/datafile/hospital_directory.csv` | `https://data.gov.in/sites/default/files/datafile/hospital_directory.csv` | `http://www.nhp.gov.in/` |
+| C1b | **none** | `https://info.nhp.gov.in/api/nin-health-facilities.csv` | none |
+| C2 | `https://www.data.gov.in/files/ogdpv2dms/s3fs-public/dataurl14092017/geocode_health_centre.csv` | `http://data.gov.in/sites/default/files/dataurl14092017/geocode_health_centre.csv` | none |
+| C3 | `https://www.data.gov.in/files/ogdpv2dms/s3fs-public/datafile/2_empanelledHospitals_1.csv` | an `api.data.gov.in/resource/de59e770-…` query that embeds an `api-key` parameter (value not recorded here) | none |
+
+So C1a, C2 and C3 each have a file on data.gov.in's own file store. **C1b has
+none**: its only listed file is on `info.nhp.gov.in`.
+
+### Terms and policies: data.gov.in (C1a, C1b, C2, C3)
+
+- **Terms of Use (R50, R51)** [PUBD]. The server-rendered page states, in
+  substance:
+  - the portal is designed, developed and hosted by NIC;
+  - no responsibility for accuracy or completeness, and no liability for loss
+    from use of data;
+  - "Catalog and Links to other websites that have been published through the
+    OGD Platform are provided for public convenience only", and the portal is
+    not responsible for linked websites;
+  - catalogs, "if reproduced, have to be accurate and are not to be used in a
+    derogatory manner or in a misleading context"; the source "must be
+    prominently acknowledged"; the permission to reproduce does not extend to
+    material identified as third-party copyright;
+  - Indian law and the courts of India govern;
+  - "The catalog and information available through the Portal are available
+    under terms described in the “license” metadata element of individual
+    dataset records except where otherwise noted."
+
+  **The Terms of Use say nothing about automated access, crawling, rate limits
+  or bulk download.** They contain no clause restricting research use.
+- **Licence pointer.** The Terms of Use defer to a per-record "license"
+  metadata element. The C1–C3 resource and catalog metadata have no licence
+  field (third pass, R48; unchanged in R55). The site-wide footer names
+  GODL-India (third pass). Whether the footer is the "otherwise noted" case is a
+  reading, not a statement made by the site. The ADR-0002 basis is not changed
+  by this pass.
+- **Copyright Policy (R52)** [PUBD]: "Material featured on this Portal may be
+  reproduced free of charge after taking proper permission by sending a mail to
+  us." The same accuracy, acknowledgement and third-party conditions follow.
+  - This wording asks for permission. GODL-India grants permission without a
+    request. The footer reads "All rights reserved except published
+    datasets/resources and metadata."
+  - The policy does not say whether "material" includes published datasets.
+    **This tension is unresolved here.** It is recorded, not settled. It does
+    not withdraw the ADR-0002 basis. It is a question for the maintainer or for
+    data.gov.in.
+- **Hyperlinking Policy (R52)** [PUBD]: direct links need no prior permission,
+  though the portal asks to be informed. Framing is not permitted.
+- **Privacy Policy (R52)** [PUBD]: the portal logs IP address, browser, date,
+  time and pages visited for statistical purposes.
+
+### Retrieval conditions: data.gov.in (technical, not licence terms)
+
+These are technical access conditions. **None of them is stated as a licence
+term or as a condition of the licence.** A file that is hard to retrieve by
+script may still be licensed for reuse.
+
+- **`robots.txt` (R49)** [PUBD]: `User-agent: *` / `Disallow: /`. It asks all
+  automated crawlers to stay off every path. It is a machine-readable request,
+  not a term in the Terms of Use, which are silent on automated access.
+- **Download form (R54)** [PUBD]. The resource page's download component asks
+  for:
+  - name and e-mail (marked required); mobile is optional, judged by its
+    validation rules (format and length only);
+  - a usage type and a purpose (both required). The option labels in the
+    component are Commercial, Non Commercial, Academia, Business, Govt Use,
+    Journalistic, R&D and Other. Which labels belong to which field was not
+    traced.
+  - an image CAPTCHA, requested from `ogdp/captcha/refresh/image/download_purpose`
+    when the component mounts.
+
+  The form is posted to `/ogdp/download_purpose`, and the download URL comes
+  back in the response. This is consistent with ADR-0004's record of a CAPTCHA
+  on the download form (2026-10-03).
+- **API (R53)** [PUBD]: the help page lists "API Key generation and access of
+  API URLs using API Key" as a service for registered users. `api.data.gov.in`
+  refused a TCP connection on port 443 on 2026-10-06 (R57), as ADR-0004
+  recorded on 2026-10-03.
+- **File URLs, `HEAD` only (R56)** [PUBD], 2026-10-06 14:53 UTC, browser-style
+  user agent:
+  - the `www.data.gov.in/files/ogdpv2dms/…` file-store URLs for C1a, C2 and C3:
+    `405 Method Not Allowed`;
+  - C1a's `datafile_url` on `data.gov.in`: `301` to
+    `https://www.data.gov.in/sites/default/files/datafile/hospital_directory.csv`,
+    which answered `200 OK`, `Content-Type: text/csv`.
+- **What the `HEAD` results do and do not show.**
+  - They show that a scripted `HEAD` request for C1a's legacy file path got
+    `200` with a CSV content type, not a challenge or error status, on that
+    date.
+  - They do not show what a `GET` would return, so they neither confirm nor
+    contradict ADR-0004's record of an Akamai bot challenge on file URLs and
+    ADR-0002's "HTTP 403/301 to scripted requests".
+  - The header lines inspected (status, `Server`, `Location`, content type and
+    length, `X-*`, `Set-Cookie`) named no CDN or bot-management product; most
+    were absent.
+  - A `405` to `HEAD` says nothing about `GET`.
+- **First-pass 403s.** The first pass's fetch tool got 403 from data.gov.in
+  pages (R13–R15), which `curl` retrieved with 200 in the second to fourth
+  passes. The cause of the difference was not determined.
+
+### `info.nhp.gov.in` and the National Health Portal (C1b)
+
+- **Host relationship, as evidenced.**
+  - data.gov.in lists C1b under the catalog "Hospital Directory (National
+    Health Portal)", contributed by MoHFW / DoHFW / NIHFW (R26, R29) [PUBD]. Its
+    only file location is `https://info.nhp.gov.in/api/nin-health-facilities.csv`
+    (R55) [PUBD].
+  - C1a's `reference_url` is `http://www.nhp.gov.in/` (R55) [PUBD].
+  - The archived National Health Portal terms (R58) [ARCH] say the portal "is
+    designed, developed and hosted by Centre for Health Informatics (CHI) of the
+    National Health Portal (NHP), set up at National Institute of Health and
+    Family Welfare (NIHFW), by the Ministry of Health and Family Welfare
+    (MoHFW)". This is from `www.nhp.gov.in`, captured 2023-04-04, with a page
+    date of 30 April 2015.
+  - `info.nhp.gov.in` is a subdomain of `nhp.gov.in`. **That it is operated by
+    CHI/NIHFW under the same terms is an inference from the domain name, not a
+    finding [U].**
+- **Reachability (R57)**, 2026-10-06 from the development machine [PUBD]:
+  - `info.nhp.gov.in` resolves to 117.239.178.13; TCP connections to ports 80
+    and 443 timed out (attempts at 14:48 and 14:58 UTC);
+  - `nhp.gov.in` resolves to 172.239.183.210; connections to ports 80 and 443
+    failed;
+  - `www.nhp.gov.in` did not resolve.
+
+  No current terms, policy page or `robots.txt` could be obtained from these
+  hosts. Whether they are down, decommissioned or blocked for this network is
+  unknown [U].
+- **Archived National Health Portal terms (R58)** [ARCH], `www.nhp.gov.in`,
+  captured 2023-04-04. In substance:
+  - "All the copyright of NHP belongs to the Ministry of Health and Family
+    Welfare, Government of India and will be governed by their guidelines, as
+    issued from time to time."
+  - "The site is meant for individual and professional use only"; "This is a
+    non-commercial web-site funded by MoHFW".
+  - Linking without prior permission is allowed; framing is not.
+  - Footer: "© 2016 MoHFW, Government of India, All rights reserved."
+  - **No reuse licence, no redistribution permission, and nothing on automated
+    access.**
+
+  These are the 2023 terms of `www.nhp.gov.in`. Whether they applied to
+  `info.nhp.gov.in`, and whether they are current, is [U].
+- **Archive index (R59)** [ARCH]. It lists captures of
+  `info.nhp.gov.in/api/nin-health-facilities.csv` (2019) and
+  `info.nhp.gov.in/api/hospital-directory.csv` (2021). **Neither capture was
+  opened.** The index shows only that the URLs existed then.
+
+### Findings per row
+
+Licence (legal permission) and retrieval (technical access) are kept apart.
+
+- **C1a.**
+  - *Licence:* unchanged. Site-wide GODL-India statement, no resource-level
+    licence (third pass). The Copyright Policy tension above applies.
+  - *Terms:* the data.gov.in Terms of Use (R50) apply as for any data.gov.in
+    resource; they are silent on automated retrieval.
+  - *Retrieval:* the file is on data.gov.in's own store. `robots.txt`
+    disallows crawling; the download form needs a CAPTCHA. A scripted `HEAD`
+    to the legacy path got `200 text/csv` (R56); `GET` untested.
+  - *Linked site:* `reference_url` points to `www.nhp.gov.in`, unreachable on
+    2026-10-06.
+- **C1b.**
+  - *Licence:* **unresolved [U].** The data.gov.in footer licenses "the content
+    published on data.gov.in". C1b's file is not on data.gov.in: its only
+    location is `info.nhp.gov.in`. The Terms of Use treat "Links to other
+    websites" published through the platform as provided for convenience only.
+    Whether GODL-India reaches a file hosted elsewhere is not stated anywhere
+    inspected. The only National Health Portal terms found (R58, archived, a
+    different subdomain) reserve all rights, grant no reuse licence and
+    describe the site as for individual and professional, non-commercial use.
+  - *Terms of the file host:* not obtainable; host unreachable [U].
+  - *Retrieval:* the host accepted no connections on 2026-10-06, so nothing
+    could be retrieved from it from this machine then. The file URL itself was
+    not requested. That is a technical fact, not evidence about permission.
+- **C2.**
+  - *Licence:* as C1a.
+  - *Terms:* as C1a.
+  - *Retrieval:* the file is on data.gov.in's own store; `HEAD` got `405`; same
+    `robots.txt` and form conditions.
+- **C3.**
+  - *Licence:* as C1a.
+  - *Terms:* as C1a.
+  - *Retrieval:* the file is on data.gov.in's own store (`HEAD`: `405`). Its
+    `datafile_url` is an `api.data.gov.in` query, and that host refused
+    connections. Same `robots.txt` and form conditions.
+
+### Effect on the open items
+
+- **Third pass, "`info.nhp.gov.in` terms":** not resolved. The host is
+  unreachable. The only terms found are archived and from a sibling host, and
+  they reserve rights. C1b's licence basis is now **unresolved**, not "as C1a".
+- **Third pass, "terms of use and automated retrieval (E5)", data.gov.in:** the
+  evidence is gathered.
+  - The Terms of Use are silent on automated retrieval.
+  - `robots.txt` disallows all crawling.
+  - Downloads go through a form with an image CAPTCHA.
+  - Under ADR-0007 §5, where the terms are silent, retrieval is manual. Which
+    method applies is recorded in a source ADR, not here.
+- **New, unresolved:** the data.gov.in Copyright Policy's "after taking proper
+  permission" wording against the GODL-India footer (R52).
+- **Not addressed in this pass:** C4's licence text and the Telangana portal's
+  retrieval terms; header rows; G4.
 
 ## Evidence status
 
@@ -677,6 +948,14 @@ pass addresses only the second pass's sandbox question for C1–C3.
 - **Publisher or publisher-platform, retrieved and inspected directly (third
   pass) [PUBD]:** data.gov.in redirect, footer markup, site build configuration,
   GODL-India text, and C1–C3 resource and catalog metadata keys (R44–R48).
+- **Publisher or publisher-platform, retrieved and inspected directly (fourth
+  pass) [PUBD]:** data.gov.in `robots.txt`, Terms of Use, policies, help and
+  API pages, download-form scripts, C1–C3 file locations, file-URL response
+  headers, and reachability of `api.data.gov.in` and the National Health Portal
+  hosts (R49–R57).
+- **Internet Archive copy, inspected directly (fourth pass) [ARCH]:** National
+  Health Portal terms of use as captured 2023-04-04 (R58); archive index for
+  `info.nhp.gov.in` (R59).
 - **Checked at the publisher (first-pass fetch summary, not directly
   inspected):** RBI terms (R7, R8). The first-pass KVS facts (R10) are
   superseded by R41–R43.
@@ -693,8 +972,9 @@ pass addresses only the second pass's sandbox question for C1–C3.
   [CALC], derived from the source-reported 1,367 "in India and around the
   world" minus one school each in Moscow, Tehran and Kathmandu [PUBD, R41].
 - **Still needs verification before any source ADR:**
-  - for C1–C3, the remaining items listed under "Effect on the second pass"
-    (third pass); the sandbox question itself is answered there;
+  - for C1–C3, the items still open under "Effect on the open items" (fourth
+    pass): C1b's licence and file-host terms, and the data.gov.in Copyright
+    Policy wording; plus header rows and G4;
   - the licence text behind C4's label;
   - C5 licence (all rights reserved at CEO Tamil Nadu, R38; district sites allow
     reuse on request, R39, R40) and schema;
@@ -713,6 +993,14 @@ pass addresses only the second pass's sandbox question for C1–C3.
     sandbox notice. The third pass (2026-10-05) found that notice hidden on
     `www.data.gov.in` and the licence text unchanged [PUBD, R44–R47]. No
     resource-level licence field exists.
+  - C1–C3, fourth pass (2026-10-06): the Terms of Use defer to a per-record
+    "license" element that the metadata lacks; the Copyright Policy asks for
+    permission "by sending a mail", against the GODL-India footer (unresolved)
+    [PUBD, R50–R52].
+  - C1b: its file is hosted only at `info.nhp.gov.in`, outside data.gov.in.
+    Whether GODL-India reaches it is unresolved; the host was unreachable, and
+    the only National Health Portal terms found (archived 2023, `www.nhp.gov.in`)
+    reserve all rights [PUBD, R55, R57; ARCH, R58].
   - C4: the publisher's dataset label "Government Open Data License - India" was
     verified directly [PUBD, R36]; the applicable licence text is not verified.
   - AISHE: mirror label only [MIR, R5].
@@ -737,7 +1025,12 @@ pass addresses only the second pass's sandbox question for C1–C3.
   consistent with the bot challenge recorded in ADR-0004. In the second pass,
   `curl` got HTTP 200 for the catalog pages and metadata APIs (R26–R34). File
   downloads were not attempted, so whether data files are retrievable is
-  untested.
+  untested. Fourth pass (2026-10-06): `robots.txt` disallows all paths; the
+  download form needs an image CAPTCHA; the Terms of Use are silent on
+  automated access; `api.data.gov.in` refused connections; `HEAD` requests to
+  file URLs got `405` (file store) or `200 text/csv` (C1a legacy path), with no
+  `GET` sent; `info.nhp.gov.in` (C1b) was unreachable [PUBD, R49–R57]. These
+  are technical access conditions, not licence terms.
 - **G6. Currency.** C1a's frequency is "One-time" (granularity "Monthly") while
   its title says "updated till last month"; C1b's is "Monthly" [PUBD, R29].
   Whether either file is actually refreshed is unknown. C2 ("Monthly" against a
