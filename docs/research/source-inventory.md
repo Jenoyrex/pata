@@ -11,15 +11,19 @@
   pass, 2026-10-05: data.gov.in host and licence re-check for C1–C3 only. Fourth
   pass, 2026-10-06: terms of use and retrieval conditions for C1–C3, including
   C1b's file host `info.nhp.gov.in`. Fifth pass, 2026-10-06: B6 aggregate and
-  schema inspection for C1–C6, offline, from responses already saved.
+  schema inspection for C1–C6, offline, from responses already saved. Sixth
+  pass, 2026-10-06: C4 licence and Telangana portal retrieval terms (B3, B8).
+  Seventh pass, 2026-10-06: B14 and B15 follow-up for C1–C3.
 - **Not exhaustive.** Only the sources and categories listed below were looked
   at. Categories identified but not researched are listed separately.
-- **Five passes.** The sections up to "Candidate-state evidence" record the
+- **Seven passes.** The sections up to "Candidate-state evidence" record the
   first pass. "Licence and header verification" records a second pass on C1–C6.
   "data.gov.in host and licence re-check" records a third pass on the C1–C3
   licence only. "Terms of use and retrieval conditions" records a fourth pass on
   C1–C3 only. "B6 aggregate and schema inspection" records a fifth pass on
-  C1–C6. Where they differ, the later pass is the current evidence; the
+  C1–C6. "C4 licence and retrieval terms" records a sixth pass on C4 only.
+  "B14 and B15 follow-up" records a seventh pass on C1–C3 only. Where they
+  differ, the later pass is the current evidence; the
   earlier text is kept as the record of what was known then.
 
 ## How the evidence was gathered
@@ -43,6 +47,13 @@
 - **Fifth pass:** no new retrieval. Responses saved by the second and fourth
   passes were re-read offline; described under "B6 aggregate and schema
   inspection".
+- **Sixth pass:** Telangana portal pages, metadata, scripts and policy, and the
+  ITE&C Department's open-data policy, retrieved with `curl` and read directly
+  [PUBD]; described under "C4 licence and retrieval terms".
+- **Seventh pass:** data.gov.in Policies page, the GODL-India gazette
+  notification, NDSAP guidelines, National Health Portal host checks and
+  NIHFW's website terms, retrieved with `curl` and read directly [PUBD];
+  described under "B14 and B15 follow-up".
 - Other claims rest on this repository's ADRs [ADR] or on the local gazetteer
   computation [CALC].
 - **Page fetches** were made with an instruction to report only metadata,
@@ -226,6 +237,8 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
 7. [U]. 8. [U].
 9. Uploaded 2025-02-19, annual [MIR, R4].
 10. "Open Government License, India" [MIR, R4]. Portal terms not obtained (R11) [U].
+    (Sixth pass: portal terms and licence evidence recorded under "C4 licence
+    and retrieval terms".)
 11. Institutional; personal columns [U].
 12. Address documented as components, not one string. Whether components can
     form `raw_text` is open (G2).
@@ -468,6 +481,9 @@ Categories: (a) explicit reuse licence for the dataset; (b) site-wide licence;
     which licence text applies, and whether it is the same instrument as the
     GODL-India text verified for data.gov.in in ADR-0002, is not independently
     verified [U].
+  - (Sixth pass: no licence text was found on the portal, and its Copyright Policy
+    and footer conflict with the label; see "C4 licence and retrieval
+    terms".)
 - **CEO Tamil Nadu (C5).** Category **(c)**.
   - Footer: "© 2021 Public (Elections) Department, Tamil Nadu. All rights
     reserved." [PUBD, R38]. No copyright, terms or policy page is linked from
@@ -566,7 +582,9 @@ Evidence status only, **not source acceptance**.
 This table records the second pass. For C1–C3, the sandbox question in it is
 answered by the third pass ("data.gov.in host and licence re-check"). The
 fourth pass ("Terms of use and retrieval conditions") found C1b's file hosted
-outside data.gov.in, so C1b's licence is unresolved rather than "as C1a".
+outside data.gov.in, so C1b's licence is unresolved rather than "as C1a". The
+sixth pass ("C4 licence and retrieval terms") found no licence text for C4 and
+a conflicting portal Copyright Policy; C4 stays licence_unverified.
 
 ### Still unresolved after the second pass
 
@@ -1082,8 +1100,278 @@ as findings about the data.
   - C5, C6: no route without a licence decision (B4).
 - What the platform's `double` typing of C1a's `subtown`, `village` and
   `hospital_regis_number` means.
-- The meaning of C4's `accrualPeriodicity` code "3".
+- The meaning of C4's `accrualPeriodicity` code "3". (Sixth pass: answered;
+  see "C4 licence and retrieval terms".)
 - Whether C3's hospital resource is mislabelled.
+
+## C4 licence and retrieval terms (sixth pass, 2026-10-06)
+
+Evidence status only. **C4 is not accepted or rejected**, Telangana is not
+selected, and no manifest or selection record is written. This pass covers C4
+only: the licence text behind its label (B3) and the Telangana portal's
+retrieval terms (B8). No dataset file was downloaded, no datastore query was
+run, and no record was read.
+
+### Method
+
+- Portal pages, the dataset metadata, the portal's metadata schema, its content
+  pages and `robots.txt` were retrieved with `curl` on 2026-10-06 between 15:55
+  and 16:03 UTC, and read directly [PUBD].
+- The portal is a single-page application. Its route list, footer and metadata
+  display were read from its main script. The copy saved on 2026-10-04 was read
+  offline, and the copy served on 2026-10-06 is byte-identical to it.
+- Content pages outside the coded routes are looked up through
+  `/local-path?alias=…`. Twenty likely aliases were probed, such as
+  `/terms-of-use`, `/copyright-policy`, `/license` and `/open-data-policy`.
+  Each lookup returns a small JSON object naming a page or echoing the alias.
+- The Telangana State Open Data Policy 2016 was downloaded from the ITE&C
+  Department site. It is a scanned PDF with no text layer. Its pages were
+  read as images, and the quotations below are transcribed from them.
+- Third-party commentary on the 2016 draft policy turned up in a web search
+  (CIS, DataMeet). It is not used as evidence.
+
+### Sources for this pass
+
+| # | URL | Kind | SHA-256 of saved response | Supports |
+|---|---|---|---|---|
+| R60 | https://data.telangana.gov.in/robots.txt | [PUBD] | `bceb8401bd93df40acb8dc657648f9557bc0ee3f07ebc1717ac7780511a41df8` | Robots exclusion |
+| R61 | https://data.telangana.gov.in/api/1/metastore/schemas/dataset/items/44935575-631b-4116-b278-41f4c507b95b | [PUBD] | `e112a96fdcbf0e14788075e5512ccac507e000a2c4d39ef7a03e535ce1eed9dd` | C4 licence value, 2026-10-06 |
+| R62 | https://data.telangana.gov.in/api/1/metastore/schemas/dataset | [PUBD] | `ae61dcb077cbfc23ffea19c9583608f2b4beed0d1d6ce35e62d4eb47778878d7` | Definition of the portal's `license` field |
+| R63 | https://data.telangana.gov.in/frontend/build/static/js/main.8f3435a2.chunk.js, loaded by https://data.telangana.gov.in/ | [PUBD] | `0a28865933e5da46c285bd1e06ea36e6cdb732f363ca3706ce7cc94280a20e2c` (homepage `c3196b483b6d0cec610fb350eb78a85720188257dd87deca8487083b58ca5093`) | Routes, footer, licence display, periodicity codes |
+| R64 | https://data.telangana.gov.in/local-path?alias=… (20 aliases) | [PUBD] | not saved | Which content pages exist |
+| R65 | https://data.telangana.gov.in/node/2258?_format=json (alias `/policies`) | [PUBD] | `7f9cab1c21cd432367e2ed237559064c13176e017f409b2d3d9a5df8658d380e` | Hyperlinking, Privacy and Copyright policies |
+| R66 | https://data.telangana.gov.in/node/2257?_format=json (alias `/contact-us`) | [PUBD] | `ae944c5c9eb21a27dd7f8b5ed5857dd24dc0c14d3dcc4e553c0fbadaede9b0ab` | Contact for clarifications |
+| R67 | https://it.telangana.gov.in/initiatives/open-data/ | [PUBD] | `908de29aff860e0918ad53d2cb0a6fb25d295a15f68bdf640ace776874d20ddf` | ITE&C Department open-data page; link to the policy |
+| R68 | https://it.telangana.gov.in/wp-content/uploads/2016/10/Telangana-Open-Data-Policy1.pdf | [PUBD] | `5143e676152a4d981dfe802ed37a5ad3df753b000a054435f2430e123804dd54` | Telangana State Open Data Policy 2016 |
+| R69 | https://data.telangana.gov.in/api/1 | [PUBD] | none | API documentation: **not obtained**, timed out twice with no bytes received |
+
+### Licence findings (B3)
+
+- **Dataset licence value (R61)** [PUBD]: `license` is "Government Open Data
+  License - India". This is unchanged from 2026-10-04 (R36); the two saved
+  copies differ only in how they are serialized. There is no `rights` field,
+  and no licence URL or text.
+- **What the field is (R62)** [PUBD]. The portal's metadata schema defines
+  `license` as a free-text string. Its description points to a US federal page
+  of open licences, which is the platform's default wording. The schema does
+  not tie the value to any licence text.
+- **How the portal shows it (R63)** [PUBD]: as a plain "License" row in the
+  dataset's metadata table. There is no link.
+- **No licence page and no Terms of Use found (R63, R64)** [PUBD].
+  - The coded routes are `/`, `/about`, `/publishers`, `/search`, `/api`, the
+    dataset and collection pages, `/featured/…` and `/frontend/login`.
+  - Of the 20 aliases probed, only `/policies` and `/contact-us` resolve to a
+    page. No licence, terms-of-use, copyright, disclaimer or open-data-policy
+    page exists under those names.
+  - The `/about` route shows the platform's placeholder text ("This is the
+    default state of the DKAN data catalog. … Update this about page before
+    publishing.").
+- **Copyright Policy (R65)** [PUBD]. The Policies page (created 2022-05-21)
+  says: "Material featured on this Portal may be reproduced free of charge
+  after taking proper permission by sending a mail to us." Accuracy,
+  non-derogatory use, prominent acknowledgement and a third-party exclusion
+  follow, under Indian law. **The page does not mention GODL-India or any other
+  licence.**
+- **Footer (R63)** [PUBD]: "© Copyright @ {year}. Open Data Unit, Information
+  Technology, Electronics & Communication Department (IT E&C), Government Of
+  Telangana. All rights reserved." Unlike the data.gov.in footer, it has **no
+  exception for published datasets** and names no licence.
+- **State policy (R68)** [PUBD]. The Telangana State Open Data Policy 2016
+  applies to public authorities within the state.
+  - Its preamble aims to share data "under open license".
+  - §8 says GoI e-governance initiatives will be adopted, "including but not
+    limited to Adoption of Open Source Software, Open APIs, Open Standards &
+    Open Data Use License".
+  - Its definition of metadata says it "will also include license type".
+  - §9 promises detailed implementation guidelines within six months. Whether
+    they were issued, and what they say, is [U].
+  - **The policy names no licence and contains no licence text.** It does not
+    say that "Open Data Use License" means GODL-India.
+- **ITE&C open-data page (R67)** [PUBD]: gives a general definition of open
+  data ("freely used, reused and redistributed – subject only, at the most, to
+  the requirement of attribution"). It is a description, not a licence grant
+  for any dataset.
+- **Contact (R66)** [PUBD]: clarifications about datasets go to the Open Data
+  Unit, Department of ITE&C, at opendata[at]telangana[dot]gov[dot]in.
+
+**What this establishes about B3.**
+- The label is the only licence statement attached to C4. The portal, the
+  department and the state policy were searched, and no linked or published
+  licence text was found.
+- The portal's own Copyright Policy asks for permission by mail, and its footer
+  reserves all rights without exception.
+- Whether the label means the GODL-India instrument verified on data.gov.in
+  (third pass, R47) is **not stated by any Telangana source** [U]. Whether that
+  label prevails over the portal's Copyright Policy and footer is also [U].
+- B3 therefore stays **open**, now with a documented conflict (B16 in the
+  evaluation notes). This pass does not infer permission from the label.
+
+### Retrieval findings (B8)
+
+These are terms and technical conditions. They say nothing about the licence.
+
+- **Terms:** no Terms of Use page was found (R64). The Policies page (R65)
+  covers hyperlinking, links out, privacy, copyright and blogs. **It is silent
+  on automated access, the API, bulk download and rate limits.**
+  - Its Hyperlinking Policy allows direct links without prior permission,
+    asks to be informed, and does not permit framing.
+  - Under ADR-0007 §5, silent terms point to manual retrieval. Which method
+    applies is recorded in a source ADR, not here.
+- **Technical conditions (not terms):**
+  - `robots.txt` (R60) disallows only `/search` for all user agents. It names
+    `/sitemap.xml`, which returned 404.
+  - The portal publishes an API under `/api/1`, which the second pass used for
+    metadata (R35–R37). Its documentation endpoint (R69) did not respond on
+    2026-10-06.
+  - The dataset lists one CSV file under `/sites/default/files/`. It was not
+    requested.
+- The 2016 policy's commitment to open APIs (§6.6, for real-time data) is a
+  policy aim, not a term of use.
+
+### Other corrections and facts
+
+- **C4 periodicity (answers a B6 open item).** The portal's display script maps
+  `accrualPeriodicity` codes to labels, and code 3 is "Annually" (R63). That
+  agrees with the first pass's "annual" from the mirror [MIR, R4]. The fifth
+  pass's "meaning [U]" is superseded.
+- **Publisher identity.** The footer and contact page name the Open Data Unit,
+  Department of ITE&C, as the portal's operator (R63, R66). The dataset's
+  publisher remains "Health and Medical and Family Welfare" (R61). The portal
+  operator and the dataset publisher are named differently; how they relate,
+  and G4, stay open.
+
+### Effect on the open items
+
+- **B3 (C4 licence text): not resolved.** No licence text was found on the
+  portal. The label is free text. The portal's Copyright Policy and footer
+  point the other way. **New: B16**, the C4 label against the portal's
+  Copyright Policy and footer. Like B14, it is for the maintainer or the
+  publisher to clarify; the Open Data Unit contact (R66) is the documented
+  route.
+- **B8 (Telangana portal): evidence gathered.** The terms are silent on
+  automated retrieval, and `robots.txt` excludes only `/search`. That is not
+  permission for automated retrieval.
+- **Unchanged:** the C4 schema and the 7,001 platform count (fifth pass), G2 (no
+  single address string), G4, and the absence of a header row.
+
+## B14 and B15 follow-up (seventh pass, 2026-10-06)
+
+Evidence status only. **No source is accepted, rejected or selected**, and no
+manifest is written. This pass covers B14 (the data.gov.in Copyright Policy
+against GODL-India, for C1a, C2 and C3) and B15 (C1b's file host
+`info.nhp.gov.in`). C4 was not revisited. No dataset file was requested and no
+record was read.
+
+### Method
+
+- Pages and official PDFs were retrieved with `curl` on 2026-10-06 between
+  16:27 and 16:32 UTC and read directly [PUBD]. A saved fourth-pass site
+  script was re-read offline.
+- The two data.gov.in PDFs are policy documents linked from the portal's
+  Policies page. They sit under a path that the portal's `robots.txt` disallows
+  (fourth pass, R49); two requests were made, one per document.
+- A web search was used only to find NIHFW's official site. Search results are
+  not used as evidence.
+
+### Sources for this pass
+
+| # | URL | Kind | SHA-256 of saved response | Supports |
+|---|---|---|---|---|
+| R70 | https://www.data.gov.in/policies, re-retrieved 16:28 UTC | [PUBD] | `0e1ef1afd34980873c056e859b0350e13666f0a7a5e0809f3f958b0c1bf7d500` (identical to R52) | Copyright Policy unchanged; its link to the GODL-India notification |
+| R71 | https://data.gov.in/sites/default/files/Gazette_Notification_OGDL.pdf (served from `www.data.gov.in`) | [PUBD] | `b338e0cfacc9cdc83a40950feaaf5ac9d2396b43d3105f99f7d494921c7e3ebe` | GODL-India as notified in the Gazette of India |
+| R72 | https://data.gov.in/sites/default/files/NDSAP%20Implementation%20Guidelines%202.4.pdf | [PUBD] | `5de555da05f9c725246ac1b73ff7fad94b4b9e38df0ca707e5b2a034ae8215a5` | NDSAP guidelines before GODL-India |
+| R73 | https://www.data.gov.in/_nuxt/4499f47.js (saved 2026-10-06, fourth pass) | [PUBD] | `2e6adbbe6036de8fd185ff42295bda4642b3fd903c3aad33a226d9edda04bd9d` | The two Policies components and their copyright texts |
+| R74 | Connection attempts, 16:29 UTC: `info.nhp.gov.in`, `nhp.gov.in`, `www.nhp.gov.in` | [PUBD] | none | Reachability (repeat of R57) |
+| R75 | https://nihfw.ac.in/, https://nihfw.ac.in/cms/website-policy.php, https://nihfw.ac.in/cms/terms--and-conditions.php | [PUBD] | `bf4dc6c568fdd649870383ce4d5d65846ab5eaeb6c3266c8ad407aaa3aeee0d1` (home); `baa7fcc2782db5b7d7dcab17b27d5049b591d5424047580c862bc249cbd77539` (policy); `b707426bf4373ca682428c481172e1122acd20d4c9059485424ad989c2ba4571` (terms) | NIHFW's own website terms |
+
+### B14: data.gov.in Copyright Policy and GODL-India
+
+- **Copyright Policy unchanged (R70)** [PUBD]. The Policies page is
+  byte-identical to the copy read earlier on 2026-10-06 (R52). It still says:
+  "Material featured on this Portal may be reproduced free of charge after
+  taking proper permission by sending a mail to us." The footer still reads
+  "All rights reserved except published datasets/resources and metadata."
+- **The same page lists GODL-India (R70)** [PUBD]. Among its policy documents is
+  "Govt Open Data License - India", linked to the gazette notification (R71).
+  The page gives no text relating that document to the Copyright Policy.
+- **GODL-India as notified (R71)** [PUBD]: MeitY Notification F.No.
+  8(2)/2013-EG-I, New Delhi, 10 February 2017, titled "Government Open Data
+  License - India".
+  - Its preamble says that "the open license for data sets published under
+    NDSAP and through the OGD Platform remained unspecified till now".
+  - Section 3 grants the licence "Following the mandate of the National Data
+    Sharing and Accessibility Policy (NDSAP) … that applies to all shareable
+    non-sensitive data … generated using public funds by various agencies of
+    the Government of India", subject to sections 4 and 7.
+  - Sections 4 to 9 cover attribution, non-endorsement, the attribution
+    template, exemptions, termination, dispute redress and governing law. They
+    were not compared clause by clause with the `/Godl` text (R47) recorded in
+    the third pass.
+  - **The notification does not mention the portal's Copyright Policy.**
+- **NDSAP Implementation Guidelines 2.4 (R72)** [PUBD], dated 18 November 2015,
+  before the notification. They record a Task Force decision of 10 September
+  2015 to form a committee to "review and recommend the license to be
+  associated with the data being published on the OGD Platform". They contain
+  no licence text and do not mention the Copyright Policy.
+- **A second copyright text in the site script (R73)** [PUBD]. The script holds
+  two "Policies" components.
+  - The one served on `/policies` carries the "proper permission" text.
+  - The other carries a different "Copyright Policy": "The content available on
+    the portal is the intellectual property of NIC and its various content
+    providers from Government of India."
+  - Which page or host shows the second component was not determined [U].
+  - Neither text mentions published datasets.
+- **What this establishes about B14.**
+  - The notified text says the open licence for data sets published "under
+    NDSAP and through the OGD Platform" had remained unspecified, and grants
+    GODL-India for shareable non-sensitive data generated with public funds
+    (R71). It does not name C1a, C2 or C3. The portal's footer excepts
+    published datasets from "All rights reserved" (R70).
+  - No official text found explains how the Copyright Policy's permission
+    requirement relates to published datasets, or which statement governs where
+    they differ [U].
+  - B14 stays **open**. This pass does not decide precedence, and it does not
+    withdraw or strengthen the ADR-0002 basis.
+
+### B15: C1b and `info.nhp.gov.in`
+
+- **Hosts still unreachable (R74)** [PUBD], 16:29 UTC.
+  - `info.nhp.gov.in` (117.239.178.13) and `nhp.gov.in` (172.239.183.210)
+    refused or timed out on ports 80 and 443.
+  - `www.nhp.gov.in` did not resolve.
+  - No current terms, licence or `robots.txt` could be read [U].
+- **NIHFW's own site (R75)** [PUBD]. NIHFW is the contributor named for the C1
+  catalog (R26).
+  - Its Website Policy (last updated 03-08-2023) is a disclaimer and a privacy
+    note.
+  - Its "Terms & Conditions" page holds only "Content Provided By Department"
+    (last updated 24-03-2025), with no terms.
+  - Its footer reads "Contents on this website is published and managed by The
+    National Institute of Health & Family Welfare. Copyright © 2017. All rights
+    reserved."
+  - Neither page mentions the National Health Portal, `info.nhp.gov.in` or the
+    reuse of NHP data. These terms cover NIHFW's own website; **they are not
+    evidence about C1b's file host.**
+- **Historical evidence unchanged.** The 2023 National Health Portal terms
+  (fourth pass, R58) remain [ARCH], historical, from `www.nhp.gov.in`. They are
+  not current evidence and not evidence about `info.nhp.gov.in`.
+- **Relevant, not decisive.**
+  - The GODL-India notification frames its grant by NDSAP data generated
+    with public funds and does not address where a file is hosted (R71).
+  - The C1 catalog page says "Released Under: National Data Sharing and
+    Accessibility Policy (NDSAP)" (second pass, R26).
+  - No inspected source says whether that catalog-level statement covers C1b's
+    externally hosted file. B15 stays **open** [U].
+
+### Effect on the open items
+
+- **B14:** open. GODL-India's notified wording is now cited from the
+  Gazette text (R71). The Copyright Policy's relation to datasets remains
+  unexplained.
+- **B15:** open; unchanged in substance. The hosts are still unreachable, and
+  NIHFW's site has no terms for NHP data.
+- **Unchanged:** technical retrieval conditions (fourth pass), C4 (sixth pass),
+  B6, G2 and G4.
 
 ## Evidence status
 
@@ -1105,6 +1393,16 @@ as findings about the data.
   counts for C1–C3 (R32–R34) and C4's datastore schema, count and dataset
   metadata (R36, R37); C1–C3 resource-metadata notes and file facts (R55). No
   new retrieval; no file or record read.
+- **Publisher or publisher-platform, retrieved and inspected directly (sixth
+  pass) [PUBD]:** Telangana portal `robots.txt`, C4 metadata, metadata schema,
+  routes, footer, content-page lookups, Policies and Contact pages; ITE&C
+  open-data page and the Telangana State Open Data Policy 2016 (R60–R68). The
+  portal's API documentation was not obtained (R69).
+- **Publisher or publisher-platform, retrieved and inspected directly (seventh
+  pass) [PUBD]:** data.gov.in Policies page re-check, the GODL-India gazette
+  notification and NDSAP Implementation Guidelines 2.4, the two Policies
+  components in the site script, National Health Portal host checks and
+  NIHFW's website terms (R70–R75).
 - **Internet Archive copy, inspected directly (fourth pass) [ARCH]:** National
   Health Portal terms of use as captured 2023-04-04 (R58); archive index for
   `info.nhp.gov.in` (R59).
@@ -1125,9 +1423,10 @@ as findings about the data.
   world" minus one school each in Moscow, Tehran and Kathmandu [PUBD, R41].
 - **Still needs verification before any source ADR:**
   - for C1–C3, the items still open under "Effect on the open items" (fourth
-    pass): C1b's licence and file-host terms, and the data.gov.in Copyright
-    Policy wording; plus header rows and G4;
-  - the licence text behind C4's label;
+    and seventh passes): C1b's licence and file-host terms (B15), and the
+    data.gov.in Copyright Policy wording (B14); plus header rows and G4;
+  - the licence text behind C4's label, and the conflict with the portal's
+    Copyright Policy and footer (sixth pass);
   - C5 licence (all rights reserved at CEO Tamil Nadu, R38; district sites allow
     reuse on request, R39, R40) and schema;
   - C6 licence (reuse on request, R42) and schema;
@@ -1148,13 +1447,22 @@ as findings about the data.
   - C1–C3, fourth pass (2026-10-06): the Terms of Use defer to a per-record
     "license" element that the metadata lacks; the Copyright Policy asks for
     permission "by sending a mail", against the GODL-India footer (unresolved)
-    [PUBD, R50–R52].
+    [PUBD, R50–R52]. Seventh pass: the Copyright Policy is unchanged; the
+    gazette notification addresses the licence for data sets published under
+    NDSAP and through the OGD Platform and does not mention the Copyright
+    Policy (unresolved, B14) [PUBD, R70, R71].
   - C1b: its file is hosted only at `info.nhp.gov.in`, outside data.gov.in.
     Whether GODL-India reaches it is unresolved; the host was unreachable, and
     the only National Health Portal terms found (archived 2023, `www.nhp.gov.in`)
-    reserve all rights [PUBD, R55, R57; ARCH, R58].
+    reserve all rights [PUBD, R55, R57; ARCH, R58]. Seventh pass: the hosts are
+    still unreachable, and NIHFW's own website terms do not cover NHP data
+    (unresolved, B15) [PUBD, R74, R75].
   - C4: the publisher's dataset label "Government Open Data License - India" was
     verified directly [PUBD, R36]; the applicable licence text is not verified.
+    Sixth pass (2026-10-06): no licence text or link was found on the portal; the
+    portal's Copyright Policy asks for permission by mail and its footer
+    reserves all rights; the 2016 state policy names no licence [PUBD,
+    R61–R68]. Unresolved.
   - AISHE: mirror label only [MIR, R5].
   - C5: all rights reserved at CEO Tamil Nadu (R38); district sites allow reuse
     on request (R39, R40).
@@ -1183,7 +1491,10 @@ as findings about the data.
   automated access; `api.data.gov.in` refused connections; `HEAD` requests to
   file URLs got `405` (file store) or `200 text/csv` (C1a legacy path), with no
   `GET` sent; `info.nhp.gov.in` (C1b) was unreachable [PUBD, R49–R57]. These
-  are technical access conditions, not licence terms.
+  are technical access conditions, not licence terms. Sixth pass (2026-10-06),
+  Telangana portal (C4): no Terms of Use page found; the Policies page is silent on
+  automated access; `robots.txt` disallows only `/search`; the API
+  documentation endpoint did not respond [PUBD, R60–R69].
 - **G6. Currency.** C1a's frequency is "One-time" (granularity "Monthly") while
   its title says "updated till last month"; C1b's is "Monthly" [PUBD, R29].
   Whether either file is actually refreshed is unknown. C2 ("Monthly" against a

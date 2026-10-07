@@ -7,9 +7,11 @@
 - **Based on:** `docs/research/source-inventory.md` as committed in `a89f609`,
   updated with its third pass (2026-10-05, data.gov.in host and licence
   re-check), fourth pass (2026-10-06, terms of use and retrieval conditions
-  for C1–C3) and fifth pass (2026-10-06, B6 aggregate and schema inspection,
-  offline), ADR-0001 to ADR-0007, and `docs/gazetteer.md`. No retrieval was
-  done for these notes beyond what the inventory records. Evidence labels
+  for C1–C3), fifth pass (2026-10-06, B6 aggregate and schema inspection,
+  offline), sixth pass (2026-10-06, C4 licence and Telangana portal terms)
+  and seventh pass (2026-10-06, B14 and B15 follow-up), ADR-0001 to ADR-0007,
+  and `docs/gazetteer.md`. No retrieval was done for these notes beyond what
+  the inventory records. Evidence labels
   ([PUBD], [ARCH], [MIR], [SRCH], [ADR], [CALC], [U]) and source numbers
   (C1–C6, R#) are those of the inventory.
 - **Gazetteer:** `gazetteer_version`
@@ -63,7 +65,7 @@ coverage statement.
 | C1b | Same as C1a [PUBD] | As C1a | All India [MIR, R1]; `State_Name` | `Address` | **Unresolved** (B15): file hosted only at `info.nhp.gov.in`, not on data.gov.in; host unreachable on 2026-10-06; only National Health Portal terms found (archived 2023, `www.nhp.gov.in`) reserve all rights [ARCH, R58] | None → `snapshot` | Not assessable to acceptance |
 | C2 | MoHFW / DoHFW [PUBD] | `government_published` (G4 open) | All India [MIR, R2]; `State Name` | `Facility Address` | As C1a | `Nin_N`, stability [U] | Not assessable to acceptance |
 | C3 | MoHFW / DoHFW / CGHS [PUBD] | `government_published` (G4 open) | CGHS cities, not listed by state [U]; **no state column** | `DiagnosticCentreAddress` | As C1a | None → `snapshot` | Not assessable to acceptance |
-| C4 | "Health and Medical and Family Welfare" on the Telangana Open Data portal [PUBD] | `government_published` (G4 open) | Telangana only; `State` | **None** (components only) | Publisher label only; licence text [U] | None → `snapshot` | Not assessable to acceptance |
+| C4 | "Health and Medical and Family Welfare" on the Telangana Open Data portal [PUBD] | `government_published` (G4 open) | Telangana only; `State` | **None** (components only) | Publisher label only; licence text [U]. Sixth pass (2026-10-06): no licence text or link found on the portal; portal Copyright Policy asks for permission by mail and footer reserves all rights (B16) [PUBD, R61–R68] | None → `snapshot` | Not assessable to acceptance |
 | C5 | CEO Tamil Nadu; district administrations [PUBD] | Open (G4; CEO vs district publisher) | Per constituency (TN); statewide [U] | [U] (PDFs, not opened) | All rights reserved (CEO TN); district sites reuse on request | PS number within constituency [SRCH], stability [U] | No reuse licence found; outcome depends on B4 |
 | C6 | Kendriya Vidyalaya Sangathan [PUBD] | Open (legal status not verified) | All India [PUB, R10]; 1,364 schools in India [CALC]; state filter in the search form [PUBD, R43] | [U] (search form) | Reuse on request (R42) | UDISE code searchable; stability [U] | No reuse licence found; outcome depends on B4 |
 
@@ -94,6 +96,14 @@ are recorded there as rejected. Nothing here changes those entries.
     data.gov.in [PUBD, R55]. The footer licenses "the content published on
     data.gov.in", and no inspected page says whether that reaches a file hosted
     elsewhere. C1b's licence is therefore unresolved (B15).
+  - Seventh pass (2026-10-06): the Copyright Policy is unchanged. The gazette
+    notification of GODL-India (MeitY, 10 February 2017) says in its preamble
+    that the open licence for data sets published under NDSAP and through the
+    OGD Platform had remained unspecified, and its §3 grants the licence for
+    shareable non-sensitive data generated with public funds. It does not
+    mention the Copyright Policy, so B14 stays open [PUBD, R70, R71].
+    The National Health Portal hosts are still unreachable, and NIHFW's own
+    website terms do not cover NHP data, so B15 stays open [PUBD, R74, R75].
 - *Terms and retrieval.* Licence permission and technical access are separate;
   nothing below limits the licence.
   - The data.gov.in Terms of Use are silent on automated access [PUBD, R50].
@@ -167,6 +177,23 @@ are recorded there as rejected. Nothing here changes those entries.
 - *Licence.* The publisher's dataset label "Government Open Data License - India"
   is verified [PUBD, R36]. The licence text it refers to is not. Under ADR-0007
   §5 the licence must be verified from the official text.
+  - Sixth pass (2026-10-06): the label is still the same, and it is a free-text
+    field with no link or text [PUBD, R61–R63]. No licence page and no Terms
+    of Use were found among the portal's routes and 20 probed aliases [PUBD,
+    R63, R64].
+  - The portal's Copyright Policy says material "may be reproduced free of
+    charge after taking proper permission by sending a mail to us" [PUBD, R65].
+    Its footer reserves all rights, with no exception for datasets [PUBD, R63].
+  - The Telangana State Open Data Policy 2016 commits to adopting an "Open Data
+    Use License" but names none and gives no text [PUBD, R68].
+  - So whether GODL-India governs C4 is not stated by any Telangana source. The
+    label against the Copyright Policy and footer is unresolved (B16).
+- *Terms and retrieval.* Licence permission and technical access are separate.
+  - No Terms of Use page was found. The Policies page is silent on automated
+    access, the API and rate limits [PUBD, R64, R65]. Under ADR-0007 §5 that
+    points to manual retrieval; the source ADR records the answer (E5).
+  - `robots.txt` disallows only `/search` [PUBD, R60]. That is a technical
+    condition, not permission.
 - *`raw_text`.* No single address string is published. ADR-0006 §2 defines
   `raw_text` as the string "exactly as published". Whether a concatenation of
   `Street`, `Landmark` and `Locality` can meet that definition is an open
@@ -216,7 +243,9 @@ are recorded there as rejected. Nothing here changes those entries.
   - header rows and file-level aggregate statistics (B6; schema-level part
     gathered in the fifth pass, file-level part not)
   - their personal-data questions settled
-- **C4** depends on its licence text (B3) and on G2 (B5).
+- **C4** depends on its licence text (B3), the conflict with the portal's
+  Copyright Policy and footer (B16), and G2 (B5). Its retrieval terms were
+  gathered in the sixth pass (B8, Telangana part).
 - **C5 and C6:** no reuse licence was found, and the outcome depends on B4.
 - No `operator_published` source with a licence has been found, so that family
   is empty (ADR-0007 Consequences anticipates this).
@@ -241,7 +270,8 @@ detail is in the inventory, "B6 aggregate and schema inspection".
   to one is established.
   - data.gov.in: retrieval points to manual (B8), and B14 is open.
   - C1b: the host was unreachable (B15).
-  - C4: the portal's terms (B3, B8) are unchecked.
+  - C4: the portal's terms (B3, B8) were unchecked at the time. (Sixth pass:
+    B8 evidence gathered; B3 open, with B16.)
   - C5, C6: depend on B4.
 - **Not an ADR-0007 dimension.** How easy a source is to inspect is not one of
   the §4 selection dimensions and is not used to rank states.
@@ -253,7 +283,7 @@ dimensions.
 
 | State | Sources with state-specific evidence (status) | Source families documented | Publishers documented for the state | Sub-district verification (§8) | Language/script per documentation | Gazetteer properties [CALC, ad hoc] |
 |---|---|---|---|---|---|---|
-| Telangana (`lgd:state:36`) | C4 (licence text [U]; G2) | `government_published` only (G4 open) | 1 state department. C1, C2 and C6 declare all-India coverage (first pass: [MIR] C1, C2; [PUB] C6) | Unverified | [U] | 33 districts, 621 sub-districts, 3 sub-districts without villages, 41 same-name, 0 variant-name, median 16 villages/PIN, 0 of its PINs also map villages in another state |
+| Telangana (`lgd:state:36`) | C4 (licence unresolved, B3 and B16; G2) | `government_published` only (G4 open) | 1 state department. C1, C2 and C6 declare all-India coverage (first pass: [MIR] C1, C2; [PUB] C6) | Unverified | [U] | 33 districts, 621 sub-districts, 3 sub-districts without villages, 41 same-name, 0 variant-name, median 16 villages/PIN, 0 of its PINs also map villages in another state |
 | Tamil Nadu (`lgd:state:33`) | C5 (no reuse licence found; B4) | Open (C5 family not classified) | CEO TN, or one or more district administrations (unresolved). C1, C2 and C6 declare all-India coverage (first pass: [MIR] C1, C2; [PUB] C6) | Unverified | Tamil and English [SRCH, R20]; whether native-script lists are admissible is O6 | 38 districts, 317 sub-districts, 0 / 0 without villages, 88 same-name, 2 variant-name, median 7 villages/PIN, 17 of its PINs also map villages in another state |
 | Karnataka (`lgd:state:29`) | C5, one district page only (no reuse licence found; B4) | Open | One district administration. C1, C2 and C6 declare all-India coverage (first pass: [MIR] C1, C2; [PUB] C6) | Unverified | [U] | 31 districts, 240 sub-districts, 0 / 0 without villages, 646 same-name, 16 variant-name, median 17 villages/PIN, 0 of its PINs also map villages in another state |
 | The other 33 states/UTs | No state-specific source. C1, C2 and C6 declare all-India coverage (first pass: [MIR] C1, C2; [PUB] C6) | `government_published` (G4 open) | MoHFW (one or several publishers, G4); KVS | Unverified | [U] | In the inventory's table |
@@ -305,14 +335,15 @@ Observations, none of them a selection criterion:
 |---|---|---|---|
 | B1 | ADR-0006 and ADR-0007 are Proposed | Formal assessments, source ADR, selection records | Maintainer decision |
 | B2 | **Resolved 2026-10-05.** The data.gov.in sandbox notice is hidden on `www.data.gov.in` and shown only on `sandbox.data.gov.in`; the GODL-India text is unchanged since ADR-0002 (inventory, third pass) | — | — |
-| B3 | Licence text behind C4's label | C4 licence | Telangana portal documentation or the Telangana Open Data Unit |
+| B3 | Licence text behind C4's label. **Sixth pass (2026-10-06):** none found on the portal; the 2016 state policy names no licence (inventory, sixth pass) | C4 licence | The Telangana Open Data Unit (opendata[at]telangana[dot]gov[dot]in, R66) |
 | B4 | Whether permission or reuse on request can count as an acceptable licence basis (ADR-0001 §1, §4; ADR-0007 §5) | C5, C6 | Maintainer decision; it would be a new decision, not an assessment finding |
 | B5 | G2. **C4:** components only, so whether a concatenation can be `raw_text` "exactly as published". **C1a:** a single string is published, but whether `Address_Original_First_Line` is complete enough is unknown | C4; usefulness of C1a | Maintainer decision (C4); scripted aggregate statistics (C1a) |
 | B6 | No header rows and no scripted aggregate statistics from files. **Fifth pass (2026-10-06):** schema-level part gathered offline (platform field types and counts, C4 platform count, missing-value notes); file-level part not done, as no candidate file is held and no permitted scripted route is established | §5 assessment items (personal-data risk, context-column approval) | A script within the §5 evidence limit, run on a file obtained through a permitted route. Per-state counts for §4 step 3 come later, from accepted source files. |
 | B7 | G4: publisher identity of C1–C3; whether NIHFW, CGHS and KVS count as "a government body" | `source_family`, publisher count, holdout unit | Publisher documentation; maintainer decision |
 | B9 | No versioned procedure for gazetteer properties (G10) | Selection records (§4 step 3) | Code, after approval |
-| B14 | data.gov.in Copyright Policy: "may be reproduced free of charge after taking proper permission by sending a mail to us" [PUBD, R52], against the footer's GODL-India statement and "All rights reserved except published datasets/resources and metadata" | Licence basis of C1a, C2, C3 (not withdrawn; unresolved) | data.gov.in (NIC) clarification; maintainer decision on how to read it |
-| B15 | C1b's file is hosted only at `info.nhp.gov.in`; whether GODL-India reaches it, and that host's terms. Host unreachable on 2026-10-06; only archived National Health Portal terms (2023) found, reserving all rights | C1b licence | National Health Portal / NIHFW documentation, if the host returns; otherwise C1b stays unresolved |
+| B14 | data.gov.in Copyright Policy: "may be reproduced free of charge after taking proper permission by sending a mail to us" [PUBD, R52], against the footer's GODL-India statement and "All rights reserved except published datasets/resources and metadata" | Licence basis of C1a, C2, C3 (not withdrawn; unresolved). **Seventh pass (2026-10-06):** policy unchanged (R70); the gazette notification's preamble says the open licence for data sets published under NDSAP and through the OGD Platform had remained unspecified, and its §3 grants GODL-India for shareable non-sensitive data generated with public funds; it does not mention the Copyright Policy (R71); no official text relating the two was found | data.gov.in (NIC) clarification; maintainer decision on how to read it |
+| B15 | C1b's file is hosted only at `info.nhp.gov.in`; whether GODL-India reaches it, and that host's terms. Host unreachable on 2026-10-06; only archived National Health Portal terms (2023) found, reserving all rights. **Seventh pass (2026-10-06):** hosts still unreachable (R74); NIHFW's own website terms do not cover NHP data (R75) | C1b licence | National Health Portal / NIHFW documentation, if the host returns; otherwise C1b stays unresolved |
+| B16 | C4's label "Government Open Data License - India" against the Telangana portal's Copyright Policy ("may be reproduced free of charge after taking proper permission by sending a mail to us") and its footer ("All rights reserved", no exception for datasets) [PUBD, R61, R63, R65] | C4 licence (unresolved; the label is not withdrawn) | The Open Data Unit or the publisher to clarify; maintainer decision on how to read it |
 
 The treatment of platform field lists as publisher documentation (see
 "Procedural position") also needs the maintainer's confirmation.
@@ -321,11 +352,68 @@ The treatment of platform field lists as publisher documentation (see
 
 | # | Item | Meaning |
 |---|---|---|
-| B8 | Whether automated retrieval is allowed: data.gov.in, `info.nhp.gov.in`, Telangana DKAN (E5) | Decides the retrieval method, not acceptance. Where terms are silent, retrieval is manual (ADR-0007 §5). **data.gov.in, evidence gathered 2026-10-06:** Terms of Use silent; `robots.txt` disallows all paths; download form with image CAPTCHA; API host refused connections. **`info.nhp.gov.in`:** unreachable, terms [U]. **Telangana DKAN:** not checked. |
+| B8 | Whether automated retrieval is allowed: data.gov.in, `info.nhp.gov.in`, Telangana DKAN (E5) | Decides the retrieval method, not acceptance. Where terms are silent, retrieval is manual (ADR-0007 §5). **data.gov.in, evidence gathered 2026-10-06:** Terms of Use silent; `robots.txt` disallows all paths; download form with image CAPTCHA; API host refused connections. **`info.nhp.gov.in`:** unreachable, terms [U]. **Telangana portal, evidence gathered 2026-10-06:** no Terms of Use page found; Policies page silent on automated access; `robots.txt` disallows only `/search`; API documentation endpoint did not respond. |
 | B10 | C3 has no state column | Dependency on O4 (retention of unknown-state records) |
 | B11 | No `operator_published` source with a licence | A recorded absence. Reported, not worked around (ADR-0007 Consequences). |
 | B12 | Sub-district semantics unverified for every state (§8) | Expected to be "unverified" at selection time (§4 step 3). Recorded in each selection record. |
 | B13 | Address language/script undocumented for every source except C5 [SRCH] | Recorded as unknown, not guessed (§4 step 3). Bears on O6. |
+
+### C. Pending external clarification requests
+
+These are **requests, not evidence and not licence decisions.** Nothing is
+recorded as sent until the maintainer sends it, and nothing is recorded as
+answered until a reply is received and cited. No permission is assumed in the
+meantime.
+
+**C4 (B3, B16): draft to the Telangana Open Data Unit. Not sent.**
+
+- To: Open Data Unit, Department of ITE&C, Government of Telangana,
+  opendata[at]telangana[dot]gov[dot]in (the contact on the portal, R66)
+- Drafted: 2026-10-06
+- Status: draft, not sent
+- The project description in the draft ("non-commercial", "academic") is the
+  maintainer's to confirm before sending; the ADRs do not record it.
+
+> **Subject:** Licence and reuse terms for "Details of Health centres latitude
+> and longitude in Telangana" (data.telangana.gov.in)
+>
+> Dear Open Data Unit,
+>
+> I maintain Pata, a non-commercial, open-source academic research project on
+> the parsing and resolution of Indian addresses. Before using any dataset, I
+> check its licence and terms of use, and I would be grateful for your
+> clarification about the following dataset on the Telangana Open Data portal:
+>
+> - Title: Details of Health centres latitude and longitude in Telangana
+> - Dataset identifier: 44935575-631b-4116-b278-41f4c507b95b
+> - Publisher shown: Health and Medical and Family Welfare
+>
+> The dataset's metadata lists its licence as "Government Open Data License -
+> India". The portal's Policies page also contains a Copyright Policy stating
+> that material "may be reproduced free of charge after taking proper
+> permission by sending a mail to us".
+>
+> Could you please confirm:
+>
+> 1. Whether this dataset is licensed under the Government Open Data License -
+>    India (GODL-India).
+> 2. If it is, the official licence text or reference that applies (for
+>    example, a link to the licence text).
+> 3. Whether the Copyright Policy's requirement to obtain permission by email
+>    applies to published open datasets such as this one.
+> 4. Whether downloading, reusing and redistributing this dataset is permitted
+>    for non-commercial academic research, including as part of an open-source
+>    research benchmark, and if so under what conditions (for example, the
+>    required attribution).
+>
+> Thank you for your time.
+>
+> Regards,
+> [Name]
+> [Project link and contact details]
+
+Until a reply is received and recorded, B3 and B16 stay open and C4 stays
+unresolved, unaccepted and unselected.
 
 ## Recommended next evidence step
 
@@ -345,7 +433,14 @@ The treatment of platform field lists as publisher documentation (see
    - B8 for data.gov.in: evidence gathered (fourth pass, 2026-10-06). It found
      B14 and B15.
    - B8 for `info.nhp.gov.in`: blocked; the host was unreachable.
-   - B8 for Telangana DKAN, and B3 (C4's licence text): not yet done.
+   - B8 for the Telangana portal: evidence gathered (sixth pass, 2026-10-06).
+   - B3 (C4's licence text): searched in the sixth pass; no licence text was
+     found and a conflict was recorded (B16). Still open. A clarification
+     request to the Telangana Open Data Unit is drafted, not sent (section C
+     above).
+   - B14 and B15: followed up in the seventh pass (2026-10-06). Both stay
+     open; B14 needs data.gov.in (NIC) to clarify, B15 needs a reachable
+     National Health Portal host or NIHFW documentation.
 3. **Then B6, file-level part**, after maintainer approval. Its schema-level
    part was gathered in the fifth pass (above). A candidate file is placed in
    `data/raw/` (never committed) through a permitted route, and a script checks
@@ -356,6 +451,6 @@ The treatment of platform field lists as publisher documentation (see
    - It prints no record text, and no person reads the file.
    - This is §5 assessment evidence. Per-state record counts for selection
      records are produced later (§4 step 3), from accepted source files.
-4. **B1, B4, B5 (for C4), B7 and the reading of B14 are maintainer
+4. **B1, B4, B5 (for C4), B7 and the readings of B14 and B16 are maintainer
    decisions,** as is the platform-field-list interpretation. No further
    evidence resolves them.
