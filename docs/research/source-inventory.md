@@ -13,16 +13,18 @@
   C1b's file host `info.nhp.gov.in`. Fifth pass, 2026-10-06: B6 aggregate and
   schema inspection for C1–C6, offline, from responses already saved. Sixth
   pass, 2026-10-06: C4 licence and Telangana portal retrieval terms (B3, B8).
-  Seventh pass, 2026-10-06: B14 and B15 follow-up for C1–C3.
+  Seventh pass, 2026-10-06: B14 and B15 follow-up for C1–C3. Eighth pass,
+  2026-10-07: alternative address sources (C7–C12), metadata only.
 - **Not exhaustive.** Only the sources and categories listed below were looked
   at. Categories identified but not researched are listed separately.
-- **Seven passes.** The sections up to "Candidate-state evidence" record the
+- **Eight passes.** The sections up to "Candidate-state evidence" record the
   first pass. "Licence and header verification" records a second pass on C1–C6.
   "data.gov.in host and licence re-check" records a third pass on the C1–C3
   licence only. "Terms of use and retrieval conditions" records a fourth pass on
   C1–C3 only. "B6 aggregate and schema inspection" records a fifth pass on
   C1–C6. "C4 licence and retrieval terms" records a sixth pass on C4 only.
-  "B14 and B15 follow-up" records a seventh pass on C1–C3 only. Where they
+  "B14 and B15 follow-up" records a seventh pass on C1–C3 only. "Alternative
+  address sources" records an eighth pass on new candidates C7–C12. Where they
   differ, the later pass is the current evidence; the
   earlier text is kept as the record of what was known then.
 
@@ -54,6 +56,11 @@
   notification, NDSAP guidelines, National Health Portal host checks and
   NIHFW's website terms, retrieved with `curl` and read directly [PUBD];
   described under "B14 and B15 follow-up".
+- **Eighth pass:** web search and data.gov.in catalog searches for discovery
+  only; then data.gov.in and state-instance metadata APIs, policy pages and
+  site scripts, and the AISHE, UDISE+, CBSE and AIKosh sites, retrieved with
+  `curl` and read directly [PUBD]; described under "Alternative address
+  sources".
 - Other claims rest on this repository's ADRs [ADR] or on the local gazetteer
   computation [CALC].
 - **Page fetches** were made with an instruction to report only metadata,
@@ -150,6 +157,9 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
 (3) family, (4) contents, (5) coverage, (6) address fields, (7) language/script,
 (8) stable ID, (9) dates, (10) licence/terms, (11) privacy/scope fit,
 (12) limitations, (13) held-out-publisher potential.
+
+C1–C6 are the first-pass candidates. C7–C12 were found in the eighth pass and
+are recorded under "Alternative address sources".
 
 ### C1. Hospital Directory / NIN Health Facilities (National Health Portal)
 
@@ -312,7 +322,10 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
 
 ### Identified but not researched
 
-Listed so the gap is visible. None is claimed to be suitable.
+Listed so the gap is visible. None is claimed to be suitable. (Eighth pass:
+AISHE, UDISE+, CBSE and seven state open-data instances were looked at; see
+"Alternative address sources". UGC, eCourts and NIC district pages remain
+unresearched.)
 
 - CBSE affiliated-school directory
 - UGC list of universities
@@ -328,6 +341,7 @@ may be a residence. **This is an assumption to verify from documentation, not a
 finding.**
 
 **`operator_published` family:** no candidate with a known licence was found.
+(Eighth pass: still none.)
 
 ## Candidate-state evidence
 
@@ -1373,6 +1387,329 @@ record was read.
 - **Unchanged:** technical retrieval conditions (fourth pass), C4 (sixth pass),
   B6, G2 and G4.
 
+## Alternative address sources (eighth pass, 2026-10-07)
+
+Evidence status only. **No source is accepted, rejected or selected**, no state
+is selected, and no manifest or selection record is written. This pass looked
+for address-bearing public sources that could replace or complement C1–C6. No
+dataset file was downloaded, no datastore or record API was queried, and no
+record was read.
+
+### Method
+
+- Discovery used web search [SRCH] and keyword searches of the data.gov.in
+  catalog metadata API. Search results located pages; they are not used as
+  evidence for any claim below.
+- Publisher pages, platform metadata APIs and site scripts were retrieved with
+  `curl` on 2026-10-07, between about 14:40 and 15:00 UTC, and read directly
+  [PUBD]. Field lists come from the platform's list API, which returns field
+  names and types, not records.
+- **Requests to hosts whose `robots.txt` disallows all paths.** Roughly 120
+  metadata and page requests went to data.gov.in hosts: `www.data.gov.in`
+  (R49) and the state instances, whose `robots.txt` is byte-identical to R49
+  (R83, R84). Earlier passes did the same. Eighteen field-list requests
+  failed locally because of a script error (a trailing carriage return in
+  the identifier) and were repeated.
+- **Incidental record exposure.** One discovery search (Jan Aushadhi Kendras)
+  returned a third-party site's summary that quoted a few individual outlet
+  addresses. They are not recorded here, were not used, and the source was not
+  pursued; it is third-party [SRCH, 3P]. As with the first pass's C5 summary,
+  this was not intentional inspection, but it is disclosed because ADR-0007 §5
+  keeps record text out of assessment.
+- The first reachability probe of the state instances failed on DNS. A retry
+  minutes later reached seven of them (R92). The failures were resolver
+  timeouts, not evidence that the hosts are absent.
+
+### Sources for this pass
+
+| # | URL | Kind | SHA-256 of saved response | Supports |
+|---|---|---|---|---|
+| R76 | https://www.data.gov.in/backend/dmspublic/v1/catalogs?filters[node_alias]=/catalog/company-master-data | [PUBD] | `8169d9e8fa6a746cdde0139c8641f3b4c38cb861caac83ef90cfc00755f484c6` | C7 catalog metadata |
+| R77 | https://www.data.gov.in/backend/dmspublic/v1/resources?filters[catalog_reference]=354261 | [PUBD] | `d4a7a40997a0d9444fcd81337206d0edd86b5ed07cf0d0a8231f55888f4d04fe` | C7 resource metadata |
+| R78 | https://www.data.gov.in/backend/dataapi/v1/lists?format=json&filters[catalog_uuid]=ec58dab7-d891-4abb-936e-d5d274a6ce9b (offsets 0 and 100) | [PUBD] | `e9922ba043c31d8bbdf69895d051d3a344cc459ec3b0a9fcc7c6894f73270f7f`; `f5554c4193be137908532e455100a7f38039a533c5c177094da152a16599a76c` | C7 field lists (128 lists) |
+| R79 | https://www.data.gov.in/backend/dmspublic/v1/catalogs?query=… (18 keyword searches, such as "address", "directory", "contact details", "police station") | [PUBD] | saved; not individually hashed | Discovery only |
+| R80 | https://www.data.gov.in/backend/dmspublic/v1/resources?filters[catalog_reference]=… for the catalogs in C8–C10 and "Not assessable or not pursued" | [PUBD] | listed per catalog below | Resource metadata |
+| R81 | https://www.data.gov.in/backend/dataapi/v1/lists?format=json&filters[catalog_uuid]=… for the same catalogs | [PUBD] | listed per catalog below | Field lists, where they exist |
+| R82 | https://www.data.gov.in/_nuxt/36aab54.js, re-retrieved | [PUBD] | `45fc26bc7b8d0b25fa746c168d1c37bd6be28dfae91b5e09b45f72ce2ad23458` (identical to R47) | GODL-India text unchanged; grant wording |
+| R83 | https://tn.data.gov.in/ (home, `/terms-of-use`, `/policies`, `/robots.txt`) | [PUBD] | home `f88ef1c0df63628e411db1ea4aa5b958fa7a3a0fdfb682e8a9e896120e95dc0e`; terms `7665ee9f366f956606c7dab60865493f2ee27c574952fd4f98541e56798436a0`; policies `a5d2f7cf837c5002c48e66ced8ff63c95485688981f7737e17355c1d25a15e83`; robots `efdb5938a9736727f5cce2b60355588e4fa541d19d022d222d8a09b8efd5dcce` | Tamil Nadu instance footer, terms, policies |
+| R84 | https://karnataka.data.gov.in/ (the same four paths) | [PUBD] | home `f0b8f416b6e5c46e55d12c89486150f390ed3781349cb9f34962122206a5011e`; terms `0ebcd7eb5d045b0375f7606795b062670953cf432ec5ea216961aa638ac7613f`; policies `040d01b9e127470e702b2eefa959a00aa9186d04a99dfba2c66122481b359425`; robots as R83 | Karnataka instance footer, terms, policies |
+| R85 | `/policies` on `odisha`, `sikkim`, `punjab`, `kerala` and `ap.data.gov.in` | [PUBD] | `de65554c1ce0ba35cebda51e354d45f758d0008bbade4ed081a024e51fcd7e0d`; `824ca0a3de4217b1604a483590f3dfe370e2e475ef179eeb5e9ea77bdd939b65`; `2347f0f2660a5b7249d7d999918f6665f2b157c6335a803c917c4bcfcfaaa278`; `50c02115ef5e6ad5250439e11278d304e3b4ebbdefd6f7545a161b5be2a119af`; `bd7361f1d488c6ca37c920e6708fe2e8bf4a1893d88c2d026a871f099ca08251` | Same footer and Copyright Policy on five more state instances |
+| R86 | https://smartcities.data.gov.in/policies | [PUBD] | `09160cc0d750bc0c1c4c1cc026e1be51006b875d87388eda180941fe2c13e659` | Smart Cities instance policies |
+| R87 | https://aikosh.indiaai.gov.in/ and its scripts; https://aikosha-api.indiaai.gov.in/ad/idp/api/v1/admin/content/detail/terms_and_conditions | [PUBD] | home `887995cb32885b1fa0cdf49a194625796693364270a7235f49f6e2eb0d12139c`; main script `9c5df858153fba5cfd40d3e65a13c26dd01428d4e93c5a6c8ae66420f756f48f`; terms API `12a22880bc2e59f8278b4a5e547567f0aa14d020ea456598267fa00208cfebc5` (a `403 Forbidden` body) | AIKosh footer; terms **not obtained** |
+| R88 | https://aikosh.indiaai.gov.in/home/datasets/details/all_colleges_as_per_aishe_dashboard_3.html | [MIR] | `cdc26da2b9850ad70fc991255023894b39b5c3ba6d04b94f576bfac7a6cdf29a` | AISHE mirror metadata, read directly this time (R5 was a fetch summary) |
+| R89 | https://dashboard.aishe.gov.in/hedirectory/ and its scripts `main.6a3f3221b4aecf63.js`, `337.52e2d3e8e3776afe.js` | [PUBD] | page `7689ede8a68ffc9e5e5fabd9c345357b063bb401f3962a63e4b4ecdff27f7f3c`; main `7ed241f7cdfbfc4e626d0b479754d7e5d69e5e3c1b10b8a25e38cc5f8c810149`; module `37add94d3048733a5c8cd2b51644e0efd03a54d6f3161463335415f61dd574e3` | C11 directory fields and query handling |
+| R90 | https://udiseplus.gov.in/ and `main-KGJ6AKF7.js`; https://data.udiseplus.gov.in/archive; `kys.udiseplus.gov.in`, `microdata.udiseplus.gov.in` | [PUBD] | home `002f6499d0b8df10274e366b94d67f8f505955d591de6af0ad721a7acc873661`; script `c4db55841d3c9ac04637ffa7450d74ec493f073068715f7fa96c353317cdfee7`; archive `b722f328a12a68931951cc61c379b87af6e8c74e9d5a955f5af38c26fe2214fe` | UDISE+ sub-portals; archive behind a login; two hosts did not respond |
+| R91 | https://saras.cbse.gov.in/SARAS/AffiliatedList/ListOfSchdirReport | [PUBD] | `7c672f1463abc2d17019e61bf18c1353d191b0be01d335db18fb1bc0d6408ca1` | C12 directory page |
+| R92 | Reachability of state open-data hosts, 2026-10-07 | [PUBD] | none | Seven state instances reachable on retry; `rajasthan`, `delhi` and `surat.data.gov.in`, `data.karnataka.gov.in` and `opendata.maharashtra.gov.in` did not answer |
+
+### The GODL-India basis for state-department data (B17)
+
+C8 and C9 are published by state departments through NIC's state instances of
+the Open Government Data Platform. C7 and C10 are central and sit on
+`www.data.gov.in`, like C1–C3.
+
+- **Footer, on every state instance read (R83–R85)** [PUBD]: "© 2012-2022
+  GOVERNMENT OF INDIA All rights reserved except published datasets/resources
+  and metadata." and "The content published on data.gov.in are owned by the
+  respective Ministry/State/Department/Organization licensed under the
+  Government Open Data License - India." It is the same footer as on
+  `www.data.gov.in` (R26, R70), and it names state owners.
+- **GODL-India text unchanged (R82)** [PUBD]. The script is byte-identical to
+  R47. Its grant (section 3) reads: "Following the mandate of the National Data
+  Sharing and Accessibility Policy (NDSAP) of Government of India that applies
+  to all shareable non-sensitive data … generated using public funds by various
+  agencies of the Government of India, … all users are provided a worldwide,
+  royalty-free, non-exclusive license to use, adapt, publish (either in
+  original, or in adapted and/or derivative forms), translate, display, add
+  value, and create derivative works (including products and services), for
+  all lawful commercial and non-commercial purposes". A search of the
+  licence text strings in the script found no "State" or "States".
+- **Terms of Use on the state instances (R83, R84)** [PUBD]. Like the
+  `www.data.gov.in` terms recorded in the fourth pass (R50), they defer to
+  "the 'license' metadata element of individual dataset records", require
+  accuracy and prominent acknowledgement, and are silent on automated
+  access. They were not compared with R50 word for word.
+- **The Copyright Policy differs by host** [PUBD].
+  - Seven state instances (R83–R85) carry: "The content available on the
+    portal is the intellectual property of NIC and its various content
+    providers from Government of India. NIC shall not be liable for any delays
+    in content updation …". It matches the second "Policies" component found
+    in the data.gov.in script in the seventh pass (R73), which was not then
+    placed on any page. **It has no permission requirement and does not mention
+    datasets or a licence.**
+  - `www.data.gov.in` (R70) and `smartcities.data.gov.in` (R86) carry the
+    "proper permission by sending a mail to us" text (B14).
+- **Same files, two portals.** The C8 and C9 catalogs are returned by the
+  `www.data.gov.in` catalog API with their state instance as domain name, and
+  their files sit on the `www.data.gov.in` file store (R79, R80). So the same
+  files can be reached through portals whose Copyright Policies differ.
+  Whether `www.data.gov.in` presents them as its own content was not checked
+  [U].
+- **What this establishes.**
+  - The platform footer extends GODL-India to state-owned content in so many
+    words. The licence's own grant sentence refers to agencies of the
+    Government of India and does not mention state governments. No inspected
+    text says whether that sentence limits the footer for state data [U].
+  - On the state instances the B14 permission sentence is absent; on
+    `www.data.gov.in`, through which the same files are reached, it is
+    present. No inspected text says which portal's policy governs such a
+    file [U].
+  - **New B17** (evaluation notes). Like B14, it is not resolved here, and this
+    pass decides no precedence.
+
+### Candidates found
+
+Numbered on from C6. "Family" is a first-look classification only; G4 applies
+to every one.
+
+#### C7. Company Master Data (Ministry of Corporate Affairs, data.gov.in)
+
+1. **Publisher:** Ministry of Corporate Affairs (R76) [PUBD].
+2. **Title and URL:** catalog "Company Master Data",
+   https://www.data.gov.in/catalog/company-master-data; active resource
+   "Registrars of Companies (RoC)-wise Company Master Data",
+   `/resource/registrars-companies-roc-wise-company-master-data` (R76, R77).
+3. **Family:** `government_published` (G4 open).
+4. **Licence:** the site-wide GODL-India statement, as for C1–C3 (R70, R82).
+   No resource-level licence field. **B14 applies.**
+5. **Redistribution and commercial use:** if GODL-India governs, its text
+   grants publication "in original, or in adapted and/or derivative forms" for
+   "all lawful commercial and non-commercial purposes", subject to its sections
+   4 and 7. Whether it governs is B14.
+6. **Retrieval:** catalog `is_webservice` 1 and resource `is_api_available` 1
+   (R76, R77). `api.data.gov.in` refused connections in the fourth pass and was
+   not re-tested. The platform's download form and CAPTCHA (R54, recorded for
+   C2) were not re-checked for this resource. Silent terms point to manual
+   retrieval (B8).
+7. **Coverage:** jurisdiction "All India" [PUBD, R76]. Mapping to `lgd:state:`
+   IDs [U].
+8. **Fields (R78)** [PUBD]. The active list (updated 2026-07-22) has 16 fields:
+   `CIN`, `CompanyName`, `CompanyROCcode`, `CompanyCategory`,
+   `CompanySubCategory`, `CompanyClass`, `AuthorizedCapital`, `PaidupCapital`,
+   `CompanyRegistrationdate_date`, `Registered_Office_Address`,
+   `Listingstatus`, `CompanyStatus`, `CompanyStateCode`,
+   `CompanyIndian/Foreign Company`, `nic_code`,
+   `CompanyIndustrialClassification`.
+   - The other 127 lists (state-wise snapshots to 2015, 2018, 2019 and 2021)
+     are inactive. 93 of them also have `email_addr`.
+   - **Address:** one string, `Registered_Office_Address`. Completeness [U]
+     (G2).
+   - **State:** `CompanyStateCode`. Its code scheme is [U], so its mapping to
+     `lgd:state:` is [U]. `CompanyROCcode` names a Registrar of Companies,
+     which is not a state. No district or PIN column.
+9. **Identifier:** `CIN` ("Corporate Identification Number", per the
+   catalog description, R76), which could support `record_id_scope`
+   `native`. Stability across snapshots [U].
+10. **Currency:** frequency "Monthly"; the resource note says "The data upto
+    3rd November 2023"; the resource's `datafile_url` points to a 2015 Goa file
+    (R77). The metadata conflicts (G6).
+11. **Privacy and scope:**
+    - The active list has no person or contact field. The inactive lists'
+      `email_addr` would be removed at ingestion (ADR-0001 §2) if they were
+      ever used.
+    - Registered offices of small companies may be residences [U]. ADR-0001 §2
+      excludes residential-looking records, and only the record-level screen
+      can tell how many (ADR-0006 §12).
+    - Company names can contain names of individuals [U].
+    - Whether a company's registered office is an address "of
+      institutions/facilities" under ADR-0001 §1 is a maintainer decision
+      (**B18**).
+12. **Schema observation (not a preference):** its field list shows national
+    declared coverage, one address string, a company identifier and a state
+    code. It is also the furthest from the facility types of C1–C6, and its
+    residential share is unknown.
+
+#### C8. Karnataka state-department address catalogs (karnataka.data.gov.in)
+
+Each catalog is a separate candidate; C8a and C8b share a publisher. Licence
+for all:
+the footer and terms above, with B14 and B17. Retrieval for all: a
+`robots.txt` that disallows all paths (R84) and silent terms (B8); whether the
+state instances use the download form recorded for `www.data.gov.in` (R54) was
+not checked [U].
+Department and jurisdiction come from the catalog records returned by R79;
+agency, frequency, dates and file sizes from R80 [PUBD]. Sizes are file sizes
+from metadata, not row counts.
+
+| Row | Catalog (resources) | Publisher (department / agency) | Jurisdiction | Frequency; published | File size | Field list (R81) | SHA-256 (R80; R81) |
+|---|---|---|---|---|---|---|---|
+| C8a | List of Karnataka one centers address and contact details (1) | DPAR, Electronic Delivery of Citizen Services (EDCS) | Karnataka | Annual; 2021-10-27 | 8,347 B | none | `3616cc23dacc191cb5a2a63d7843c093e0fb7417b40d94c45b8a2ffc9cebc1ea`; `6f546342c197bf25d28c15ae22d71cdc0e2bf2393b60d44a0ed70e9fa249a3d4` |
+| C8b | List of Grama One centers details (2, same title and size) | DPAR, EDCS | "All India" | Biannual; 2021-11-18 | 32,064 B | none | `b3f8f083d1548b9eae4f0c933a63f0a02eaf16baebf7773e3b76ba6a31c7bdc9`; `613cde457d419c455beeaaa8b8439d9898c43a38b9466cdb15450d3046f6b932` |
+| C8c | FIRE STATION DETAILS (1) | Home Dept, Karnataka State Fire and Emergency Services | Bangalore Urban | Annual; 2025-07-15 | 11,640 B; file name "DETAILS_OF_FIRE_STATIONS_WITH_PHONE_NUMBERS" | none | `2b88620533726bf960f0aaef1df3b4f349682b235d0c481ba571d3920f2fbee8`; `9c0fe89feb17339656f72d59e5383f10d19661a4873030253899c5d23a6a3ea8` |
+| C8d | List of Prisons in Karnataka State (5) | Home Dept, Prisons and Correctional Services | Karnataka | Annual; 2022 | 234–1,637 B each | none | `f1a3ca33919a6dc3f84e4e19127f18a8c7bf033ae8ae53f914a00f806aeb8514`; `a571f0624d5a0f1e2d851f67dac52ac577c37a9b4165690b402bd2479afae528` |
+| C8e | List of APMCs (1) | Agricultural Marketing Department | Karnataka | Annual; 2021-10-12 | 19,566 B | none | `8783befc7e9c23dd1c9766db38189aaa3bcdbfa0869572462cddba6ab50e6457`; `5c8d82024cb377ab032c9a047556ee1c1162c56be50c02ed79a543321b5bf0f3` |
+| C8f | Fisheries Office Contact Details (3) | Animal Husbandry and Fisheries Department | Karnataka | One-time; 2021–2022 | 597–4,238 B each | none | `3520d87f7726758cfbd81d1b9a5a62d1f0cc83a8d126b20eb025c2c26f89c023`; `39f01b7f684415ee054a0ef22002fb653a4b4121209890334303490c1964d11a` |
+| C8g | List of training center in Karnataka skill development center (1) | Karnataka Vocational Training and Skill Development Corporation | Karnataka | Half yearly; 2022-01-07 | 644 B | none | `f566c436298374fa79c9209b049337bcacf1b20b23ae6d79580c6ef595ba1c34`; `bf96a0efc52b38498ef1a4c23a3918ea8d491770825b167511613a1a5382b1f0` |
+| C8h | Registrar of Cooperative Societies - List of Societies (KSC Act 1959) (1) | Co-operative Department | Karnataka | Annual; 2021-10-12 | 1,147 B | none | `03d0b110755bf7e3bc3973f32bf0dd8e8881786c38c7d076806a78d0cc7429ef`; `2155253a27fb431afb7404f6673af3abc80be462a39d18452a0cb91d5174a019` |
+| (C8i) | List of Museums (1) | Directorate of Tourism | Karnataka | Annual; 2021-12-01 | 1,784 B | `district_`, `museum_name_`, `fee`, `museum_incharge_head`, `contact_numbers`, `email_id` | `5ff804320ad791b77d9628bf447ce3dc5f2179dd5e6154dade3107317604d206`; `2ab2f946e17b21b6384d943dca73bba5dd97e7951dc93b23e044023dd62561b9` |
+
+- **Address fields:** [U] for C8a–C8h. They have no platform field list, so
+  only a header row could show them (B6). The titles of C8a and C8f name
+  "address" or "contact details"; a title is not schema evidence.
+- **C8i has no address field** in its field list. It is listed so that it is
+  not re-checked; it is **not an address-bearing candidate**. It has a
+  person-related column (`museum_incharge_head`) and contact columns.
+- **Coverage:** one state each. `coverage_state` would be `lgd:state:29` only
+  if a file holds Karnataka records alone [U]. C8b's jurisdiction label "All
+  India" conflicts with its state publisher.
+- **Identifier, state, district and PIN columns:** [U].
+- **Size:** the files are small (234 B to 32 KB). C8d, C8g and C8h are under
+  2 KB each, so they can hold only a few dozen short rows at most
+  (inference from size). What each holds is [U].
+- **Privacy:** contact columns are likely, from the titles [U]. Who operates
+  Karnataka One and Grama One centres, and whether any are run by individuals,
+  is [U]. C8h (societies) may include residential addresses [U].
+- **Why it matters:** several Karnataka departments publish separately. If G4
+  treats them as distinct publishers, that bears on ADR-0007 §6 (holdout) and
+  on the publisher-count dimension. Neither is decided here.
+
+#### C9. Tamil Nadu state-department address catalogs (tn.data.gov.in)
+
+Licence and retrieval as for C8 (R83 for the instance).
+
+| Row | Catalog (resources) | Publisher | Frequency; published | File size | Field list (R81) | SHA-256 (R80; R81) |
+|---|---|---|---|---|---|---|
+| C9a | Commissionerate of Municipal Administration (CMA): Regional Offices and ULBs Address Details (1) | Municipal Administration and Water Supply Dept, CMA | Annual; 2017-12-29 | 23,541 B | `sl_no`, `name_of_the_regional_office`, `name_of_the_ulb_rdma`, `address`, `telephone_no__with_std_code`, `fax_number_`, `email_id`, `no_of_wards` | `ba882adfa6f1e22009bf230383a5dcdc5a7dc2f07399bcc4ba65860edc6bc23f`; `da459cf4c2e68fd57cd99dc2554f9bb0e5fa827721ddbe95d8beb2c681be9360` |
+| C9b | List of Study Centres under Tamil Nadu Open University in 2020 (10) | Higher Education Dept, Tamil Nadu Open University (TNOU) | Annual; 2021-08-12 | 976 B–31 KB each; the enrolment-count resource 152 KB | Two of ten lists: B.Ed study centres (`name_of_the_region`, `name_of_the_district`, `name_of_the_institute`, `address`, `phone_number`, `mobile_number_`, `mail_id`); enrolment counts (no address) | `5ce4f79e57ad0c2b013d1bdb7216778872f0aa8e873eaa878ffd5f1508887df7`; `287b1f78714278c4d228f5e0c8329ae0d072e5718133f51244804c78f4b88649` |
+| C9c | Details of State, District Offices of the Fire and Rescue Services department and fire stations (1) | Home, Prohibition and Excise Dept, TN Fire and Rescue Services | Annual; 2019-06-04 | 299 B | none | `e74dcc5876ad375389f875a9efccd05fd06ae375b54bf5dda9289eac6d4d52a0`; `53abc76a0650d932cf3f1d641c866df7f5ea87ffb2edece50d1b335a142a1d35` |
+
+- **C9a:** its field list shows one `address` string per regional office or
+  urban local body. It has no district, PIN or
+  identifier column. Its contact columns would be removed at ingestion
+  (ADR-0001 §2); whether they are office or personal contacts is [U]. The
+  gazetteer has no urban units, so ULB offices could not link below district
+  level (ADR-0006 §19).
+- **C9b:** one list shows `address` and `name_of_the_district`. Its
+  `mobile_number_` may be a person's number [U]. The other eight lists'
+  schemas are [U]. Apart from the enrolment counts, the resources are lists of
+  institutions (centres, partner institutions).
+- **C9c:** 299 B, file name `office_infrastructure_details.csv` (R80). It can
+  hold only a few short rows, so it is unlikely to be a list of fire stations
+  (inference from size); what it holds is [U]. Weak.
+- **Coverage:** jurisdiction "Tamil Nadu" for all three; `lgd:state:33` [U].
+- The publishers differ from C5's (CEO Tamil Nadu or district
+  administrations), and unlike C5 these catalogs carry a site-wide licence
+  statement.
+
+#### C10. Blood Bank Directory (National Health Portal, data.gov.in)
+
+- Publisher NIHFW, as for C1. Two resources (R80, R81) [PUBD]:
+  - "Blood Bank Directory (updated till last month)", Monthly, published
+    2017-08-10, `datafile_url` `https://info.nhp.gov.in/api/blood-banks.csv`.
+    That is C1b's file host, so **B15 applies**.
+  - "Blood Bank Directory as on September 2015", 2015-09-18.
+- Fields include `_state`, `_district`, `_city`, `_address`, `pincode`,
+  latitude and longitude. They also include `_nodal_officer_`,
+  `_contact_nodal_officer`, `_mobile_nodal_officer`, `_email_nodal_officer` and
+  `_qualification_nodal_officer`, which are personal data and would be removed
+  at ingestion (ADR-0001 §2).
+- SHA-256: resources
+  `37d9612bc8333bbf5d3123c4da3a9fdb63182abbc9b49cc5eee7e98bd0382a9d`; lists
+  `b07771e75be20bdbc53cf1db50d2ea5a9024a65ef4c40018514da5b8dc334797`.
+- No evidence advantage over C1: same publisher, same file host, B14 and
+  B15.
+
+#### C11. AISHE higher-education directory (Ministry of Education)
+
+- **Directory (R89)** [PUBD]: https://dashboard.aishe.gov.in/hedirectory/. Its
+  institution detail view shows `name`, `address1`, `state`, `district`,
+  `pincode` and `website`, loaded from `institutionDirectory` endpoints by an
+  `id` parameter. The scripts also handle an AISHE code, which the mirror
+  lists as a column (R88).
+- **Access:** an interactive search. The client encrypts search text and AISHE
+  codes before sending them. No bulk file was found in the directory.
+- **Licence:** no licence, terms or copyright text was found in the directory
+  page or scripts. The only licence statement is the mirror label "Open
+  Government License, India" (R88) [MIR]; a label alone is not verified licence
+  text. The mirror copy lists "Location", not an address column.
+- **Outcome:** no licence text found; not assessable to acceptance. Whether
+  `aishe.gov.in` has terms was not checked [U].
+
+#### C12. CBSE affiliated-school directory (SARAS)
+
+- **Page (R91)** [PUBD]: "CBSE SCHOOLS DIRECTORY", "Total No. of Schools
+  affiliated with CBSE : 33169". It filters by state, district, region, keyword
+  ("any word from School Name or Address"), affiliation number and level.
+  Result columns: "Aff. No & School Code", "State & District", "Status",
+  "School & Head Name", "Address Details".
+- **Licence:** none on the page; CBSE's website policies were not checked [U].
+- **Privacy:** "Head Name" is a person's name and would be removed (ADR-0001
+  §2). What "Address Details" holds besides the address is [U].
+- **Family:** CBSE publishes as the affiliating board. Whether it operates any
+  of the listed schools is not stated on the page [U]. G4 open.
+- **Outcome:** not assessable to acceptance. Like C6, a search form with no
+  licence found.
+
+### Not assessable or not pursued
+
+| Source | Finding |
+|---|---|
+| UDISE+ school directory (R90) | The archive needs a login; `kys.udiseplus.gov.in` and `microdata.udiseplus.gov.in` did not respond; `api.udiseplus.gov.in` returns 404 at its root. Terms [U]. Not assessable. |
+| AIKosh terms (R87) | The terms API returned `403 Forbidden`; the footer reads "Copyright AIKosh. All rights reserved." AIKosh is a mirror, so its terms would not be the publisher's licence. |
+| Maharashtra Labour Department and Allied Offices (data.gov.in; published 2025-09-25; 66,199 B) | Address-bearing by title; no field list; schema [U]. Found late; not assessed. |
+| Mizoram police stations (data.gov.in; 2022-07-20; 1,783 B); Meghalaya Rural Bank branches (2014, One-time) | Address-bearing by title; schema [U]; not assessed. |
+| MoHUA Smart Cities city catalogs (police and fire stations for several cities; Agra hospitals and nursing homes) | City-level. The one checked (Chennai police stations) is on `smartcities.data.gov.in`, whose Copyright Policy carries the B14 text (R86). Not assessed. |
+| MSME Udyog Aadhaar registrations; Karnataka Udyam registrations | **Flagged for personal-data risk, not assessed:** enterprise registrations commonly include sole proprietors. An assumption to verify from documentation, not a finding. |
+| State-wise list of notaries (Ministry of Law and Justice) | By its title, a list of appointed individuals; out of scope under ADR-0001 §2. Not a candidate. |
+| Punjab "Banking Offices" | District counts, not addresses. |
+| Jan Aushadhi Kendras (PMBI) | Discovery returned only a third-party site [SRCH, 3P]; the official site was not checked. Not assessed. |
+| NDAP (`ndap.niti.gov.in`), Navodaya Vidyalaya Samiti, UGC, eCourts | Reachable; not researched in this pass. |
+
+### Effect on the open items
+
+- **No source is ready for a source ADR.** None of C7–C12 has file header rows
+  or file-level statistics (B6).
+- **New B17:** the GODL-India basis for state-department data, and which
+  Copyright Policy governs files listed on both a state instance and
+  `www.data.gov.in`.
+- **New B18:** whether company registered offices (C7) fall within ADR-0001 §1,
+  and how residential registered offices are handled.
+- **B14** now also covers C7 and C10, and bears on C8 and C9 through B17.
+- **B15** now also covers C10.
+- **Seventh-pass [U] answered in part:** the second data.gov.in Copyright
+  Policy text (R73) is the one shown on the state instances (R83–R85).
+- **Unchanged:** C1–C6 and their open items.
+
 ## Evidence status
 
 - **Publisher or publisher-platform, retrieved and inspected directly (second
@@ -1403,6 +1740,14 @@ record was read.
   notification and NDSAP Implementation Guidelines 2.4, the two Policies
   components in the site script, National Health Portal host checks and
   NIHFW's website terms (R70–R75).
+- **Publisher or publisher-platform, retrieved and inspected directly (eighth
+  pass) [PUBD]:** C7 catalog, resource and field-list metadata (R76–R78);
+  catalog searches used for discovery (R79); C8–C10 and other resource and
+  field-list metadata (R80, R81); GODL-India text re-check (R82); footer and
+  policies of seven state instances, terms and `robots.txt` of two of them,
+  and the Smart Cities instance's policies (R83–R86); AIKosh, AISHE directory, UDISE+ and CBSE SARAS pages and
+  scripts (R87, R89–R91); host reachability (R92). AISHE mirror metadata read
+  directly [MIR, R88]. AIKosh terms not obtained.
 - **Internet Archive copy, inspected directly (fourth pass) [ARCH]:** National
   Health Portal terms of use as captured 2023-04-04 (R58); archive index for
   `info.nhp.gov.in` (R59).
@@ -1434,7 +1779,10 @@ record was read.
   - C1 and C2 currency;
   - CEO versus district publisher for C5;
   - C5 statewide coverage;
-  - the AISHE `Location` field, the UDISE+ API terms and the RBI disclaimer text.
+  - the AISHE `Location` field, the UDISE+ API terms and the RBI disclaimer text;
+  - for C7–C12 (eighth pass): B14, B17 and B18 as they apply, header rows for
+    every file-only resource, the C7 state-code scheme, and licence text for
+    C11 and C12.
 
 ## Evidence gaps
 
@@ -1468,11 +1816,19 @@ record was read.
     on request (R39, R40).
   - C6: reuse on request (R42).
   - C5 and C6: no reuse licence found. RBI grants none.
+  - Eighth pass (2026-10-07): C7 and C10 rest on the same site-wide statement
+    as C1–C3 (B14; C10 also B15). C8 and C9 rest on the same footer on the
+    state instances, whose Copyright Policy lacks the B14 permission sentence;
+    whether GODL-India's grant reaches state-department data, and which host's
+    policy governs, is unresolved (B17) [PUBD, R82–R85]. C11 and C12: no
+    licence text found [PUBD, R89, R91; MIR, R88].
 - **G2. `raw_text`.** C1a has `Address_Original_First_Line`, C1b has `Address`,
   C2 has `Facility Address` and C3 has `DiagnosticCentreAddress`. Whether these
   are complete enough to serve as `raw_text` is unverified (C1a's field is named
   a first line). C4 publishes components only. Whether a concatenation counts as
-  published `raw_text` under ADR-0006 is not decided.
+  published `raw_text` under ADR-0006 is not decided. Eighth pass: C7 has
+  `Registered_Office_Address`, C9a and C9b's B.Ed list have `address`, C10 has
+  `_address`; their completeness is equally unverified.
 - **G3. Headers.** Publisher/platform schema fields for C1–C4 were inspected
   directly [PUBD, R32–R34, R37]. No downloadable file was opened, so actual file
   header rows remain unverified. The fifth pass (B6) added platform field types
@@ -1481,7 +1837,10 @@ record was read.
 - **G4. Publisher identity.** C1–C3 all sit under MoHFW (NIHFW, DoHFW, CGHS).
   Whether they are one `publisher` for ADR-0007 §6 is open. So is whether
   autonomous and statutory bodies (KVS, NIHFW, NHA, RBI) and public-sector
-  companies count as "a government body" for `source_family`.
+  companies count as "a government body" for `source_family`. Eighth pass: the
+  same questions arise for MCA (C7), for each Karnataka and Tamil Nadu
+  department or agency in C8 and C9 (department, agency or state government as
+  the `publisher` unit), for TNOU and for CBSE (C12).
 - **G5. Retrieval.** The first pass's fetch tool got HTTP 403 from data.gov.in,
   consistent with the bot challenge recorded in ADR-0004. In the second pass,
   `curl` got HTTP 200 for the catalog pages and metadata APIs (R26–R34). File
@@ -1499,7 +1858,8 @@ record was read.
   its title says "updated till last month"; C1b's is "Monthly" [PUBD, R29].
   Whether either file is actually refreshed is unknown. C2 ("Monthly" against a
   2016 snapshot) and C4 (8 February 2023 against 8 November 2022) also have
-  conflicting metadata.
+  conflicting metadata. So does C7 ("Monthly", data "upto 3rd November 2023",
+  and a 2015 file URL) [PUBD, R77].
 - **G7. Per-state counts.** No ingestion-time aggregates exist (ADR-0007 §4
   step 3).
 - **G8. Language.** Only C5 in Tamil Nadu has any language evidence, and it is
@@ -1508,4 +1868,7 @@ record was read.
 - **G10. Reproducibility.** The gazetteer table came from an ad-hoc script that is
   not in the repository. ADR-0007 §4 requires a versioned procedure.
 - **G11. Coverage of this inventory.** Not exhaustive; see "Identified but not
-  researched".
+  researched" and, for the eighth pass, "Not assessable or not pursued".
+- **G12. Schemas of state-instance files.** Most C8 and C9 resources have no
+  platform field list, so their address, state, district, PIN and identifier
+  columns are unknown until a header row is read (B6).
