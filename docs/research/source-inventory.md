@@ -24,7 +24,8 @@
   C1–C3 only. "B6 aggregate and schema inspection" records a fifth pass on
   C1–C6. "C4 licence and retrieval terms" records a sixth pass on C4 only.
   "B14 and B15 follow-up" records a seventh pass on C1–C3 only. "Alternative
-  address sources" records an eighth pass on new candidates C7–C12. Where they
+  address sources" records an eighth pass on new candidates C7–C12 (C7 was
+  later put out of v0 scope by the maintainer, B18). Where they
   differ, the later pass is the current evidence; the
   earlier text is kept as the record of what was known then.
 
@@ -159,7 +160,8 @@ Field numbers follow the requested checklist: (1) publisher, (2) URL,
 (12) limitations, (13) held-out-publisher potential.
 
 C1–C6 are the first-pass candidates. C7–C12 were found in the eighth pass and
-are recorded under "Alternative address sources".
+are recorded under "Alternative address sources". C7 is out of scope for v0
+by maintainer decision (B18, 2026-10-07).
 
 ### C1. Hospital Directory / NIN Health Facilities (National Health Portal)
 
@@ -1504,6 +1506,18 @@ to every one.
 
 #### C7. Company Master Data (Ministry of Corporate Affairs, data.gov.in)
 
+> **B18 decided 2026-10-07 (maintainer scope decision): Option B. C7 is out
+> of scope for v0 and is no longer a v0 candidate.** Under the existing
+> wording of ADR-0001 §1 and ADR-0006 §12 rule 2, a company registered office
+> is not clearly the address of an institution, facility or public place;
+> including it would require expanding or reinterpreting the source category.
+> This is a scope decision, not a licence rejection: C7's licence status (B14)
+> and its evidence status below are unchanged and are kept as historical
+> assessment context. It does not claim that company addresses are invalid
+> or unsafe. A separate organization/company-address track (Option C) remains
+> possible later; it would need a new ADR with its own reporting and privacy
+> rules.
+
 1. **Publisher:** Ministry of Corporate Affairs (R76) [PUBD].
 2. **Title and URL:** catalog "Company Master Data",
    https://www.data.gov.in/catalog/company-master-data; active resource
@@ -1552,8 +1566,8 @@ to every one.
       can tell how many (ADR-0006 §12).
     - Company names can contain names of individuals [U].
     - Whether a company's registered office is an address "of
-      institutions/facilities" under ADR-0001 §1 is a maintainer decision
-      (**B18**).
+      institutions/facilities" under ADR-0001 §1 was a maintainer decision
+      (**B18**), decided 2026-10-07: out of v0 scope (see the note above).
 12. **Schema observation (not a preference):** its field list shows national
     declared coverage, one address string, a company identifier and a state
     code. It is also the furthest from the facility types of C1–C6, and its
@@ -1697,14 +1711,17 @@ Licence and retrieval as for C8 (R83 for the instance).
 
 ### Effect on the open items
 
-- **No source is ready for a source ADR.** None of C7–C12 has file header rows
-  or file-level statistics (B6).
+- **No source is ready for a source ADR.** None of C8–C12 has file header rows
+  or file-level statistics (B6). C7 is out of v0 scope (B18).
 - **New B17:** the GODL-India basis for state-department data, and which
   Copyright Policy governs files listed on both a state instance and
   `www.data.gov.in`.
 - **New B18:** whether company registered offices (C7) fall within ADR-0001 §1,
-  and how residential registered offices are handled.
-- **B14** now also covers C7 and C10, and bears on C8 and C9 through B17.
+  and how residential registered offices are handled. **Decided 2026-10-07
+  by the maintainer: Option B, C7 out of scope for v0** (scope decision, not
+  a licence rejection; see C7).
+- **B14** now also covers C10 (and covered C7, kept as historical context),
+  and bears on C8 and C9 through B17.
 - **B15** now also covers C10.
 - **Seventh-pass [U] answered in part:** the second data.gov.in Copyright
   Policy text (R73) is the one shown on the state instances (R83–R85).
@@ -1780,9 +1797,9 @@ Licence and retrieval as for C8 (R83 for the instance).
   - CEO versus district publisher for C5;
   - C5 statewide coverage;
   - the AISHE `Location` field, the UDISE+ API terms and the RBI disclaimer text;
-  - for C7–C12 (eighth pass): B14, B17 and B18 as they apply, header rows for
-    every file-only resource, the C7 state-code scheme, and licence text for
-    C11 and C12.
+  - for C8–C12 (eighth pass): B14 and B17 as they apply, header rows for
+    every file-only resource, and licence text for C11 and C12. C7 is out
+    of v0 scope (B18), so its open items are not pursued for v0.
 
 ## Evidence gaps
 
@@ -1817,7 +1834,8 @@ Licence and retrieval as for C8 (R83 for the instance).
   - C6: reuse on request (R42).
   - C5 and C6: no reuse licence found. RBI grants none.
   - Eighth pass (2026-10-07): C7 and C10 rest on the same site-wide statement
-    as C1–C3 (B14; C10 also B15). C8 and C9 rest on the same footer on the
+    as C1–C3 (B14; C10 also B15). C7 is out of v0 scope (B18); its licence
+    status is unchanged and kept as historical context. C8 and C9 rest on the same footer on the
     state instances, whose Copyright Policy lacks the B14 permission sentence;
     whether GODL-India's grant reaches state-department data, and which host's
     policy governs, is unresolved (B17) [PUBD, R82–R85]. C11 and C12: no
@@ -1827,7 +1845,7 @@ Licence and retrieval as for C8 (R83 for the instance).
   are complete enough to serve as `raw_text` is unverified (C1a's field is named
   a first line). C4 publishes components only. Whether a concatenation counts as
   published `raw_text` under ADR-0006 is not decided. Eighth pass: C7 has
-  `Registered_Office_Address`, C9a and C9b's B.Ed list have `address`, C10 has
+  `Registered_Office_Address` (C7 now out of v0 scope, B18), C9a and C9b's B.Ed list have `address`, C10 has
   `_address`; their completeness is equally unverified.
 - **G3. Headers.** Publisher/platform schema fields for C1–C4 were inspected
   directly [PUBD, R32–R34, R37]. No downloadable file was opened, so actual file
@@ -1838,7 +1856,8 @@ Licence and retrieval as for C8 (R83 for the instance).
   Whether they are one `publisher` for ADR-0007 §6 is open. So is whether
   autonomous and statutory bodies (KVS, NIHFW, NHA, RBI) and public-sector
   companies count as "a government body" for `source_family`. Eighth pass: the
-  same questions arise for MCA (C7), for each Karnataka and Tamil Nadu
+  same questions arose for MCA (C7, now out of v0 scope, B18), and arise for
+  each Karnataka and Tamil Nadu
   department or agency in C8 and C9 (department, agency or state government as
   the `publisher` unit), for TNOU and for CBSE (C12).
 - **G5. Retrieval.** The first pass's fetch tool got HTTP 403 from data.gov.in,
@@ -1859,7 +1878,7 @@ Licence and retrieval as for C8 (R83 for the instance).
   Whether either file is actually refreshed is unknown. C2 ("Monthly" against a
   2016 snapshot) and C4 (8 February 2023 against 8 November 2022) also have
   conflicting metadata. So does C7 ("Monthly", data "upto 3rd November 2023",
-  and a 2015 file URL) [PUBD, R77].
+  and a 2015 file URL) [PUBD, R77]; C7 is out of v0 scope (B18).
 - **G7. Per-state counts.** No ingestion-time aggregates exist (ADR-0007 §4
   step 3).
 - **G8. Language.** Only C5 in Tamil Nadu has any language evidence, and it is

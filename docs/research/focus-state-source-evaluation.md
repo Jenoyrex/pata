@@ -56,7 +56,8 @@ licence basis is open (B4). **No source is recorded as rejected in these notes.*
 The inventory has seven candidate rows (C1a, C1b, C2, C3, C4, C5, C6) for six
 numbered sources (C1–C6). C1, C2 and C3 are the three data.gov.in health sources.
 The eighth pass added C7–C12; they have their own table under "Eighth-pass
-alternatives (C7–C12)" below.
+alternatives (C7–C12)" below. C7 is out of scope for v0 by maintainer
+decision (B18, 2026-10-07).
 
 "All India" coverage for C1, C2 and C6 is first-pass evidence only ([MIR] for
 C1 and C2, the [PUB] fetch summary for C6). The second pass did not verify any
@@ -240,7 +241,7 @@ unlikely to be a station list (inference from size).
 
 | Source | Publisher (as stated) | `source_family` | Declared coverage; state column | Single address string | Licence status | Identifier → likely `record_id_scope` | Status |
 |---|---|---|---|---|---|---|---|
-| C7 Company Master Data | Ministry of Corporate Affairs [PUBD, R76] | `government_published` (G4 open) | All India [PUBD, R76]; `CompanyStateCode`, scheme [U] | `Registered_Office_Address`, completeness [U] | Site-wide GODL-India statement, as C1–C3; B14 | `CIN`, stability [U] | Not assessable to acceptance; scope and residential share open (B18) |
+| C7 Company Master Data | Ministry of Corporate Affairs [PUBD, R76] | `government_published` (G4 open) | All India [PUBD, R76]; `CompanyStateCode`, scheme [U] | `Registered_Office_Address`, completeness [U] | Site-wide GODL-India statement, as C1–C3; B14 | `CIN`, stability [U] | **Out of scope for v0** (maintainer scope decision B18, 2026-10-07; not a licence rejection). Licence and evidence columns kept as historical context |
 | C8a–C8h Karnataka department catalogs | Eight catalogs from seven agencies in six Karnataka departments [PUBD, R79, R80] | `government_published` (G4 open, including the publisher unit) | Karnataka (C8b labelled "All India") [PUBD, R79]; state column [U] | [U]: no field lists | State-instance footer (GODL-India); B14 on `www.data.gov.in`; B17 | [U] → `snapshot` unless a column is found | Not assessable to acceptance; small files |
 | C9a CMA ULB offices (TN) | Commissionerate of Municipal Administration [PUBD, R79, R80] | `government_published` (G4 open) | Tamil Nadu [PUBD, R79]; no state column [PUBD, R81] | `address` [PUBD, R81], completeness [U] | As C8 | None → `snapshot` | Not assessable to acceptance |
 | C9b TNOU centres (TN) | Tamil Nadu Open University [PUBD, R79, R80] | Open (G4) | Tamil Nadu [PUBD, R79]; `name_of_the_district` in one list [PUBD, R81] | `address` in one of ten lists [PUBD, R81] | As C8 | [U] | Not assessable to acceptance |
@@ -265,6 +266,8 @@ How they compare with C4, C5 and C6, on the evidence only:
   stronger than C6: interactive searches with no licence found.
 - These are differences in the evidence gathered so far. They rank no
   source and prefer none.
+- **C7 after B18.** The points above about C7 are historical assessment
+  context. C7 is no longer a v0 candidate (B18).
 
 ### O2 result
 
@@ -285,8 +288,10 @@ How they compare with C4, C5 and C6, on the evidence only:
   Copyright Policy and footer (B16), and G2 (B5). Its retrieval terms were
   gathered in the sixth pass (B8, Telangana part).
 - **C5 and C6:** no reuse licence was found, and the outcome depends on B4.
-- **C7–C12 (eighth pass):** none is ready either.
-  - C7 needs B14, B18 and its state-code scheme, plus B6.
+- **C7–C12 (eighth pass):** none is ready either, and C7 is no longer a v0
+  candidate.
+  - C7: out of scope for v0 (B18, maintainer scope decision, 2026-10-07).
+    Its B14 status and missing evidence are not pursued for v0.
   - C8 and C9 need B14 and B17, and header rows for every file-only resource
     (B6, G12).
   - C10 needs B14 and B15, as C1b does.
@@ -336,8 +341,8 @@ C3 is not in the table: it has no state column, its declared coverage (CGHS
 cities) is not listed by state, and its records cannot currently be attributed to
 any state (O4).
 
-Eighth pass: C7 declares "All India" [PUBD, R76], and C10, C11 and C12 are
-national. Like C1, C2 and C6, they add no state-specific evidence: how their
+Eighth pass: C7 declares "All India" [PUBD, R76] but is out of v0 scope
+(B18); C10, C11 and C12 are national. Like C1, C2 and C6, they add no state-specific evidence: how their
 state columns map to `lgd:state:` IDs is [U]. Nothing in the eighth pass
 changes the Telangana row.
 
@@ -362,9 +367,9 @@ Observations, none of them a selection criterion:
     currently [U]. It is not assumed to cover all 36 pinned units.
   - C3 could not, for the reasons above.
   - Other national sources (C6, AISHE, UDISE+) are unresolved, not excluded.
-  - Eighth pass: C7 could also provide multi-state coverage, subject to B14,
-    B18 and the mapping of `CompanyStateCode`. C8 and C9 could each meet the
-    source condition only for their own state, subject to B14 and B17.
+  - Eighth pass: C8 and C9 could each meet the source condition only for
+    their own state, subject to B14 and B17. C7 is out of v0 scope (B18)
+    and is not counted here.
   - Per-state record counts come afterwards, in the selection records (§4 step
     3), from accepted source files.
 - **Gazetteer properties.** The figures above come from an ad-hoc script, not
@@ -402,7 +407,7 @@ Observations, none of them a selection criterion:
 | B15 | C1b's file is hosted only at `info.nhp.gov.in`; whether GODL-India reaches it, and that host's terms. Host unreachable on 2026-10-06; only archived National Health Portal terms (2023) found, reserving all rights. **Seventh pass (2026-10-06):** hosts still unreachable (R74); NIHFW's own website terms do not cover NHP data (R75) | C1b licence | National Health Portal / NIHFW documentation, if the host returns; otherwise C1b stays unresolved |
 | B16 | C4's label "Government Open Data License - India" against the Telangana portal's Copyright Policy ("may be reproduced free of charge after taking proper permission by sending a mail to us") and its footer ("All rights reserved", no exception for datasets) [PUBD, R61, R63, R65] | C4 licence (unresolved; the label is not withdrawn) | The Open Data Unit or the publisher to clarify; maintainer decision on how to read it |
 | B17 | State-department data on the data.gov.in state instances. The footer says content "owned by the respective Ministry/State/Department/Organization" is licensed under GODL-India; the GODL-India grant refers to data "generated using public funds by various agencies of the Government of India" and does not mention states. The state instances' Copyright Policy has no permission requirement, while `www.data.gov.in`, through which the same files are reached, carries the B14 text [PUBD, R79–R85] | Licence basis of C8 and C9 (unresolved) | data.gov.in (NIC) or the publishing departments to clarify; maintainer decision on how to read it |
-| B18 | Whether a company's registered office is an address "of institutions/facilities" (ADR-0001 §1), and how residential registered offices are handled (ADR-0001 §2) | C7 scope | Maintainer decision; the residential share can only be seen by the record-level screen (ADR-0006 §12) |
+| B18 | **Decided 2026-10-07 (maintainer scope decision): Option B. C7 (MCA Company Master Data) is out of scope for v0 and is no longer a v0 candidate.** Under the existing wording of ADR-0001 §1 and ADR-0006 §12 rule 2, a company registered office is not clearly the address of an institution, facility or public place; including it would require expanding or reinterpreting the source category. This is a scope decision, not a licence rejection: C7's licence status (B14) and evidence status are unchanged and kept as historical assessment context. It does not claim that company addresses are invalid or unsafe. Option C, a separate organization/company-address track, remains possible later and would need a new ADR with its own reporting and privacy rules. | — (C7 out of v0 scope) | — |
 
 The treatment of platform field lists as publisher documentation (see
 "Procedural position") also needs the maintainer's confirmation.
@@ -513,15 +518,16 @@ unresolved, unaccepted and unselected.
      records are produced later (§4 step 3), from accepted source files.
 4. **B1, B4, B5 (for C4), B7 and the readings of B14 and B16 are maintainer
    decisions,** as is the platform-field-list interpretation. No further
-   evidence resolves them. The eighth pass adds the readings of B17 and B18.
+   evidence resolves them. The eighth pass adds the reading of B17. B18 was
+   decided by the maintainer on 2026-10-07 (Option B).
 5. **Alternatives (eighth pass, 2026-10-07).** If the maintainer wants to
    pursue them, the evidence still missing per candidate is (listed in no
    order of preference):
-   - C7: B18 first, as it decides whether C7 is in scope at all; then the
-     `CompanyStateCode` scheme from publisher documentation, and B6.
+   - C7: none for v0; it is out of scope (B18). A future organization/
+     company-address track (Option C) would need a new ADR first.
    - C9a and C9b, then C8: header rows for the file-only resources (B6, G12),
      which needs a permitted manual route (B19).
-   - All of C7–C10 inherit B14; C8 and C9 also need B17.
+   - C8, C9 and C10 inherit B14; C8 and C9 also need B17.
    - C11 and C12: publisher terms (`aishe.gov.in`, CBSE website policies)
      before anything else.
 
