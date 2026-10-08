@@ -8,9 +8,10 @@
   updated with its third pass (2026-10-05, data.gov.in host and licence
   re-check), fourth pass (2026-10-06, terms of use and retrieval conditions
   for C1–C3), fifth pass (2026-10-06, B6 aggregate and schema inspection,
-  offline), sixth pass (2026-10-06, C4 licence and Telangana portal terms)
-  seventh pass (2026-10-06, B14 and B15 follow-up) and eighth pass
-  (2026-10-07, alternative address sources C7–C12), ADR-0001 to ADR-0007,
+  offline), sixth pass (2026-10-06, C4 licence and Telangana portal terms),
+  seventh pass (2026-10-06, B14 and B15 follow-up), eighth pass
+  (2026-10-07, alternative address sources C7–C12) and ninth pass
+  (2026-10-07, C9a and C9b assessment evidence), ADR-0001 to ADR-0007,
   and `docs/gazetteer.md`. No retrieval was done for these notes beyond what
   the inventory records. Evidence labels
   ([PUBD], [ARCH], [MIR], [SRCH], [ADR], [CALC], [U]) and source numbers
@@ -243,8 +244,8 @@ unlikely to be a station list (inference from size).
 |---|---|---|---|---|---|---|---|
 | C7 Company Master Data | Ministry of Corporate Affairs [PUBD, R76] | `government_published` (G4 open) | All India [PUBD, R76]; `CompanyStateCode`, scheme [U] | `Registered_Office_Address`, completeness [U] | Site-wide GODL-India statement, as C1–C3; B14 | `CIN`, stability [U] | **Out of scope for v0** (maintainer scope decision B18, 2026-10-07; not a licence rejection). Licence and evidence columns kept as historical context |
 | C8a–C8h Karnataka department catalogs | Eight catalogs from seven agencies in six Karnataka departments [PUBD, R79, R80] | `government_published` (G4 open, including the publisher unit) | Karnataka (C8b labelled "All India") [PUBD, R79]; state column [U] | [U]: no field lists | State-instance footer (GODL-India); B14 on `www.data.gov.in`; B17 | [U] → `snapshot` unless a column is found | Not assessable to acceptance; small files |
-| C9a CMA ULB offices (TN) | Commissionerate of Municipal Administration [PUBD, R79, R80] | `government_published` (G4 open) | Tamil Nadu [PUBD, R79]; no state column [PUBD, R81] | `address` [PUBD, R81], completeness [U] | As C8 | None → `snapshot` | Not assessable to acceptance |
-| C9b TNOU centres (TN) | Tamil Nadu Open University [PUBD, R79, R80] | Open (G4) | Tamil Nadu [PUBD, R79]; `name_of_the_district` in one list [PUBD, R81] | `address` in one of ten lists [PUBD, R81] | As C8 | [U] | Not assessable to acceptance |
+| C9a CMA ULB offices (TN) | Commissionerate of Municipal Administration [PUBD, R79, R80] | `government_published` (G4 open) | Tamil Nadu [PUBD, R79]; no state column [PUBD, R81] | `address` [PUBD, R81], completeness [U] | As C8 | None → `snapshot` | Not assessable to acceptance; ninth pass below |
+| C9b TNOU centres (TN) | Tamil Nadu Open University [PUBD, R79, R80] | Open (G4) | Tamil Nadu [PUBD, R79]; `name_of_the_district` in one list [PUBD, R81] | `address` in one of ten lists [PUBD, R81]; ninth pass: nine of ten [PUBD, R80, R81] | As C8 | [U]; ninth pass: centre code in seven lists [PUBD, R80] | Not assessable to acceptance; ninth pass below |
 | C10 Blood Bank Directory | NIHFW [PUBD, R79, R80] | As C1 | All India [PUBD, R79]; `_state`, `_district`, `pincode` [PUBD, R81] | `_address` | As C1b: file at `info.nhp.gov.in`; B14, B15 | [U] | Not assessable to acceptance; no better than C1 |
 | C11 AISHE directory | Ministry of Education (mirror label) [MIR, R88] | `government_published` (G4 open) | National [U]; `state`, `district`, `pincode` in the detail view [PUBD, R89] | `address1` [PUBD, R89] | No licence text found; mirror label only | AISHE code [PUBD, R89] | No licence found; interactive search only |
 | C12 CBSE SARAS directory | CBSE [PUBD, R91] | Open (G4; whether CBSE operates any listed school is [U]) | State filter [PUBD, R91] | "Address Details" column [PUBD, R91] | None found on the page; policies not checked [U] | Affiliation number / school code [PUBD, R91] | No licence found; interactive search only |
@@ -257,7 +258,8 @@ How they compare with C4, C5 and C6, on the evidence only:
   That is a difference in the evidence, not a resolved licence: C7 and C10
   carry B14, and C8 and C9 carry B17.
 - **Address strings.** C7, C9a, C9b (one list) and C10 publish a single address
-  field, which C4 does not (G2).
+  field, which C4 does not (G2). Ninth pass: C9b lists an `Address` column in
+  nine of ten resources [PUBD, R80, R81].
 - **Publishers.** C8 and C9 add state-department publishers in Karnataka and
   Tamil Nadu, distinct from C5's election authorities. Whether each department
   is a separate `publisher` (ADR-0007 §6) is G4.
@@ -268,6 +270,34 @@ How they compare with C4, C5 and C6, on the evidence only:
   source and prefer none.
 - **C7 after B18.** The points above about C7 are historical assessment
   context. C7 is no longer a v0 candidate (B18).
+
+### C9a and C9b (ninth pass, 2026-10-07)
+
+Detail in the inventory, "C9a and C9b assessment evidence". **Neither is
+accepted, rejected or selected**, and Tamil Nadu is not selected.
+
+| Item | C9a (CMA offices) | C9b (TNOU centres) |
+|---|---|---|
+| Publisher (G4) | CMA, under the Municipal Administration and Water Supply Department, Tamil Nadu [PUBD, R93]; unit open | TNOU, under the Higher Education Department, Tamil Nadu [PUBD, R94]; legal status [U]; unit open |
+| Licence statement | Site footer only; no `license` metadata element [PUBD, R80, R83, R93, R95]. The catalog page says "Released Under: NDSAP", a policy, not a licence [PUBD, R95] | Site footer only; no `license` metadata element [PUBD, R80, R83, R94]. No C9b page obtained, so any "Released Under" statement is [U] |
+| Licence status | **Unresolved:** B17, with B14 | **Unresolved:** B17, with B14 |
+| Publisher website | "All rights reserved" footer; about the website, not the dataset [PUBD, R97] | Same [PUBD, R96] |
+| Retrieval (technical) | Terms silent; `robots.txt` disallows all [PUBD, R83]; download-modal CAPTCHA styles on the resource page (inference) [PUBD, R95]; manual (B19) | Terms and `robots.txt` as C9a (instance-wide) [PUBD, R83]; download form not checked (no C9b page obtained) [U]; `is_api_available` "0" [PUBD, R80]; manual (B19) |
+| Columns | Platform field list: `Address`, office and ULB names, contact columns, `No.of Wards` [PUBD, R81] | Nine address-bearing resources: eight with declared `meta_field` lists [PUBD, R80], one (B.Ed Study Centres) from the platform field list [PUBD, R81]; one aggregate resource [PUBD, R81] |
+| Header row | Not obtained | Not obtained |
+| State and district | No state or district column [PUBD, R81] | No state column; `Name of the District` in six lists [PUBD, R80, R81] |
+| Declared coverage → LGD | "Tamil Nadu" [PUBD, R93] → `lgd:state:33` by exact `name_key` [CALC, R98]; declared label only, records unverified [U] | Same [PUBD, R94; CALC, R98] |
+| Identifier → `record_id_scope` | None → `snapshot` [PUBD, R81] | Centre code in seven lists [PUBD, R80] (stability [U]) → possibly `native`; B.Ed lists `snapshot` |
+| Privacy | Contact columns (not ingestible) [PUBD, R81]; address content [U] | `Contact Person` column; contact columns [PUBD, R80]; address content [U]; B20 (Partner Institutions `Name of the Company`) |
+| Currency | Last changed 2017-12-29 [PUBD, R80] | 2020–2021 period; last changed 2021-08-13 [PUBD, R80] |
+
+**Readiness.** Neither can go to a formal §5 assessment yet with a result other
+than "licence unclear", which §5 treats as rejection. The order of what is
+missing:
+1. B17 (and B14): a licence basis for state-department data on the platform.
+2. Header rows and scripted aggregate statistics (B6), from a manual download
+   through the form (B19), after maintainer approval.
+3. G4 (publisher unit) and, for C9b, B20.
 
 ### O2 result
 
@@ -293,7 +323,8 @@ How they compare with C4, C5 and C6, on the evidence only:
   - C7: out of scope for v0 (B18, maintainer scope decision, 2026-10-07).
     Its B14 status and missing evidence are not pursued for v0.
   - C8 and C9 need B14 and B17, and header rows for every file-only resource
-    (B6, G12).
+    (B6, G12). Ninth pass: C9a and C9b evidence gathered as far as metadata
+    allows; still B17, B6, G4 and (C9b) B20.
   - C10 needs B14 and B15, as C1b does.
   - C11 and C12 have no licence text.
 - No `operator_published` source with a licence has been found, so that family
@@ -408,6 +439,7 @@ Observations, none of them a selection criterion:
 | B16 | C4's label "Government Open Data License - India" against the Telangana portal's Copyright Policy ("may be reproduced free of charge after taking proper permission by sending a mail to us") and its footer ("All rights reserved", no exception for datasets) [PUBD, R61, R63, R65] | C4 licence (unresolved; the label is not withdrawn) | The Open Data Unit or the publisher to clarify; maintainer decision on how to read it |
 | B17 | State-department data on the data.gov.in state instances. The footer says content "owned by the respective Ministry/State/Department/Organization" is licensed under GODL-India; the GODL-India grant refers to data "generated using public funds by various agencies of the Government of India" and does not mention states. The state instances' Copyright Policy has no permission requirement, while `www.data.gov.in`, through which the same files are reached, carries the B14 text [PUBD, R79–R85] | Licence basis of C8 and C9 (unresolved) | data.gov.in (NIC) or the publishing departments to clarify; maintainer decision on how to read it |
 | B18 | **Decided 2026-10-07 (maintainer scope decision): Option B. C7 (MCA Company Master Data) is out of scope for v0 and is no longer a v0 candidate.** Under the existing wording of ADR-0001 §1 and ADR-0006 §12 rule 2, a company registered office is not clearly the address of an institution, facility or public place; including it would require expanding or reinterpreting the source category. This is a scope decision, not a licence rejection: C7's licence status (B14) and evidence status are unchanged and kept as historical assessment context. It does not claim that company addresses are invalid or unsafe. Option C, a separate organization/company-address track, remains possible later and would need a new ADR with its own reporting and privacy rules. | — (C7 out of v0 scope) | — |
+| B20 | Whether TNOU partner-company premises (C9b, "Partner Institutions", declared column `Name of the Company`) are the address of an institution, facility or public place (ADR-0006 §12 rule 2). Related to, but not decided by, B18 [PUBD, R80] | That C9b resource | Maintainer decision |
 
 The treatment of platform field lists as publisher documentation (see
 "Procedural position") also needs the maintainer's confirmation.
@@ -421,7 +453,7 @@ The treatment of platform field lists as publisher documentation (see
 | B11 | No `operator_published` source with a licence | A recorded absence. Reported, not worked around (ADR-0007 Consequences). |
 | B12 | Sub-district semantics unverified for every state (§8) | Expected to be "unverified" at selection time (§4 step 3). Recorded in each selection record. |
 | B13 | Address language/script undocumented for every source except C5 [SRCH] | Recorded as unknown, not guessed (§4 step 3). Bears on O6. Eighth pass: also undocumented for C7–C12. |
-| B19 | State instances (C8, C9): retrieval conditions | Same as data.gov.in (B8): Terms of Use silent; `robots.txt` disallows all paths; files on the `www.data.gov.in` file store [PUBD, R80, R83, R84]; whether the state instances use the same download form was not checked [U]. Silent terms point to manual retrieval. |
+| B19 | State instances (C8, C9): retrieval conditions | Same as data.gov.in (B8): Terms of Use silent; `robots.txt` disallows all paths; files on the `www.data.gov.in` file store [PUBD, R80, R83, R84]; whether the state instances use the same download form was not checked [U]. Silent terms point to manual retrieval. **Ninth pass:** the C9a resource page on `tn.data.gov.in` carries `#download-modal` CAPTCHA styles, which points to the same form (inference; component not traced) [PUBD, R95]. |
 
 ### C. Pending external clarification requests
 
@@ -526,7 +558,9 @@ unresolved, unaccepted and unselected.
    - C7: none for v0; it is out of scope (B18). A future organization/
      company-address track (Option C) would need a new ADR first.
    - C9a and C9b, then C8: header rows for the file-only resources (B6, G12),
-     which needs a permitted manual route (B19).
+     which needs a permitted manual route (B19). Ninth pass: C9a and C9b
+     metadata evidence is gathered (see "C9a and C9b (ninth pass)"); B17 is
+     the first blocker, then B6, G4 and B20.
    - C8, C9 and C10 inherit B14; C8 and C9 also need B17.
    - C11 and C12: publisher terms (`aishe.gov.in`, CBSE website policies)
      before anything else.

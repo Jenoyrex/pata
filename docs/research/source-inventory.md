@@ -14,10 +14,11 @@
   schema inspection for C1–C6, offline, from responses already saved. Sixth
   pass, 2026-10-06: C4 licence and Telangana portal retrieval terms (B3, B8).
   Seventh pass, 2026-10-06: B14 and B15 follow-up for C1–C3. Eighth pass,
-  2026-10-07: alternative address sources (C7–C12), metadata only.
+  2026-10-07: alternative address sources (C7–C12), metadata only. Ninth
+  pass, 2026-10-07: C9a and C9b assessment evidence.
 - **Not exhaustive.** Only the sources and categories listed below were looked
   at. Categories identified but not researched are listed separately.
-- **Eight passes.** The sections up to "Candidate-state evidence" record the
+- **Nine passes.** The sections up to "Candidate-state evidence" record the
   first pass. "Licence and header verification" records a second pass on C1–C6.
   "data.gov.in host and licence re-check" records a third pass on the C1–C3
   licence only. "Terms of use and retrieval conditions" records a fourth pass on
@@ -25,7 +26,8 @@
   C1–C6. "C4 licence and retrieval terms" records a sixth pass on C4 only.
   "B14 and B15 follow-up" records a seventh pass on C1–C3 only. "Alternative
   address sources" records an eighth pass on new candidates C7–C12 (C7 was
-  later put out of v0 scope by the maintainer, B18). Where they
+  later put out of v0 scope by the maintainer, B18). "C9a and C9b assessment
+  evidence" records a ninth pass on C9a and C9b only. Where they
   differ, the later pass is the current evidence; the
   earlier text is kept as the record of what was known then.
 
@@ -62,6 +64,11 @@
   site scripts, and the AISHE, UDISE+, CBSE and AIKosh sites, retrieved with
   `curl` and read directly [PUBD]; described under "Alternative address
   sources".
+- **Ninth pass:** saved eighth-pass metadata re-read; C9a/C9b catalog
+  metadata, the C9a state-instance pages and the publishers' websites
+  retrieved with `curl` and read directly [PUBD]; a `name_key` lookup in
+  the pinned gazetteer [CALC]; described under "C9a and C9b assessment
+  evidence".
 - Other claims rest on this repository's ADRs [ADR] or on the local gazetteer
   computation [CALC].
 - **Page fetches** were made with an instruction to report only metadata,
@@ -1727,6 +1734,221 @@ Licence and retrieval as for C8 (R83 for the instance).
   Policy text (R73) is the one shown on the state instances (R83–R85).
 - **Unchanged:** C1–C6 and their open items.
 
+## C9a and C9b assessment evidence (ninth pass, 2026-10-07)
+
+Evidence status only. **C9a and C9b are not accepted or rejected**, Tamil Nadu
+is not selected, and no manifest or selection record is written. This pass
+covers C9a and C9b only. No dataset file was downloaded, no record API was
+queried, and no record was read.
+
+### Method
+
+- Saved eighth-pass responses for both catalogs (R80, R81) were re-read
+  offline, including resource-metadata keys not used before.
+- New requests on 2026-10-07, between 16:26 and 16:30 UTC, read directly with
+  `curl` [PUBD]: catalog metadata for both (R93, R94); the C9a resource and
+  catalog pages on `tn.data.gov.in` (R95); the publishers' own websites (R96,
+  R97). Four of these requests went to data.gov.in hosts, whose `robots.txt`
+  disallows all paths (R49, R83); a further request, for a C9b resource page on
+  `tn.data.gov.in`, got no response (R95).
+- Two web searches were used only to find the publishers' official domains.
+  They are not evidence.
+- The resource page was scanned by script for licence and download markers. Any
+  table markup was stripped before text was printed, and no field values were
+  printed.
+- The `lgd:state:` mapping was computed with `pata.normalize.name_key` against
+  the pinned gazetteer's `admin_unit.csv` [CALC] (R98).
+- **Header rows were not obtained.** The only download route found is the
+  portal's download form (see "Retrieval"). Fetching the file-store URL by
+  script would bypass that form, so it was not done.
+
+### Sources for this pass
+
+| # | URL | Kind | SHA-256 of saved response | Supports |
+|---|---|---|---|---|
+| R93 | https://www.data.gov.in/backend/dmspublic/v1/catalogs?filters[node_alias]=/catalog/commissionerate-municipal-administrationcma-regional-offices-and-ulbs-address-details | [PUBD] | `59aa429a892f9c5d628535b3f5563c1740e8ba47f4c565eeced8824b6d96132f` | C9a catalog metadata |
+| R94 | https://www.data.gov.in/backend/dmspublic/v1/catalogs?filters[node_alias]=/catalog/list-study-centres-under-tamil-nadu-open-university-2020 | [PUBD] | `06075c0d408d347c0d971c16449d3cb159cf502134484936a4f44df148fc2dbd` | C9b catalog metadata |
+| R95 | https://tn.data.gov.in/resource/cma-regional-offices-and-urban-local-bodies-ulbs-address-details and https://tn.data.gov.in/catalog/commissionerate-municipal-administrationcma-regional-offices-and-ulbs-address-details | [PUBD] | resource page `cdef1578ed5cef11ff5b99752e1cb90db1026be22c6befafb52a050c0e547eec`; catalog page `b3523a999c20f20b3a8d2e92ad59dd6f6d82d9f373892dc0c298e3e394a012fb` | "Released Under" statement; licence markers; download-modal styles. A C9b resource page request got no response. |
+| R96 | https://www.tnou.ac.in/, https://www.tnou.ac.in/Policies.php, https://www.tnou.ac.in/robots.txt | [PUBD] | home `5aefc7567d2aace22e376345bccf22a657a169758dc160bd4e37ea3d5a680211`; policies `9bb7323b9d0f6228f87b34ad17cee41f30efc1c8a9fcb7a6f0bf4f7b0bb25167`; robots (404 body) `80c3fe2ae1062abf56456f52518bd670f9ec3917b7f85e152b347ac6b6faf880` | TNOU website footer and policy list |
+| R97 | https://tnurbantree.tn.gov.in/ (redirects to `www.`), https://tnurbantree.tn.gov.in/robots.txt | [PUBD] | home `a04243d0be232d369413dbe977c5ff8b67939444eb160ff7e05845fdbff77576`; robots `9c95d9da3cd858c4c71776bbc1efe78eaeecb3dd48d94fc9b677e27d492ab021` | CMA website footer |
+| R98 | `data/processed/gazetteer/admin_unit.csv` at `gazetteer_version` `bf4a8b5d…2c78` (local, not committed) | [CALC] | — | `name_key` match of "Tamil Nadu" |
+
+### C9a: CMA regional offices and ULB address details
+
+1. **Publisher and unit (G4).** Catalog `field_state_department`: "Tamil Nadu",
+   "Municipal Administration and Water Supply Department", "Commissionerate of
+   Municipal Administration (CMA)"; `govt_type` "State" (R93). The catalog page
+   names the contributor the same way (R95) [PUBD]. Whether the `publisher`
+   unit is CMA, the department or the state government is G4.
+2. **URLs (R80, R93)** [PUBD]:
+   - catalog: https://tn.data.gov.in/catalog/commissionerate-municipal-administrationcma-regional-offices-and-ulbs-address-details
+   - resource: `/resource/cma-regional-offices-and-urban-local-bodies-ulbs-address-details`
+   - file (metadata `datafile`): `https://www.data.gov.in/files/ogdpv2dms/s3fs-public/datafile/ulb_addresses_wards_2017_0.csv`,
+     `text/csv`, 23,541 B.
+3. **Licence.**
+   - The catalog page says "Released Under: National Data Sharing and
+     Accessibility Policy (NDSAP)" (R95) [PUBD]. That names a policy, not a
+     licence.
+   - The only licence statement is the site footer (GODL-India, owners
+     including "State") (R83, R95) [PUBD]. Neither catalog nor resource
+     metadata has a `license` element (R80, R93). The Terms of Use defer to that
+     element (R83), so what they point to is absent, as for C1–C3 in the fourth
+     pass.
+   - The GODL-India grant refers to agencies of the Government of India (R82).
+     Whether it reaches this state-department dataset, and which Copyright
+     Policy governs (state instance or `www.data.gov.in`), is **B17,
+     unresolved**. B14 applies through `www.data.gov.in`.
+   - The publisher's own website footer reads "Copyright © The Commissionerate
+     of Municipal Administration. Government of Tamilnadu. Chennai. All rights
+     reserved." (R97) [PUBD]. It concerns that website; it says nothing about the
+     OGD dataset, either way.
+   - **Licence status: unresolved.** No licence permission is inferred from the
+     footer.
+4. **Terms and retrieval** (technical conditions, not licence terms):
+   - Terms of Use: silent on automated access (R83).
+   - `robots.txt` on `tn.data.gov.in`: disallows all paths (R83).
+   - The resource page's stylesheet has `#download-modal` rules with a CAPTCHA
+     wrapper (R95). That points to the same download form as on
+     `www.data.gov.in` (R54: name, e-mail, purpose, CAPTCHA). It is an
+     inference; the download component was not traced.
+   - Resource `is_api_available` "1" (R80), so a record API exists. It was not
+     used, as it returns records.
+   - Bulk: one CSV. Retrieval points to manual (ADR-0007 §5; B19).
+5. **Schema** (platform field list, R81; header row **not** obtained) [PUBD]:
+   `Sl.No` (double), `Name of the Regional Office`, `Name of the ULB/RDMA`,
+   `Address`, `Telephone No. with STD code`, `Fax Number ` (trailing space as
+   given), `Email id`, `No.of Wards` (double). The platform adds `document_id`
+   and `resource_uuid`.
+   - These display names look like header strings, but that is an inference;
+     only a header row can verify them (B6).
+   - **Address:** one field, `Address`. Completeness [U] (G2).
+   - **State and district:** no state, district or PIN column.
+   - **Identifier:** none besides a serial number.
+   - **Missing values:** no publisher note (R80) [U].
+6. **Privacy and admission (ADR-0001 §2; ADR-0006 §12).**
+   - The records are offices of the CMA and of urban local bodies, which fits
+     "institution, facility or public place … published by … a government body"
+     on the documentation.
+   - Telephone, fax and e-mail columns would not be approved as
+     `context_columns` (§12). Whether they hold office or personal contacts is
+     [U]. Whether `Address` values contain phone numbers or names is for the
+     record-level screen.
+   - `Name of the Regional Office`, `Name of the ULB/RDMA` and `No.of Wards` are
+     not administrative-geography or facility-category columns as §12 lists
+     them. Whether any can be approved is for the assessment [U].
+7. **State attribution.** The catalog's declared jurisdiction is "Tamil Nadu"
+   (R93). Its `name_key` matches exactly one state in the pinned gazetteer,
+   `lgd:state:33` (R98) [CALC]. That maps the **declared label**. It does not
+   verify that every record is in Tamil Nadu [U]. With no state column, step 1
+   of the split key would rely on `coverage_state` (ADR-0007 §3).
+8. **Record ID.** No stable identifier, so `record_id_scope` would be
+   `snapshot`. Reproducibility rests on the file's SHA-256 and the manifest.
+9. **Currency.** Frequency "Annual"; created and last changed 2017-12-29; the
+   file name contains "2017" (R80) [PUBD]. Whether the list is current is [U]
+   (G6).
+
+### C9b: Tamil Nadu Open University centres
+
+1. **Publisher and unit (G4).** Catalog `field_state_department`: "Tamil Nadu",
+   "Higher Education Department", "Tamil Nadu Open University (TNOU)";
+   `field_group_name` "Tamil Nadu Open University"; `govt_type` "State" (R94)
+   [PUBD]. TNOU's legal status, and so whether it is "a government body", was
+   not verified (G4) [U].
+   - The resource metadata names the catalog's data officer by an e-mail
+     address that appears personal. It is not reproduced here.
+2. **URLs.** Catalog: https://tn.data.gov.in/catalog/list-study-centres-under-tamil-nadu-open-university-2020
+   (R94). Ten resources (R80), each one CSV on the `data.gov.in` file store.
+3. **Resources and declared columns.** The `meta_field` lists in the resource
+   metadata (R80) [PUBD] are publisher-entered column names. Each list repeats
+   its names twice; the repeat is shown once here. Two resources have no
+   `meta_field`; their columns come from the platform field list (R81).
+
+| Resource (file size) | Declared columns | Address-bearing | Centre code | Person or contact columns |
+|---|---|---|---|---|
+| Work Centres, region-wise (5,324 B) | S.No, Name of the Region, Name of the District, Center Code, Name of the Institute, Area, Address, Programme Offered, Phone Number, Mobile Number, Mail Id | yes | yes | phone, mobile, mail |
+| Regional Centres (1,518 B) | S.No, Name of the Region, College Center Code, Contact Person, Address, Phone Number, Mobile Number, Mail Id | yes | yes | **Contact Person**, phone, mobile, mail |
+| Programme Study Centres (2,604 B) | S.No, Name of the Region, Name of the District, Centre Code, Name of the Institute and Technology, Course Details, Area, Address, Phone Number, Mobile Number, Mail Id | yes | yes | phone, mobile, mail |
+| Partner Institutions (1,322 B) | S.No, Name of the Region, Name of the District, Center Code, Name of the Company, Category, Area, Address, Phone Number, Mobile Number, Mail Id | yes | yes | phone, mobile, mail |
+| Learner Resource Centres (30,970 B) | S.No, Name of the District, Centre Code, Name of the Learner Resource Centres (LRC), Address, Phone Number, Mobile Number, Mail Id | yes | yes | phone, mobile, mail |
+| Learning Support Centres, region-wise (8,350 B) | S.No, Name of the Region, Name of the District, Center Code, Name of the Institute, Address, Mobile Number, Phone Number, Mail Id | yes | yes | phone, mobile, mail |
+| Jail Study Centres (976 B) | S.No, Name of the Region, Name of the Central Prison, Centre Code, Address, Phone Number, Mobile Number | yes | yes | phone, mobile |
+| B.Ed Study Centres (1,808 B) | (field list, R81) S.No, Name of the Region, Name of the District, Name of the Institute, Address, Phone Number, Mobile Number, Mail Id | yes | no | phone, mobile, mail |
+| B.Ed Special Education Centres (1,653 B) | S.No, Name of the Region, Specialization, Name of the Institute, Address, Phone Number | yes | no | phone |
+| Students Enrolled and Passed out (151,813 B) | (field list, R81) Sl.No, Admission year, Program code, Program Name, Enrolled count, Pass out Count | **no** (aggregate counts) | — | — |
+
+4. **Licence.** Same position as C9a: footer only, no `license` element in the
+   metadata (R80, R94), **B17 unresolved**, B14 through `www.data.gov.in`. No
+   C9b page was obtained, so whether it shows a "Released Under" statement is
+   [U]; on C9a that statement names a policy, not a licence. The
+   TNOU website footer reads "Copyright © tnou.ac.in All Rights Reserved." (R96)
+   [PUBD]; it concerns the website. TNOU's Policies page lists institutional
+   policies, among them an "Institutional OER Policy 2020"; none was opened, and
+   none is shown to cover the OGD resources [U]. **Licence status:
+   unresolved.**
+5. **Terms and retrieval.** Terms of Use and `robots.txt` as C9a, as they are
+   instance-wide (R83). The download-modal styles were seen on the C9a resource
+   page only; the C9b download form was not checked [U]. `is_api_available` "0" for all ten
+   resources (R80). `www.tnou.ac.in/robots.txt` returned 404 (R96). Retrieval
+   points to manual (B19).
+6. **Schema status.** Column names exist for nine address-bearing resources:
+   eight declared in `meta_field`, one (B.Ed Study Centres) from the platform
+   field list. **No header row was obtained** (B6). Missing-value conventions:
+   one note, on the Special Education list, expands the abbreviations HI, VI and
+   MR; no missing-value note [U].
+7. **Privacy and admission.**
+   - `Contact Person` (Regional Centres) holds names of individuals. Phone,
+     mobile and mail columns appear in every address-bearing list. None could be
+     an approved context column (ADR-0006 §12).
+   - Whether `Address` values contain names, "c/o" phrases or phone numbers is
+     for the record-level screen.
+   - **Partner Institutions** declares `Name of the Company`. Whether a partner
+     company's premises are "the address of an institution, facility or public
+     place" is a scope question related to, but not the same as, B18 (which
+     concerned registered offices). Open (**B20**).
+   - The Jail Study Centres list gives the addresses of central prisons, which
+     are public institutions.
+8. **State attribution.** Declared jurisdiction "Tamil Nadu" (R94) maps by
+   `name_key` to `lgd:state:33` (R98) [CALC], with the same limits as C9a.
+   Six resources have `Name of the District`; whether those values match
+   pinned LGD districts is [U].
+9. **Record ID.** Seven address-bearing resources declare a centre code. If it
+   is stable and unique, `record_id_scope` could be `native`; otherwise
+   `snapshot` [U]. The two B.Ed lists have no code, so `snapshot`. One manifest
+   per resource, or one for the catalog, is a source-ADR choice.
+10. **Currency.** `data_time_period` 2020-01-01 to 2021-12-31; published
+    2021-08-12, last changed 2021-08-13; frequency "Annual" (R80) [PUBD].
+    Whether it is current is [U] (G6).
+
+### ADR-0007 §5 checklist, as far as the evidence goes
+
+| §5 item | C9a | C9b |
+|---|---|---|
+| Licence verified from official text | **No.** Footer only; B17 (and B14) unresolved | **No.** Same |
+| Terms of use, automated retrieval | Gathered: silent; points to manual (B19) | Same |
+| Redistribution | Depends on the licence; not established | Same |
+| Personal-data risk | Contact columns (not ingested); address content [U] | `Contact Person` column; contact columns; address content [U]; B20 |
+| Declared coverage | Tamil Nadu → `lgd:state:33` by `name_key` [CALC]; no state column | Same; district column in six lists |
+| Identifier | None → `snapshot` | Centre code in seven lists, stability [U] |
+| Header row (evidence limit) | Not obtained | Not obtained |
+| Scripted aggregate statistics | Not done | Not done |
+
+Under §5, "an unclear or missing licence means the source is rejected". A
+formal assessment written now would have to record the licence as unclear.
+**So B17 needs an answer before a formal assessment can conclude anything
+other than that.** This pass does not write the assessment and rejects nothing.
+
+### Effect on the open items
+
+- **C9a, C9b:** not ready for a formal §5 assessment or a source ADR. Missing:
+  B17 (with B14), header rows and scripted aggregate statistics (B6, through a
+  permitted manual download, B19), G4 for the publisher unit, and, for C9b, B20.
+- **New B20:** whether TNOU partner-company premises (C9b, Partner Institutions)
+  are in scope.
+- **B8/B19:** the C9a resource page on `tn.data.gov.in` carries download-modal
+  styles with a CAPTCHA (inference); the earlier [U] about the form is narrowed,
+  not closed. C9b's page was not obtained.
+- **Unchanged:** C7's B18 exclusion, C8, C9c, C10–C12, C1–C6.
+
 ## Evidence status
 
 - **Publisher or publisher-platform, retrieved and inspected directly (second
@@ -1765,6 +1987,11 @@ Licence and retrieval as for C8 (R83 for the instance).
   and the Smart Cities instance's policies (R83–R86); AIKosh, AISHE directory, UDISE+ and CBSE SARAS pages and
   scripts (R87, R89–R91); host reachability (R92). AISHE mirror metadata read
   directly [MIR, R88]. AIKosh terms not obtained.
+- **Publisher or publisher-platform, retrieved and inspected directly (ninth
+  pass) [PUBD]:** C9a and C9b catalog metadata (R93, R94), the C9a resource
+  and catalog pages on `tn.data.gov.in` (R95), and the TNOU and CMA website
+  footers and `robots.txt` (R96, R97); saved R80 and R81 re-read. Gazetteer
+  `name_key` lookup [CALC, R98]. No header row obtained.
 - **Internet Archive copy, inspected directly (fourth pass) [ARCH]:** National
   Health Portal terms of use as captured 2023-04-04 (R58); archive index for
   `info.nhp.gov.in` (R59).
@@ -1799,7 +2026,9 @@ Licence and retrieval as for C8 (R83 for the instance).
   - the AISHE `Location` field, the UDISE+ API terms and the RBI disclaimer text;
   - for C8–C12 (eighth pass): B14 and B17 as they apply, header rows for
     every file-only resource, and licence text for C11 and C12. C7 is out
-    of v0 scope (B18), so its open items are not pursued for v0.
+    of v0 scope (B18), so its open items are not pursued for v0. Ninth pass:
+    for C9a and C9b, still B17 (with B14), header rows (B6), G4 and, for
+    C9b, B20.
 
 ## Evidence gaps
 
@@ -1846,7 +2075,9 @@ Licence and retrieval as for C8 (R83 for the instance).
   a first line). C4 publishes components only. Whether a concatenation counts as
   published `raw_text` under ADR-0006 is not decided. Eighth pass: C7 has
   `Registered_Office_Address` (C7 now out of v0 scope, B18), C9a and C9b's B.Ed list have `address`, C10 has
-  `_address`; their completeness is equally unverified.
+  `_address`; their completeness is equally unverified. Ninth pass: nine of
+  C9b's ten resources list an `Address` column (R80, R81); completeness
+  equally unverified.
 - **G3. Headers.** Publisher/platform schema fields for C1–C4 were inspected
   directly [PUBD, R32–R34, R37]. No downloadable file was opened, so actual file
   header rows remain unverified. The fifth pass (B6) added platform field types
