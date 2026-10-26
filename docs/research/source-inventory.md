@@ -15,10 +15,12 @@
   pass, 2026-10-06: C4 licence and Telangana portal retrieval terms (B3, B8).
   Seventh pass, 2026-10-06: B14 and B15 follow-up for C1–C3. Eighth pass,
   2026-10-07: alternative address sources (C7–C12), metadata only. Ninth
-  pass, 2026-10-07: C9a and C9b assessment evidence.
+  pass, 2026-10-07: C9a and C9b assessment evidence. Tenth pass, 2026-10-25:
+  B17 for Tamil Nadu (the Tamil Nadu Data Policy 2022), official documents
+  only, with a follow-up on 2026-10-26 on its open points.
 - **Not exhaustive.** Only the sources and categories listed below were looked
   at. Categories identified but not researched are listed separately.
-- **Nine passes.** The sections up to "Candidate-state evidence" record the
+- **Ten passes.** The sections up to "Candidate-state evidence" record the
   first pass. "Licence and header verification" records a second pass on C1–C6.
   "data.gov.in host and licence re-check" records a third pass on the C1–C3
   licence only. "Terms of use and retrieval conditions" records a fourth pass on
@@ -27,7 +29,8 @@
   "B14 and B15 follow-up" records a seventh pass on C1–C3 only. "Alternative
   address sources" records an eighth pass on new candidates C7–C12 (C7 was
   later put out of v0 scope by the maintainer, B18). "C9a and C9b assessment
-  evidence" records a ninth pass on C9a and C9b only. Where they
+  evidence" records a ninth pass on C9a and C9b only. "B17 for Tamil Nadu"
+  records a tenth pass on the Tamil Nadu side of B17 only. Where they
   differ, the later pass is the current evidence; the
   earlier text is kept as the record of what was known then.
 
@@ -69,6 +72,13 @@
   retrieved with `curl` and read directly [PUBD]; a `name_key` lookup in
   the pinned gazetteer [CALC]; described under "C9a and C9b assessment
   evidence".
+- **Tenth pass:** web search for discovery only; then the Tamil Nadu Data
+  Policy 2022 (two official copies), TNeGA's G.O. and policy listings, a State
+  Planning Commission page and two `tn.data.gov.in` pages, retrieved with
+  `curl` and read directly [PUBD]. PDF text was extracted with `pdftotext`.
+  Described under "B17 for Tamil Nadu". Its 2026-10-26 follow-up made no
+  search; it used `curl`, `pdftotext`, and page images extracted from a
+  scanned PDF and viewed directly.
 - Other claims rest on this repository's ADRs [ADR] or on the local gazetteer
   computation [CALC].
 - **Page fetches** were made with an instruction to report only metadata,
@@ -1949,6 +1959,314 @@ other than that.** This pass does not write the assessment and rejects nothing.
   not closed. C9b's page was not obtained.
 - **Unchanged:** C7's B18 exclusion, C8, C9c, C10–C12, C1–C6.
 
+## B17 for Tamil Nadu: the Tamil Nadu Data Policy 2022 (tenth pass, 2026-10-25)
+
+Evidence status only. **C9a and C9b are not accepted or rejected**, Tamil Nadu
+is not selected, and no manifest, selection record or ADR is written or
+changed. This pass covers one question: whether an official Tamil Nadu
+government document states the licence for datasets on `tn.data.gov.in`
+(B17, Tamil Nadu side). No dataset file was downloaded, no datastore or record
+API was queried, no record was read, and no official was contacted.
+
+### Method
+
+- **Targets, fixed before searching:**
+  1. the Tamil Nadu Data Policy 2022 (TNDP), from an official host;
+  2. the Government Order that issued it;
+  3. official TNeGA or Tamil Nadu open-data implementation guidelines;
+  4. any official document stating the licence for datasets on
+     `tn.data.gov.in`.
+- **Discovery:** four web searches [SRCH]. They located URLs only. No claim
+  below rests on a search summary. The G.O. number and date that the summaries
+  gave are cited only from the retrieved document (R100).
+- **Retrieval:** `curl` on 2026-10-25, 13:24–13:34 UTC.
+  - Responses were saved locally, outside the repository, and hashed.
+  - PDF text was extracted with `pdftotext -layout` and read directly [PUBD].
+  - Each quotation of the policy text below was checked by script against the
+    extracted text of both policy copies (R99, R100) [CALC]. The exception is
+    R100's annexure header line and R99's cover text, each of which is quoted
+    from its own copy only. Line breaks are joined, and
+    characters the extraction renders as replacement glyphs (dashes, bullets)
+    are left out. The wording is unchanged.
+  - `https://it.tn.gov.in/en/policies` returned 404 (13:26:02 UTC).
+- **`robots.txt`.** `it.tn.gov.in` and `spc.tn.gov.in` answered 403, and
+  `tnega.tn.gov.in` answered 404 (R107), so no crawl rule could be read on those
+  hosts. Two requests went to `tn.data.gov.in`, whose `robots.txt` disallows all
+  paths (R83), as earlier passes did.
+- **Stop rule.** The pass ended once each target had been looked for on the
+  official hosts found. It did not continue with open-ended searching (see
+  "Route status").
+
+### Sources for this pass
+
+| # | URL | Kind | SHA-256 of saved response | Supports |
+|---|---|---|---|---|
+| R99 | https://it.tn.gov.in/sites/default/files/2022-09/TN%20DataPolicy_2022.pdf | [PUBD] | `4a503edc3de410eb761e2a84972cd6df72c667aeb21c4eedfeb1e73aef778150` | TNDP, Information Technology Department copy; cover "February \| 2022"; 5,828,687 B; retrieved 13:24:09 UTC |
+| R100 | https://tnega.tn.gov.in/documents/2022_G.O.(Ms)_No.16.pdf | [PUBD] | `0d891fc092796b2a31a36f41aa2f7dd5704d031144344b71db4667cadf52144d` | TNDP as annexed to G.O.(Ms.) No.16; 3,015,946 B; retrieved 13:28:07 UTC |
+| R101 | https://tnega.tn.gov.in/notifications/government-orders | [PUBD] | `c259a689dd5f6acd73fb3c1db418a36f69d04e9ff18e9e0829aa0cb94fae30ac` | TNeGA G.O. listing (182 linked documents); the entry that links R100; retrieved 13:26:42 UTC |
+| R102 | https://tnega.tn.gov.in/notifications/policies-guidelines; https://tnega.tn.gov.in/ | [PUBD] | listing `b8549b0ebb0e37e713abf9dc3c8fa45159d5857fd3b0444ed879fc225b0a7a2f`; home `e2d3ea9d8a0c8abba0253f7ee49e4ead580aa4c4cba80dc742a3936753a91668` | TNeGA "Policies & Guidelines" listing (23 documents); retrieved 13:26:41 and 13:26:03 UTC |
+| R103 | https://kygcms.tn.gov.in/cms_migrated/document/GO/it_e_16_2022_Ms.pdf | — | **not retrieved** | Second official copy of G.O.(Ms.) No.16. The name resolved, but TCP connections failed on port 443 (13:24:17 and 13:25:20 UTC) and port 80 (13:25:41 UTC) |
+| R104 | https://tnega.tn.gov.in/documents/2021_G.O.(Ms.)_No.17.pdf | retrieved, not inspected | `593dc200e036b7f808d78cebb0719d8e6a582529ff8ce46702ce7864d88262f9` | G.O.(Ms.) No.17 (2021), cited by TNDP; retrieved 13:29:39 UTC. A 7-page scan with no text layer, and no OCR or PDF renderer was available: **retrieved but not read** |
+| R105 | https://spc.tn.gov.in/policy/tamil-nadu-data-policy-2022 | [PUBD] | `37590806c29fbfa9a6c4eed2406318da169659badeb4bd36fa5768cbae67beee` | State Planning Commission summary page; retrieved 13:26:24 UTC |
+| R106 | https://tn.data.gov.in/terms-of-use; https://tn.data.gov.in/policies | [PUBD] | terms `d7d8b280bfed355f286d872b75af5ed44d8fbeb274d761c37bca53f456e2a8d8`; policies `3d5a6a2450d103673669e648fd96fc6a3457381a1517e665dd92b81a96c6a230` | Re-check of R83; retrieved 13:30:02 and 13:30:07 UTC |
+| R107 | `/robots.txt` on `it.tn.gov.in`, `tnega.tn.gov.in`, `spc.tn.gov.in` | [PUBD] | `5b13fb5957b84ef7bb9d0b6cd509c947ff6a37d67efdac2b896ddd3b908aad10`; `7b8ec1e9d073d2c8d4518f406be9f1f7ce1a499a9da62b15d248d2ebc77b0846`; `1d08335e65da7cf40d1c4a7ba0088e0f39b9c5a4b2e42de95fc9ffa69fb96c7a` | 403, 404 and 403 response bodies; retrieved 13:33 UTC |
+
+### The policy and its issuing order (targets 1 and 2)
+
+- **R100 is the annexure, not the order.** Its first line reads: "ANNEXURE TO
+  G.O.(Ms.) No.16, Information Technology (E1) Department, dated 10.03.2022"
+  [PUBD]. TNeGA's listing links it as "G.O. (Ms) No. 16", year "2022",
+  department "IT&DS Department" (R101) [PUBD].
+- **The operative order was not obtained.**
+  - The extracted text of R100 begins at the annexure and runs to the
+    policy's "Conclusion". A search for order markers ("ABSTRACT", "ORDER",
+    "Read:", "BY ORDER OF THE GOVERNOR") found none.
+  - The other official copy (R103) could not be reached.
+  - So what the G.O. itself orders, from when it takes effect, and whether it
+    says anything on licensing are [U].
+- **R99** is a separately typeset copy (cover "February | 2022", different
+  pagination). Every passage quoted below appears in both R99 and R100 [CALC].
+- **R105** summarises the policy, links no document and says nothing about
+  licensing [PUBD].
+
+### What TNDP says that bears on a licence
+
+Quoted from R100 [PUBD]; section numbers are the policy's own.
+
+- **§3.2, Definitions:** "Open Data - is the data that is freely available to
+  everyone to use and republish, without restrictions from copyright, patents
+  or other mechanisms of control. Users have a worldwide, royalty-free,
+  non-exclusive license to use, adapt, publish (either in original, or in
+  adapted and/or derivative forms), translate, display, add value, and create
+  derivative works (including products and services), for all lawful
+  commercial and non-commercial purposes, and for the duration of existence of
+  such rights over the data or information. Where Open Data is intended, it is
+  specified in the Policy."
+- **§1.1.1, Openness:** "An open data set is defined as follows: "A data set
+  is said to be open if any-one is free to use, reuse and redistribute it. Open
+  data is machine-readable, and it is also easily accessible."" It continues:
+  "To the extent possible, all data should be open."
+- **§1.1.7, Protection of Intellectual Property:** "This calls for the
+  introduction of checks and balances to ensure that data is protected by IPRs
+  is not hosted as Open Data." (The source's grammar is kept.)
+- **§3.11, Metadata:** "Metadata also includes details such as the license
+  type and data dictionary defining and explaining various parameters."
+- **§5, Scope and Applicability:** "The TNDP shall be applicable to all the
+  Public Authority as defined under section 2(h) of the Right to Information
+  Act, 2005 (Central Act 22 of 2005), within the State of Tamil Nadu. The TNDP
+  will apply to all data and information created, generated, collected, and
+  archived using public funds of Government of Tamil Nadu directly or through
+  authorized agencies by various Departments / Organizations / Agencies and
+  Autonomous bodies."
+- **The portal.**
+  - §2 lists it among the "pro-active initiatives" the Government "has
+    already taken": "Launch of the Tamil Nadu Open Data Portal
+    (https://tn.data.gov.in/)."
+  - A footnote in §13.2 describes it as "Open Data portal of Government of
+    Tamil Nadu, where all entities under Government of Tamil Nadu can upload
+    all the open data sets".
+- **§13.2, Data Inter-Departmental Committee, Open Data Stream:** "Identify
+  the legitimate and legal use of the datasets published in the State Open Data
+  Platform. It will demarcate the uses prohibited for the shared public data."
+- **§11, Policy Framework:** "Sharing of data with third parties which is not
+  published under the OGD initiative shall have to be authorized and under
+  suitable restrictions by Empowered Data Governance Committee (EDGC) and at a
+  price, if any, as determined by applicable data pricing policy of TNeGA (to
+  be framed)."
+
+### What TNDP does not say
+
+- **No licence is named** [PUBD, CALC]. A script searched the extracted text
+  of R99 and R100 for "licen", "GODL", "copyright" and "attribut":
+  - "license" occurs only in §3.2 and §3.11, and "copyright" only in §3.2;
+  - "GODL" and "Government Open Data License" do not occur;
+  - neither does a licence name, a link to licence text, or an attribution
+    requirement.
+- **It does not say that datasets on `tn.data.gov.in` are "Open Data" in the
+  §3.2 sense,** or under which licence they are published.
+  - §3.2 ends "Where Open Data is intended, it is specified in the Policy". No
+    passage was found that specifies this for the portal's datasets or for any
+    named dataset.
+  - The portal footnote says "open data sets" in lower case and does not refer
+    to §3.2.
+- **It does not mention** GODL-India, the platform footer, or either
+  Copyright Policy (the state instances' text, or the B14 text on
+  `www.data.gov.in`).
+- **No list of prohibited uses was found.** §13.2 assigns the committee to
+  "demarcate the uses prohibited", but no such list was found.
+- **A textual comparison only** [CALC]. In §3.2, the words from "worldwide,
+  royalty-free, non-exclusive license to use" to "for all lawful commercial and
+  non-commercial purposes" are the same, word for word, as the GODL-India grant
+  wording quoted from R82 under "The GODL-India basis for state-department data
+  (B17)". §3.2 then adds "and for the duration of existence of such rights over
+  the data or information". Whether R82 continues with the same words was not
+  checked in this pass (it does; see the 2026-10-26 follow-up, R110). §3.2
+  does not name GODL-India and is a definition, not a grant to users of a
+  named dataset. **No licence is inferred from this match.**
+
+### Implementation guidelines and portal terms (targets 3 and 4)
+
+- **TNeGA's "Policies & Guidelines" listing (R102)** has 23 documents. Its
+  "Data Policy" category holds only "Data Centre Policy 2021". No listed title
+  is TNDP guidelines, open-data guidelines or a licence; TNDP itself is not
+  listed there [PUBD].
+- **TNDP's own pending instruments.** TNDP says "TNeGA shall notify detailed
+  process for seeking permissioned access" (§8) and refers to a data pricing
+  policy "(to be framed)" (§11). Neither was found.
+- **TNeGA's G.O. listing (R101)** gives titles only as G.O. numbers, so its
+  182 documents cannot be screened by title. Apart from R100 and R104 they were
+  not opened. That part of target 3 is **not exhaustive**.
+- **The `tn.data.gov.in` footer link** labelled "Open Data Implementation
+  Guidelines" points to `https://data.gov.in/sites/default/files/NDSAP_Implementation_Guidelines_2.2.pdf`
+  (R106). That is the national NDSAP guidance, not a Tamil Nadu document; it was
+  not retrieved (version 2.4 is R72).
+- **Portal re-check (R106)** [PUBD]. The licence-relevant sentences are the
+  same as recorded for R83:
+  - Terms of Use: "The catalogs and information available through the Portal
+    are available under terms described in the “license” metadata element of
+    individual dataset records except where otherwise noted."
+  - Copyright Policy: "The content available on the portal is the
+    intellectual property of NIC and its various content providers from
+    Government of India."
+  - The footer's GODL-India sentence.
+
+  Both page hashes differ from R83. The pages embed script state, which is a
+  likely cause, but that is an inference. Neither page mentions TNDP or a
+  G.O. [CALC].
+- **No official document was found that states the licence for datasets on
+  `tn.data.gov.in`.**
+- **Not pursued:**
+  - A Tamil Nadu Public Service Commission "open data policy" PDF was found by
+    search. It concerns that commission's own data, not the portal or the
+    C9a/C9b publishers, so it is not one of the four targets and was not
+    retrieved.
+  - G.O.(Ms.) No.17 (R104) could not be read. TNDP cites it for this: "All
+    data of all departments, including beneficiary/customer/citizen/business
+    and transaction/or any other data relating to them shall be shared with
+    TNeGA by all departments as per G.O (Ms.) No.17, dated 23.09.2021"
+    (§11, R100). That describes sharing with TNeGA, not a licence to the
+    public. What the G.O. itself says is [U]. (Read in the 2026-10-26
+    follow-up, R109.)
+
+### Route status
+
+| Target | Result |
+|---|---|
+| 1. TNDP from an official host | **Obtained:** R99, and R100 (the annexure to the G.O.) |
+| 2. The issuing G.O. | **Annexure only.** The operative order was not obtained: R100 has no order text, and R103 was unreachable |
+| 3. TNeGA or Tamil Nadu implementation guidelines | **None found** on TNeGA's listings (R102). The G.O. list (R101) was not screened beyond titles |
+| 4. Official licence statement for `tn.data.gov.in` datasets | **None found.** TNDP names no licence; the portal terms are unchanged (R106) |
+
+**The public-documentation route for the Tamil Nadu side of B17 is exhausted
+as far as this pass can take it.** Two routes are left:
+- the operative order, if the R103 host becomes reachable (what it contains
+  is [U]);
+- clarification from TNeGA or NIC, which is outside this pass because no
+  official was contacted.
+
+No further searching is planned under this item.
+
+### Follow-up on the tenth pass's open points (2026-10-26)
+
+Three gaps that the tenth pass left open were re-checked: R103, R104 and the
+R82 continuation. No new search was made. `curl` on 2026-10-26, 05:10–05:14
+UTC; responses saved outside the repository and hashed.
+
+| # | URL | Kind | SHA-256 of saved response | Supports |
+|---|---|---|---|---|
+| R108 | https://cms.tn.gov.in/cms_migrated/document/GO/it_e_16_2022_Ms.pdf | [PUBD] | `0d891fc092796b2a31a36f41aa2f7dd5704d031144344b71db4667cadf52144d` | R103's path on the `cms.tn.gov.in` host; 3,015,946 B; `Last-Modified: Tue, 26 Nov 2024 06:59:42 GMT`; retrieved 05:13:12 UTC |
+| R109 | https://tnega.tn.gov.in/documents/2021_G.O.(Ms.)_No.17.pdf | [PUBD] | `593dc200e036b7f808d78cebb0719d8e6a582529ff8ce46702ce7864d88262f9` (same as R104) | R104 re-retrieved (05:11:37 UTC) and read. Its seven embedded page JPEGs were extracted byte-for-byte from the PDF and viewed directly; no OCR |
+| R110 | https://data.gov.in/sites/default/files/Gazette_Notification_OGDL.pdf | [PUBD] | `b338e0cfacc9cdc83a40950feaaf5ac9d2396b43d3105f99f7d494921c7e3ebe` (same as R71) | GODL-India as notified in the Gazette, re-retrieved 05:13:31 UTC; text extracted with `pdftotext` |
+
+- **R103 is still unreachable.** TCP connections failed on port 443 (05:10:46
+  UTC) and port 80 (05:11:07 UTC).
+- **The same path on `cms.tn.gov.in` (R108) is byte-identical to R100** [CALC].
+  It is the annexure only: its first line is the same "ANNEXURE TO G.O.(Ms.)
+  No.16 …" header. So the copy at R103's path is very likely the annexure too,
+  not the operative order. That is an inference, because R103 itself was not
+  reached. **The operative text of G.O.(Ms.) No.16 is still not obtained and
+  is [U].**
+- **G.O.(Ms.) No.17 (R109), read** [PUBD].
+  - Abstract: "Information Technology Department – Data-driven Decision
+    Support System in the State through Data Purity and Data Governance –
+    Sharing of data by Government Departments to Tamil Nadu e-Governance
+    Agency to aid in planning, implementation and execution of Government
+    Schemes and Programs – Instructions to Government Departments – Orders -
+    Issued." Information Technology (E1) Department, dated 23.09.2021.
+  - It orders departments to give TNeGA their data and covers Aadhaar seeding.
+    Its annexure is headed "ILLUSTRATIVE LIST OF BENEFICIARY DATABASES OF
+    DEPARTMENTS TO SHARE DATA WITH TNEGA" (21 numbered entries).
+  - Para 7(b): "As Government of Tamil Nadu is the owner of all data,
+    including transaction data, that is being collected, held, or generated in
+    all government departments and its PSUs/agencies, it now mandates TNeGA to
+    obtain an electronic copy of the data and departments to provide the data
+    to TNeGA."
+  - **It does not mention** open data, `tn.data.gov.in`, publication to the
+    public, a licence, GODL-India or NDSAP. It is about sharing within
+    government, not a licence to users.
+  - Bearing on B17: para 7(b) states, in an official order, that the
+    Government of Tamil Nadu owns its departments' data. That is a statement
+    of ownership, not a licence. It does not settle whether the GODL-India
+    grant, which refers to agencies of the Government of India (R82, R110),
+    reaches that data.
+- **R82 continuation, checked against the Gazette text (R110)** [PUBD, CALC].
+  - GODL-India §3 ends: "for all lawful commercial and non-commercial purposes,
+    and for the duration of existence of such rights over the data or
+    information."
+  - So TNDP §3.2 matches the GODL-India grant clause from "worldwide,
+    royalty-free, non-exclusive license to use" to its end, word for word.
+  - Before that wording, GODL-India §3 limits itself to data "generated using
+    public funds by various agencies of the Government of India, and subject
+    to the conditions listed under section 4 and 7 of this document". TNDP
+    §3.2 has neither phrase.
+  - GODL-India then has "4. Terms and Conditions of Use of Data", starting
+    "a. Attribution: The user must acknowledge the provider, source, and
+    license of data …". TNDP has no such conditions. A search of R100's text
+    for "attribut" found only unrelated uses (data attributes, credit to
+    leadership).
+  - **No licence is inferred from this match.** §3.2 is still a definition that
+    names no licence and is not applied to the portal's datasets.
+- **Also requested, nothing obtained** [PUBD]:
+  - `https://www.data.gov.in/_nuxt/36aab54.js` (R82's URL) answered 302 with
+    an empty body (05:12:47 UTC). The script is no longer served there, so
+    R110 was used for the GODL-India text instead.
+  - `https://www.tn.gov.in/go_view/dept/31`, tried as a G.O. listing,
+    answered 404 (05:12:53 UTC).
+- **Route status, updated.** Of the two routes left above, the first is now
+  weaker: the copy at R103's path appears to be the annexure, not the order.
+  Clarification from TNeGA or NIC remains outside this work. **The
+  public-documentation route is exhausted.** B17 stays unresolved.
+
+### Effect on the open items
+
+- **B17 stays unresolved.** The policy's silence is not read as a licence or
+  as a refusal.
+- **What changed: B17 now has a state-side record.** The state policy that
+  names `tn.data.gov.in` as the portal for Tamil Nadu's open data sets, and
+  that applies to data created with Tamil Nadu public funds:
+  - names no licence;
+  - does not adopt GODL-India by name;
+  - does not designate the portal's datasets as §3.2 "Open Data".
+- **Unchanged:**
+  - The GODL-India grant sentence still refers to agencies of the Government
+    of India (R82), and TNDP does not address it.
+  - Which Copyright Policy governs is still open, and TNDP does not address
+    that either.
+- **A reading for the maintainer, not decided here.** One possible reading
+  combines three things: §3.2's licence-like definition, the policy's
+  description of the portal as the place for "open data sets", and the
+  platform footer's GODL-India statement. Whether that combination counts as a
+  licence "verified from the official text" (ADR-0007 §5) is the maintainer's
+  decision. These notes take no position on it.
+- **C9a and C9b:** still not ready for a formal §5 assessment. Missing:
+  - B17, with B14 through `www.data.gov.in`;
+  - header rows and scripted aggregate statistics (B6), through a permitted
+    manual download (B19);
+  - G4, the publisher unit; for C9b also TNOU's legal status;
+  - for C9b, B20 (Partner Institutions);
+  - G2 (completeness of `Address`) and G6 (currency), unchanged.
+- **Unchanged:** C1–C8, C9c, C10–C12, and B18.
+
 ## Evidence status
 
 - **Publisher or publisher-platform, retrieved and inspected directly (second
@@ -1992,6 +2310,22 @@ other than that.** This pass does not write the assessment and rejects nothing.
   and catalog pages on `tn.data.gov.in` (R95), and the TNOU and CMA website
   footers and `robots.txt` (R96, R97); saved R80 and R81 re-read. Gazetteer
   `name_key` lookup [CALC, R98]. No header row obtained.
+- **Official Tamil Nadu government documents, retrieved and inspected directly
+  (tenth pass) [PUBD]:**
+  - the Tamil Nadu Data Policy 2022, IT Department copy (R99) and the
+    annexure to G.O.(Ms.) No.16 on TNeGA's site (R100);
+  - TNeGA's G.O. and policy listings (R101, R102);
+  - the State Planning Commission page (R105);
+  - a `tn.data.gov.in` terms and policies re-check (R106);
+  - three `robots.txt` responses (R107).
+
+  Not obtained: the operative G.O. text, whose second host (R103) was
+  unreachable. Retrieved but not read: G.O.(Ms.) No.17 (R104), a scan with no
+  text layer.
+
+  Follow-up (2026-10-26): R103's path on `cms.tn.gov.in` (R108), identical to
+  R100; G.O.(Ms.) No.17 now read (R109); GODL-India Gazette text re-checked
+  (R110). The operative G.O. text is still not obtained.
 - **Internet Archive copy, inspected directly (fourth pass) [ARCH]:** National
   Health Portal terms of use as captured 2023-04-04 (R58); archive index for
   `info.nhp.gov.in` (R59).
@@ -2028,7 +2362,8 @@ other than that.** This pass does not write the assessment and rejects nothing.
     every file-only resource, and licence text for C11 and C12. C7 is out
     of v0 scope (B18), so its open items are not pursued for v0. Ninth pass:
     for C9a and C9b, still B17 (with B14), header rows (B6), G4 and, for
-    C9b, B20.
+    C9b, B20. Tenth pass: the Tamil Nadu Data Policy 2022 names no licence,
+    so B17 is still open for C9a and C9b, and the other items are unchanged.
 
 ## Evidence gaps
 
@@ -2069,6 +2404,20 @@ other than that.** This pass does not write the assessment and rejects nothing.
     whether GODL-India's grant reaches state-department data, and which host's
     policy governs, is unresolved (B17) [PUBD, R82–R85]. C11 and C12: no
     licence text found [PUBD, R89, R91; MIR, R88].
+  - Tenth pass (2026-10-25), C9 (Tamil Nadu):
+    - The Tamil Nadu Data Policy 2022 names no licence and does not mention
+      GODL-India or either Copyright Policy.
+    - It defines "Open Data" (§3.2) in wording that partly matches the
+      GODL-India grant, but does not say that `tn.data.gov.in` datasets are
+      Open Data in that sense.
+    - No official Tamil Nadu document stating the portal's dataset licence was
+      found, and the issuing order's own text was not obtained.
+    - B17 stays unresolved [PUBD, R99–R106].
+    - Follow-up (2026-10-26): the order text is still not obtained (R108);
+      G.O.(Ms.) No.17 states state ownership of departmental data but grants
+      no licence (R109); the §3.2 match to the GODL-India grant wording runs
+      to the end of the clause, without GODL-India's scope or conditions
+      (R110). B17 stays unresolved [PUBD, R108–R110].
 - **G2. `raw_text`.** C1a has `Address_Original_First_Line`, C1b has `Address`,
   C2 has `Facility Address` and C3 has `DiagnosticCentreAddress`. Whether these
   are complete enough to serve as `raw_text` is unverified (C1a's field is named

@@ -10,8 +10,11 @@
   for C1–C3), fifth pass (2026-10-06, B6 aggregate and schema inspection,
   offline), sixth pass (2026-10-06, C4 licence and Telangana portal terms),
   seventh pass (2026-10-06, B14 and B15 follow-up), eighth pass
-  (2026-10-07, alternative address sources C7–C12) and ninth pass
-  (2026-10-07, C9a and C9b assessment evidence), ADR-0001 to ADR-0007,
+  (2026-10-07, alternative address sources C7–C12), ninth pass
+  (2026-10-07, C9a and C9b assessment evidence) and tenth pass
+  (2026-10-25, B17 for Tamil Nadu: the Tamil Nadu Data Policy 2022, with a
+  2026-10-26 follow-up),
+  ADR-0001 to ADR-0007,
   and `docs/gazetteer.md`. No retrieval was done for these notes beyond what
   the inventory records. Evidence labels
   ([PUBD], [ARCH], [MIR], [SRCH], [ADR], [CALC], [U]) and source numbers
@@ -280,7 +283,7 @@ accepted, rejected or selected**, and Tamil Nadu is not selected.
 |---|---|---|
 | Publisher (G4) | CMA, under the Municipal Administration and Water Supply Department, Tamil Nadu [PUBD, R93]; unit open | TNOU, under the Higher Education Department, Tamil Nadu [PUBD, R94]; legal status [U]; unit open |
 | Licence statement | Site footer only; no `license` metadata element [PUBD, R80, R83, R93, R95]. The catalog page says "Released Under: NDSAP", a policy, not a licence [PUBD, R95] | Site footer only; no `license` metadata element [PUBD, R80, R83, R94]. No C9b page obtained, so any "Released Under" statement is [U] |
-| Licence status | **Unresolved:** B17, with B14 | **Unresolved:** B17, with B14 |
+| Licence status | **Unresolved:** B17, with B14. Tenth pass: the Tamil Nadu Data Policy 2022 names no licence [PUBD, R99, R100] | **Unresolved:** B17, with B14. Tenth pass: same [PUBD, R99, R100] |
 | Publisher website | "All rights reserved" footer; about the website, not the dataset [PUBD, R97] | Same [PUBD, R96] |
 | Retrieval (technical) | Terms silent; `robots.txt` disallows all [PUBD, R83]; download-modal CAPTCHA styles on the resource page (inference) [PUBD, R95]; manual (B19) | Terms and `robots.txt` as C9a (instance-wide) [PUBD, R83]; download form not checked (no C9b page obtained) [U]; `is_api_available` "0" [PUBD, R80]; manual (B19) |
 | Columns | Platform field list: `Address`, office and ULB names, contact columns, `No.of Wards` [PUBD, R81] | Nine address-bearing resources: eight with declared `meta_field` lists [PUBD, R80], one (B.Ed Study Centres) from the platform field list [PUBD, R81]; one aggregate resource [PUBD, R81] |
@@ -295,9 +298,70 @@ accepted, rejected or selected**, and Tamil Nadu is not selected.
 than "licence unclear", which §5 treats as rejection. The order of what is
 missing:
 1. B17 (and B14): a licence basis for state-department data on the platform.
+   The tenth pass checked the Tamil Nadu side and found no licence statement
+   (see "B17 for Tamil Nadu (tenth pass, 2026-10-25)" below).
 2. Header rows and scripted aggregate statistics (B6), from a manual download
    through the form (B19), after maintainer approval.
 3. G4 (publisher unit) and, for C9b, B20.
+
+### B17 for Tamil Nadu (tenth pass, 2026-10-25)
+
+Detail in the inventory, "B17 for Tamil Nadu". **Evidence only.** Nothing here
+accepts, rejects or selects anything, and no reading of the evidence is adopted.
+
+- **Evidence gathered** [PUBD]:
+  - the Tamil Nadu Data Policy 2022 (TNDP), from two official copies: the IT
+    Department's (R99), and TNeGA's annexure to G.O.(Ms.) No.16, Information
+    Technology (E1) Department, dated 10.03.2022 (R100);
+  - TNeGA's G.O. and policy listings (R101, R102);
+  - a re-check of the `tn.data.gov.in` terms and policies (R106).
+- **What TNDP says:**
+  - It defines "Open Data" (§3.2) as data users may use under "a worldwide,
+    royalty-free, non-exclusive license" in wording that partly matches the
+    GODL-India grant [CALC]. It adds: "Where Open Data is intended, it is
+    specified in the Policy."
+  - It applies to data "created, generated, collected, and archived using
+    public funds of Government of Tamil Nadu" (§5).
+  - It describes `tn.data.gov.in` as the portal "where all entities under
+    Government of Tamil Nadu can upload all the open data sets" (§13.2,
+    footnote).
+- **What TNDP does not say:**
+  - It names no licence and does not mention GODL-India.
+  - It does not say the portal's datasets are §3.2 Open Data.
+  - It does not address either Copyright Policy.
+  - No TNeGA implementation guidelines or official licence statement for
+    portal datasets were found.
+- **Not obtained:** the operative G.O. text. R100 is the annexure only, and
+  the second host (R103) was unreachable. G.O.(Ms.) No.17 (R104) is a scan and
+  was not read.
+- **Follow-up (2026-10-26)** [PUBD, R108–R110]:
+  - R103 is still unreachable. The same path on `cms.tn.gov.in` serves a file
+    byte-identical to R100, the annexure only. So the operative order is still
+    not obtained and is [U].
+  - G.O.(Ms.) No.17 was read. It orders departments to share data with TNeGA
+    and states that "Government of Tamil Nadu is the owner of all data" held by
+    its departments (para 7(b)). It does not mention open data, the portal, a
+    licence or GODL-India.
+  - TNDP §3.2 matches GODL-India §3 word for word from "worldwide,
+    royalty-free, non-exclusive license" to the end of the clause (Gazette
+    text, R110). It lacks GODL-India's scope ("agencies of the Government of
+    India") and its §4 conditions, such as attribution. No licence is inferred
+    from the match.
+- **Route status:** the public-documentation route for the Tamil Nadu side of
+  B17 is exhausted (tenth pass and its 2026-10-26 follow-up).
+- **B17 status: unresolved.** Silence is not read as a licence.
+  - Whether §3.2, the portal footnote and the platform footer together can
+    count as a licence "verified from the official text" (ADR-0007 §5) is a
+    **maintainer decision**. These notes take no position on it.
+  - The other two B17 questions are unchanged: whether the GODL-India grant
+    reaches state data, and which Copyright Policy governs.
+- **Still missing for C9a and C9b**, as listed above:
+  - B17, with B14;
+  - B6 header rows and aggregate statistics, through a manual download (B19);
+  - G4;
+  - for C9b, B20, and the `Contact Person` column, which cannot be a context
+    column (ADR-0006 §12);
+  - G2 and G6, unchanged.
 
 ### O2 result
 
@@ -324,7 +388,9 @@ missing:
     Its B14 status and missing evidence are not pursued for v0.
   - C8 and C9 need B14 and B17, and header rows for every file-only resource
     (B6, G12). Ninth pass: C9a and C9b evidence gathered as far as metadata
-    allows; still B17, B6, G4 and (C9b) B20.
+    allows; still B17, B6, G4 and (C9b) B20. Tenth pass: the Tamil Nadu Data
+    Policy 2022 names no licence; B17 is still open and the rest is
+    unchanged.
   - C10 needs B14 and B15, as C1b does.
   - C11 and C12 have no licence text.
 - No `operator_published` source with a licence has been found, so that family
@@ -437,7 +503,7 @@ Observations, none of them a selection criterion:
 | B14 | data.gov.in Copyright Policy: "may be reproduced free of charge after taking proper permission by sending a mail to us" [PUBD, R52], against the footer's GODL-India statement and "All rights reserved except published datasets/resources and metadata" | Licence basis of C1a, C2, C3 (not withdrawn; unresolved). **Seventh pass (2026-10-06):** policy unchanged (R70); the gazette notification's preamble says the open licence for data sets published under NDSAP and through the OGD Platform had remained unspecified, and its §3 grants GODL-India for shareable non-sensitive data generated with public funds; it does not mention the Copyright Policy (R71); no official text relating the two was found | data.gov.in (NIC) clarification; maintainer decision on how to read it |
 | B15 | C1b's file is hosted only at `info.nhp.gov.in`; whether GODL-India reaches it, and that host's terms. Host unreachable on 2026-10-06; only archived National Health Portal terms (2023) found, reserving all rights. **Seventh pass (2026-10-06):** hosts still unreachable (R74); NIHFW's own website terms do not cover NHP data (R75) | C1b licence | National Health Portal / NIHFW documentation, if the host returns; otherwise C1b stays unresolved |
 | B16 | C4's label "Government Open Data License - India" against the Telangana portal's Copyright Policy ("may be reproduced free of charge after taking proper permission by sending a mail to us") and its footer ("All rights reserved", no exception for datasets) [PUBD, R61, R63, R65] | C4 licence (unresolved; the label is not withdrawn) | The Open Data Unit or the publisher to clarify; maintainer decision on how to read it |
-| B17 | State-department data on the data.gov.in state instances. The footer says content "owned by the respective Ministry/State/Department/Organization" is licensed under GODL-India; the GODL-India grant refers to data "generated using public funds by various agencies of the Government of India" and does not mention states. The state instances' Copyright Policy has no permission requirement, while `www.data.gov.in`, through which the same files are reached, carries the B14 text [PUBD, R79–R85] | Licence basis of C8 and C9 (unresolved) | data.gov.in (NIC) or the publishing departments to clarify; maintainer decision on how to read it |
+| B17 | State-department data on the data.gov.in state instances. The footer says content "owned by the respective Ministry/State/Department/Organization" is licensed under GODL-India; the GODL-India grant refers to data "generated using public funds by various agencies of the Government of India" and does not mention states. The state instances' Copyright Policy has no permission requirement, while `www.data.gov.in`, through which the same files are reached, carries the B14 text [PUBD, R79–R85]. **Tenth pass (2026-10-25), Tamil Nadu:** the Tamil Nadu Data Policy 2022 (annexure to G.O.(Ms.) No.16, IT (E1) Department, 10.03.2022) names no licence, does not mention GODL-India or either Copyright Policy, and does not say `tn.data.gov.in` datasets are Open Data under its §3.2 definition. No official Tamil Nadu licence statement for portal datasets was found, and the operative G.O. text was not obtained. The public-documentation route is exhausted for this pass [PUBD, R99–R106]. **Follow-up (2026-10-26):** R103's path on another official host serves the annexure only; G.O.(Ms.) No.17 (2021) states Tamil Nadu owns its departments' data but grants no licence; TNDP §3.2 matches GODL-India's grant wording from "worldwide" onward, but not its Government-of-India scope or its conditions [PUBD, R108–R110] | Licence basis of C8 and C9 (unresolved) | data.gov.in (NIC) or the publishing departments to clarify; maintainer decision on how to read it |
 | B18 | **Decided 2026-10-07 (maintainer scope decision): Option B. C7 (MCA Company Master Data) is out of scope for v0 and is no longer a v0 candidate.** Under the existing wording of ADR-0001 §1 and ADR-0006 §12 rule 2, a company registered office is not clearly the address of an institution, facility or public place; including it would require expanding or reinterpreting the source category. This is a scope decision, not a licence rejection: C7's licence status (B14) and evidence status are unchanged and kept as historical assessment context. It does not claim that company addresses are invalid or unsafe. Option C, a separate organization/company-address track, remains possible later and would need a new ADR with its own reporting and privacy rules. | — (C7 out of v0 scope) | — |
 | B20 | Whether TNOU partner-company premises (C9b, "Partner Institutions", declared column `Name of the Company`) are the address of an institution, facility or public place (ADR-0006 §12 rule 2). Related to, but not decided by, B18 [PUBD, R80] | That C9b resource | Maintainer decision |
 
@@ -551,7 +617,11 @@ unresolved, unaccepted and unselected.
 4. **B1, B4, B5 (for C4), B7 and the readings of B14 and B16 are maintainer
    decisions,** as is the platform-field-list interpretation. No further
    evidence resolves them. The eighth pass adds the reading of B17. B18 was
-   decided by the maintainer on 2026-10-07 (Option B).
+   decided by the maintainer on 2026-10-07 (Option B). After the tenth pass,
+   the reading of B17 for Tamil Nadu includes whether the Tamil Nadu Data
+   Policy's §3.2 definition, its portal footnote and the platform footer
+   together amount to a verified licence. The public documents found do not
+   settle that; the operative G.O. text, not obtained, is [U].
 5. **Alternatives (eighth pass, 2026-10-07).** If the maintainer wants to
    pursue them, the evidence still missing per candidate is (listed in no
    order of preference):
@@ -560,7 +630,14 @@ unresolved, unaccepted and unselected.
    - C9a and C9b, then C8: header rows for the file-only resources (B6, G12),
      which needs a permitted manual route (B19). Ninth pass: C9a and C9b
      metadata evidence is gathered (see "C9a and C9b (ninth pass)"); B17 is
-     the first blocker, then B6, G4 and B20.
+     the first blocker, then B6, G4 and B20. Tenth pass: the Tamil Nadu
+     documentation route for B17 is exhausted with no licence statement
+     found. B17 now waits on one of three things: a maintainer reading, an
+     official clarification (none drafted or sent), or the operative G.O.
+     text if its host (R103) becomes reachable. The 2026-10-26 follow-up found
+     the same path on another official host serving the annexure only (R108),
+     so that last route is unlikely to yield the order. It does not wait on
+     more searching.
    - C8, C9 and C10 inherit B14; C8 and C9 also need B17.
    - C11 and C12: publisher terms (`aishe.gov.in`, CBSE website policies)
      before anything else.
