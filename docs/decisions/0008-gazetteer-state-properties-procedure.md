@@ -5,6 +5,8 @@
   ADR-0007 §4 step 3 requires, so it is used only once ADR-0007 is accepted.
   ADR-0007 is itself Proposed and cannot be accepted before ADR-0006.
 - **Date:** 2026-10-26
+- **Revision:** 2 (2026-10-26). Records the maintainer's resolutions of Q1
+  to Q3 (section 8.2). Status unchanged.
 - **Deciders:** Project maintainer
 - **Relates to:** ADR-0001 §5 and §7, ADR-0004, ADR-0005 (`gazetteer_version`,
   build provenance, sibling-name warnings), ADR-0006 §17 step 1, ADR-0007 §4,
@@ -216,6 +218,26 @@ recorded and investigated, and neither side is adjusted to match.
 - A selection record quotes the values together with
   `state_properties_procedure_version`, `gazetteer_version` and the SHA-256s
   of `state_properties.csv` and `villages_per_pin.csv`.
+- **Selection evidence (Q2).** For each state, the selection record quotes
+  every section 4 column of `state_properties.csv`: `districts`,
+  `subdistricts`, `villages`, `districts_without_villages`,
+  `subdistricts_without_villages`, the six sibling-warning columns, `pins`,
+  `villages_without_pin` and `pins_shared_with_other_states`. They are
+  labelled as properties of the pinned LGD mapping, not as measures of
+  address-source coverage or of address quality or completeness.
+- **Villages-per-PIN summary (Q1).** `villages_per_pin.csv` is the canonical
+  output and is never replaced by a summary. A selection record summarizes it
+  for each state as:
+  - `N`, the number of PINs, which equals `pins`;
+  - the minimum, the lower median and the maximum of the `N` values of
+    `n_S(p)`;
+  - the SHA-256 of `villages_per_pin.csv`.
+
+  The **lower median** is the value at position `ceil(N/2)`, counting from 1,
+  when the `N` values of `n_S(p)` are sorted in ascending order. It is read
+  from the frequency table. If `N = 0`, `N` is reported as 0, and the
+  minimum, lower median and maximum are reported as not applicable; no median
+  is invented.
 - The values feed only the ADR-0007 §4 dimension "Gazetteer coverage
   properties". They set no threshold, rank no state and do not decide O7.
 - **They do not measure** address-source availability, record counts, address
@@ -239,7 +261,8 @@ recorded and investigated, and neither side is adjusted to match.
   - anything about address sources.
 - The ad-hoc figures in the research notes stay marked as ad hoc. They are
   replaced only by output of the implemented procedure, never edited to
-  match it.
+  match it. Their medians used an unrecorded rule, so they are not comparable
+  with the lower median unless recalculated by this procedure.
 
 ### 8. Decisions
 
@@ -254,19 +277,31 @@ recorded and investigated, and neither side is adjusted to match.
 | G10-5 | The validation checks and byte-identical reruns | 6 |
 | G10-6 | The values are descriptive inputs to one ADR-0007 dimension and measure nothing about address sources | 7 |
 
-#### 8.2 Open
+#### 8.2 Resolved questions
 
-| # | Question |
-|---|---|
-| Q1 | Which summary of the villages-per-PIN distribution a selection record shows besides the full table (for example `pins`, minimum, median by a named rule, maximum). The ad-hoc notes used a median whose rule is not recorded. |
-| Q2 | Whether the unit counts and the two coverage columns of section 4 are quoted in selection records or kept only in the output files. |
-| Q3 | Where the implementation lives (a module beside `pata.gazetteer` and a script beside `scripts/build_gazetteer.py` is the existing pattern). |
+Revision 1 left these open. The maintainer resolved them on 2026-10-26. The
+resolutions are part of what is approved with section 8.1 (Q1 and Q2 with
+G10-6, Q3 with the Consequences). They do not accept this ADR.
+
+| # | Question (revision 1) | Resolution | Where |
+|---|---|---|---|
+| Q1 | Which summary of the villages-per-PIN distribution a selection record shows besides the full table (for example `pins`, minimum, median by a named rule, maximum). The ad-hoc notes used a median whose rule is not recorded. | `villages_per_pin.csv` stays the canonical output. A selection record shows `N`, minimum, lower median (position `ceil(N/2)`, one-based, ascending) and maximum, with the file's SHA-256; all three are not applicable when `N = 0`. Ad-hoc medians are not comparable unless recalculated. | Section 7 |
+| Q2 | Whether the unit counts and the two coverage columns of section 4 are quoted in selection records or kept only in the output files. | All section 4 columns are quoted, labelled as properties of the pinned LGD mapping, with `gazetteer_version` and the output SHA-256s. | Section 7 |
+| Q3 | Where the implementation lives (a module beside `pata.gazetteer` and a script beside `scripts/build_gazetteer.py` is the existing pattern). | `src/pata/state_properties.py`, `scripts/state_properties.py` and `tests/test_state_properties.py`, when implementation is authorized. Intended design only; no code exists. | Consequences |
+
+#### 8.3 Open
+
+None in this ADR. Its acceptance, and that of ADR-0006 and ADR-0007, remain
+open.
 
 ## Consequences
 
 - After approval, the procedure is implemented as code with its fixture test,
-  run on the pinned build, and cited by selection records. Until then B9 stays
-  open and no gazetteer property can go into a selection record.
+  run on the pinned build, and cited by selection records. The intended
+  locations are `src/pata/state_properties.py`,
+  `scripts/state_properties.py` and `tests/test_state_properties.py` (Q3).
+  None of them exists yet. Until the procedure is implemented and run, B9
+  stays open and no gazetteer property can go into a selection record.
 - The gazetteer builder, its tables and `build_info.json` are unchanged.
 - A new gazetteer snapshot changes `gazetteer_version` and so every output;
   a definition change changes the procedure version. Either is visible in the
