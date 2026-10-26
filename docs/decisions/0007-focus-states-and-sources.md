@@ -4,9 +4,21 @@
   approved by the maintainer. **Cannot be accepted before ADR-0006**, which is
   itself still Proposed and on which sections 3 to 7 depend.
 - **Date:** 2026-10-04
-- **Revision:** 2, after a read-only adversarial review on 2026-10-04 (split
-  timing, focus-state membership, out-of-focus records, overlapping source
-  families, holdout unit, pre-split exposure of records, verification evidence).
+- **Revision:** 3. Revision 2 followed a read-only adversarial review on
+  2026-10-04 (split timing, focus-state membership, out-of-focus records,
+  overlapping source families, holdout unit, pre-split exposure of records,
+  verification evidence).
+  Revision 3 (2026-10-26), alongside ADR-0006 revision 5:
+  - unmatched state-column values and state disagreements in sections 3, 4
+    and 9;
+  - O5 as the only owner of held-out publishers;
+  - the held-out publisher list located in sections 6 and E3;
+  - format ownership in E3: `docs/schema.md` owns every E3 format, the ADRs
+    keep policy and required information, and release ADRs record values;
+  - O4 limited to records with no state-column value and no
+    `coverage_state`.
+
+  Status unchanged.
 - **Deciders:** Project maintainer
 - **Relates to:** ADR-0001 §1, §2, §5, §6, §7 (sources, privacy, provenance,
   language and geographic scope), ADR-0002 and ADR-0004 (gazetteer sources),
@@ -44,7 +56,9 @@ changes no manifest.
   - split ratios, unresolved-group share and holdout feasibility (P6), answered
     from ingestion-time statistics
   - LGD sub-district semantics per selected state, enabling `block` and verifying
-    cue-table entries deferred "together with the focus-state ADR" (L3)
+    cue-table entries deferred "together with the focus-state ADR" (L3). Since
+    ADR-0006 revision 5, L3 points to section 8 (evidence standard) and E1
+    (per-state outcomes and `block`) of this ADR.
   - how split assignments carry over between releases is open (L5)
 
   ADR-0006 does not say who designates held-out sources, how a source is
@@ -91,7 +105,8 @@ changes no manifest.
 - The list is decided in a **new ADR** that cites the selection records (section
   4). This ADR is not amended to add it.
 - Recording `focus_state_version` in the release manifest (ADR-0006 §18) is a
-  follow-up for `docs/schema.md` and the release ADR (section 10.3, E3).
+  follow-up. `docs/schema.md` defines the field, and each release ADR records
+  its value (section 10.3, E3).
 - The list is fixed before the split is first computed. Any later change is a new
   `split_version` and a new release (section 7).
 
@@ -104,6 +119,15 @@ changes no manifest.
     ADR-0006 §17 step 1 says
   - otherwise the manifest's `coverage_state` (section 5), which is already an
     `lgd:state:` ID and needs no name matching
+  - a column value that matches no state never falls back to `coverage_state`
+  - two cases give the record no step-1 state and no membership. Both are
+    excluded and counted per source, each under its own reason (ADR-0006 §17
+    step 1, revision 5):
+    - `state_column_unmatched`: the column value matches no state;
+    - `state_coverage_disagreement`: the column's state differs from
+      `coverage_state`.
+
+    Such a record is resolved only as ADR-0006 §17 step 1 allows.
 - A district found from `raw_text` in step 2 **never** assigns a focus state. A
   merged group's key never changes a record's membership.
 - Membership never uses gold labels, annotator judgement or model output. It is
@@ -116,7 +140,9 @@ changes no manifest.
   `data/processed/`. So the choice of focus states cannot change the group key or
   split of any retained record.
 - **Unknown state.** Whether records whose step-1 state is unknown are retained is
-  open (section 10.2, O4).
+  open (section 10.2, O4). O4 covers only records with no state-column value
+  and no `coverage_state`. A `state_column_unmatched` record is excluded
+  whatever O4 decides.
 - **Exclusivity is a new decision.** ADR-0001 §7 says annotation "initially
   focuses" on a set of states. It does not require annotation to be limited to
   them. Limiting v0 annotation to focus-state records is decided here (S3), for
@@ -151,8 +177,10 @@ assigned a split, in this order:
      villages in the mapping, `same_name_siblings` and `variant_name_siblings`
      counts, and the distribution of villages per PIN
    - ingestion-time aggregate statistics produced by a script from the accepted
-     source files: record counts per source and per step-1 state, and the count
-     whose step-1 state is unknown. No record is read by a person or stored.
+     source files: record counts per source and per step-1 state, the count
+     whose step-1 state is unknown, and, kept separate, the counts excluded
+     as `state_column_unmatched` and as `state_coverage_disagreement` (section
+     3). No record is read by a person or stored.
    - the status of sub-district semantics verification for that state (section 8),
      which will usually be "unverified" at this point
    - the diversity dimensions below, as far as source documentation shows them.
@@ -242,8 +270,9 @@ gazetteer. An address source manifest carries the ADR-0001 §5 fields (including
 
 Manifests describe sources only. Holdout designation and the focus-state list are
 benchmark configuration and never go in a manifest (sections 2 and 6). Adding
-these fields to the manifest format is a follow-up (E3). This ADR changes no
-manifest.
+these fields to the manifest format is a follow-up (E3). The table above fixes
+the required information; exact field names, types and serialization are
+defined in `docs/schema.md`. This ADR changes no manifest.
 
 ### 6. Held-out publishers and grouped splits
 
@@ -257,7 +286,9 @@ source to `test_source_holdout`. This ADR decides how that designation is made:
   ADR-0006 §17).
 - **Where it is stored.** The list of held-out publishers is part of a **versioned
   split configuration**, together with `split_salt`, and is versioned with
-  `split_version`. It is not stored in source manifests.
+  `split_version`. It is not stored in source manifests. Each release manifest
+  records it (ADR-0006 §18). Its format is defined in `docs/schema.md` (E3).
+  This section sets only the policy.
 - **When.** It is fixed before the split is first computed. It is never set or
   changed on the basis of gold labels, annotations, pilot results or model
   results. Any later change is a new `split_version` and a new release (section
@@ -271,8 +302,9 @@ source to `test_source_holdout`. This ADR decides how that designation is made:
   publisher can also pull records of other publishers into `test_source_holdout`.
   The number of such records is reported per release.
 
-Which publishers are held out, and whether `test_source_holdout` is feasible at
-all, is open (O5, ADR-0006 P6).
+Which publishers are held out is open (O5, its only owner). Whether
+`test_source_holdout` is feasible at all is ADR-0006 P6, and O5 uses that
+answer.
 
 ### 7. Fixing scope before the split is first computed
 
@@ -318,6 +350,13 @@ This ADR fixes the evidence standard. The outcome for each state is open (sectio
   and per split.
 - Dropped out-of-focus records are reported as counts per state and per source
   (section 3).
+- Records excluded at split-key step 1 are reported per source, separately as
+  `state_column_unmatched` and `state_coverage_disagreement` (section 3), with
+  a reference to each recorded resolution (ADR-0006 §17 step 1).
+  - These counts equal the ingestion-time counts of the ingestion the release
+    was built from (section 4, step 3).
+  - A change in these counts between releases is traced to a recorded
+    resolution or to another section 7 change of the source set.
 - The ADR-0001 distribution-shift limitation (institutional addresses only) is
   repeated for every focus state, because no source family in section 5 covers
   user-typed residential addresses.
@@ -349,8 +388,8 @@ step 3) before the split is first computed, and never from pilot annotations.
 | O1 | Which states are focus states | Source inventory and selection records (section 4) |
 | O2 | Which address sources are accepted | Source assessments (section 5) |
 | O3 | How many focus states; minimum number of publishers per focus state; any cap on one source's, publisher's or family's share of a split | Source inventory and ingestion-time aggregate statistics |
-| O4 | Whether records whose step-1 state is unknown are retained in the annotation pool | Ingestion-time aggregate statistics (unknown-state counts) |
-| O5 | Which publishers are held out, and whether `test_source_holdout` is feasible | Ingestion-time aggregate statistics; ADR-0006 P6 |
+| O4 | Whether records whose step-1 state is unknown are retained in the annotation pool. Only records with no state-column value and no `coverage_state`; `state_column_unmatched` records are always excluded (section 3). | Ingestion-time aggregate statistics (unknown-state counts) |
+| O5 | Which publishers are held out. O5 is the only owner of this question. (Revision 2 also asked here whether `test_source_holdout` is feasible; that is ADR-0006 P6.) | Ingestion-time aggregate statistics; the feasibility answer from ADR-0006 P6 |
 | O6 | Whether sources publishing native-script addresses are admitted in v0 | ADR-0001 §6; source inventory |
 | O7 | Whether gazetteer coverage gaps (urban-heavy states, districts without villages) count for or against a candidate state | Selection records |
 
@@ -363,7 +402,7 @@ benchmark decision. It is recorded in the source ADR (section 5; E5).
 |---|---|---|
 | E1 | Per-state outcome of sub-district semantics verification; enabling `block` | A new ADR or the relevant source ADR, together with ADR-0006 L3 |
 | E2 | Redistribution of address text, and licence of the annotations | Release ADR (ADR-0006 L1) |
-| E3 | Formats: address-source manifest fields (section 5), split configuration (section 6), focus-state list file, `focus_state_version` in the release manifest, focus-state field in the split file | `docs/schema.md` and the release ADR |
+| E3 | Formats: address-source manifest fields (section 5), split configuration (section 6) including the held-out publisher list with `split_salt`, focus-state list file, `focus_state_version` and the held-out publisher list in the release manifest, focus-state field in the split file | `docs/schema.md` is the normative owner of every format in this row: exact field names, structures, types and serialization. This ADR and ADR-0006 keep the policy, procedures, invariants and required information (here sections 2, 5, 6, 7 and 9), and reference the schema. Each release ADR records that release's values, such as its held-out publisher list, and references the schema; it never redefines a format. (Revision 2 said "`docs/schema.md` and the release ADR".) |
 | E4 | How split assignments carry over between releases when sources or states change | ADR-0006 L5 |
 | E5 | Whether each source permits automated retrieval | That source's source ADR |
 

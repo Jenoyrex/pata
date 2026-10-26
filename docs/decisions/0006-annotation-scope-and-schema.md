@@ -1,18 +1,34 @@
 # ADR-0006: PataBench v0 annotation scope and schema
 
 - **Status:** Proposed. Not accepted until the decisions in section 21.1 are
-  approved by the maintainer.
+  approved by the maintainer. F1 to F13 were approved in principle on
+  2026-10-26. The ADR stays Proposed until revision 5 is reviewed.
 - **Date:** 2026-10-04
-- **Revision:** 4. Revision 2 followed a read-only design review on 2026-10-04
+- **Revision:** 5. Revision 2 followed a read-only design review on 2026-10-04
   that found circular split assignment, PIN circularity, an insufficient Layer D
   vocabulary and gaps in candidate reproducibility. Revision 3 (2026-10-04)
   narrows Layer D `deferred_coverage` to `pending_level`, fixes the
   pre-annotation boundary and removes remaining contradictions. Revision 4
   (2026-10-04), from the ADR-0007 review: P6 is answered from ingestion-time
   statistics, and cross-release split stability is recorded as open (L5).
+  Revision 5 (2026-10-26), from a review against ADR-0007:
+  - §17 step 1 takes the state from the column first and otherwise from the
+    manifest's `coverage_state`. An unmatched column value, or a disagreement
+    between the two, excludes the record under its own reason. Exclusions are
+    resolved only by a documented, evidence-based correction or disposition.
+  - §17 step 5 and §18 point to the held-out publisher list in the versioned
+    split configuration (ADR-0007 §6, E3).
+  - §17 and §18 say what the split file and release manifest must record.
+    `docs/schema.md` defines their exact field names, structures, types and
+    serialization, and each release ADR records the values.
+  - `raw_text` stays strict, and text not published as one string is deferred
+    (L6, new).
+  - L3 now points to ADR-0007 §8 and E1.
+  - P6 no longer asks which publishers are held out (ADR-0007 O5).
 - **Deciders:** Project maintainer
 - **Relates to:** ADR-0001 (data, privacy, licensing, scope), ADR-0002 and ADR-0004
-  (gazetteer sources and IDs), ADR-0005 (`gazetteer_version`)
+  (gazetteer sources and IDs), ADR-0005 (`gazetteer_version`), ADR-0007 (focus
+  states and address sources)
 
 This ADR decides **what** is annotated, **how** labels are represented, **what
 annotators and systems may see**, and **how splits and releases are built**. It
@@ -126,6 +142,13 @@ under a source manifest, never typed in by annotators.
 | `source_context` | optional | object whose keys come only from the manifest's `context_columns` allowlist (section 12) | Used only to compute split keys and for audits. Never gold. Never shown to annotators or systems. |
 | `admission.screen_version` | yes | version of the written privacy screen | Screening can be reproduced. |
 | `admission.screened_by` | yes | pseudonymous annotator ID or `rule:{name}` | Accountability for the privacy decision. |
+
+**`raw_text` is strict in v0.** It is one string the source publishes as an
+address. A concatenation of separately published components, and text
+extracted from a PDF or another document, are **not** `raw_text` in v0. A
+future documented decision may permit them (section 21.3, L6). Until then, a
+source that does not publish its addresses as such strings supplies no
+records.
 
 Removed from revision 1: `synthetic_generator` (synthetic data is excluded from v0)
 and `admission.result` (it was always `admitted`).
@@ -708,10 +731,46 @@ gazetteer. Neither the resulting key nor `source_context` is ever shown to
 annotators.
 
 1. **State.**
-   - Take the state from an allowlisted state column, or from the manifest if the
-     whole source covers one state.
-   - Match it to an LGD state by exact `name_key`. If nothing matches, the state is
-     unknown.
+   - If the record has a value in an allowlisted state column, match it to an
+     LGD state by exact `name_key`.
+   - Otherwise, if the manifest declares `coverage_state` (ADR-0007 §5), use
+     that `lgd:state:` ID directly. It is not name-matched.
+   - Otherwise the state is unknown. Whether such records are retained is
+     ADR-0007 O4.
+   - **Two exclusion reasons.** Neither value is ever chosen over the other,
+     and `coverage_state` is never a fallback for a column value:
+     - `state_column_unmatched`: the column has a value and nothing matches
+       it. The state is unknown even if `coverage_state` exists.
+     - `state_coverage_disagreement`: the column value matches a state, and
+       the manifest declares a different `coverage_state`.
+
+     A record with either reason is **excluded** from the annotation pool
+     pending resolution. It takes no part in steps 2 to 5, gets no
+     `record_id` or split, and is not written to `data/processed/`. Records
+     are counted per source and per reason at ingestion, and the two reasons
+     are never added together into one count.
+   - **Resolution.** An exclusion is resolved only by a documented,
+     evidence-based correction or disposition:
+     - correcting the manifest's `coverage_state` or the source's
+       state-column mapping;
+     - or rejecting the affected records, or the source.
+
+     Evidence is limited, before and after the split, to the kinds ADR-0007
+     §5 allows for source assessment: publisher documentation, the header row
+     and scripted aggregate statistics. Never model predictions, gold labels,
+     annotations or a person reading records. The record of a resolution
+     states:
+     - the source and the reason;
+     - the number of records affected;
+     - the evidence, cited by URL and retrieval date or by script and output
+       hash;
+     - the outcome, the date and who decided.
+
+     It is kept with the source's assessment or source ADR. A correction made
+     after the split is first computed is a change to the source set and
+     follows ADR-0007 §7.
+   - Revision 4 used "or", name-matched both inputs and had no rule for an
+     unmatched value or a disagreement.
 2. **District.** Use the first rule that gives exactly one LGD district:
    1. An allowlisted district column, matched by exact `name_key` within the known
       state (or across India, if the match is unique).
@@ -727,7 +786,8 @@ annotators.
    - The merged group's key is the lexicographically smallest member key.
 5. **Assignment.**
    - Sources designated as held out, and any merged group containing their
-     records, go to `test_source_holdout`.
+     records, go to `test_source_holdout`. The designation is per publisher
+     and is listed in the versioned split configuration (ADR-0007 §6).
    - Every other group goes to `train`, `dev` or `test` by SHA-256 of
      `group_key + "\n" + split_salt`, mapped to ratios.
    - The ratios are deferred (section 21.2, P6).
@@ -754,6 +814,10 @@ annotators.
 - Before the freeze, the split may be recomputed **only** to fix a bug in the
   procedure, as a new `split_version`, and never using gold.
 
+The table below fixes **what** the split file must record. Its exact field
+names, structure, types and serialization are defined in `docs/schema.md`
+(ADR-0007 E3).
+
 | Split-file field | Required | Allowed values / format | Purpose and scientific use |
 |---|---|---|---|
 | `record_id` | yes | as in section 2 | Joins the split to the record. |
@@ -766,6 +830,12 @@ annotators.
 Every gold release has a **release manifest**. A release is immutable. Any change
 makes a new release.
 
+The table below fixes **what** a release manifest must record. The normative
+field names, structure, types and serialization of the release manifest and
+the split configuration are defined in `docs/schema.md` (ADR-0007 E3). Each
+release ADR records that release's values and references the schema; it
+does not redefine the format.
+
 | Field | Purpose |
 |---|---|
 | `benchmark_version` | Identity of the release (semantic versioning). |
@@ -777,6 +847,7 @@ makes a new release.
 | `reference_list_version`, `cue_table_version`, `normalization_table_version` | Tables that annotation and generation depend on. |
 | `candidate_procedure_version`, `resolution_procedure_version`, `split_key_procedure_version` | Procedures that generate or derive gold and splits. |
 | `split_version`, `split_salt` | The salt is published with the release, so splits can be regenerated. |
+| Held-out publisher list | Which publishers form `test_source_holdout`, as fixed in the versioned split configuration (ADR-0007 §6). Its field name and format are defined in `docs/schema.md` (ADR-0007 E3), not here. The release ADR records the list for that release. |
 | `files`: path and SHA-256 for each file | Integrity of every file in the release. |
 | `errata` | References to errata entries that affect this release. |
 | `licence`, `attribution` | Deferred to the release ADR (section 21.3, L1). |
@@ -868,7 +939,7 @@ annotations.
 | P3 | new | Merging or removing `premise_name`, `country`, `unit`; whether the two-role precedence order works; how often `place_unspecified` is used. |
 | P4 | new | The contents of the normalization table; whether Layer B is a v0 evaluation task. |
 | P5 | new | Rules for labelling a bare name as `state` or `district` from the reference list when the same name is also a village or other place. |
-| P6 | U13 (rest) | Split ratios; acceptable share of unresolved groups; whether `test_source_holdout` is feasible, and with which publishers of the approved sources. Answered from ingestion-time aggregate statistics before the split is first computed, never from pilot annotations, because pilot records come from the dev split. |
+| P6 | U13 (rest) | Split ratios; acceptable share of unresolved groups; whether `test_source_holdout` is feasible. Answered from ingestion-time aggregate statistics before the split is first computed, never from pilot annotations, because pilot records come from the dev split. Which publishers are held out is decided only under ADR-0007 O5, which uses this feasibility answer (revision 5; revision 4 also asked "with which publishers of the approved sources"). |
 | P7 | new | The closed list of pruning reasons. |
 
 #### 21.3 Deferred to another ADR or document
@@ -877,9 +948,10 @@ annotations.
 |---|---|---|---|
 | L1 | U3 | Licence of the annotations; shipping `raw_text` or stand-off | A release ADR, before the first publication |
 | L2 | new | Task and metric definitions; whether an "open" track exists | A task-definition document |
-| L3 | U18 (rest) | LGD sub-district semantics per selected state; whether to enable `block`; verifying cue-table entries | Together with the focus-state ADR |
+| L3 | U18 (rest) | LGD sub-district semantics per selected state; whether to enable `block`; verifying cue-table entries | Evidence standard: ADR-0007 §8 (S9). Per-state outcomes and enabling `block`: a new ADR or the relevant source ADR (ADR-0007 E1). Revision 4 said "together with the focus-state ADR". |
 | L4 | U4 | Annotator recruitment, consent, compensation. Consent is required either way. | An annotation-protocol document |
 | L5 | new | How split assignments carry over between releases when new sources or records change duplicate merges (section 17, step 4). Unresolved; no policy is chosen here. Must be decided before any second release, or any change to the source set after a split is first computed. | An ADR amending section 17 (or a revision of this ADR while it is Proposed) |
+| L6 | G2/B5 (revision 5) | Whether text not published as one address string (a concatenation of published components, or text extracted from a PDF or other document) can ever be `raw_text`, and by which versioned procedure. Until decided, it cannot (section 2). | A new ADR, or a revision of this ADR while it is Proposed |
 
 #### 21.4 Removed from ADR-0006
 

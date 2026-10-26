@@ -2426,7 +2426,12 @@ UTC; responses saved outside the repository and hashed.
   `Registered_Office_Address` (C7 now out of v0 scope, B18), C9a and C9b's B.Ed list have `address`, C10 has
   `_address`; their completeness is equally unverified. Ninth pass: nine of
   C9b's ten resources list an `Address` column (R80, R81); completeness
-  equally unverified.
+  equally unverified. **2026-10-26:** ADR-0006 revision 5, still Proposed
+  and not accepted, would keep `raw_text` strict in v0: no concatenated
+  components and no text extracted from PDFs, until a documented decision
+  permits it (ADR-0006 L6). If that is accepted, C4 (components only) and C5
+  (PDF lists) could supply no records. Their licence and assessment status is
+  unchanged.
 - **G3. Headers.** Publisher/platform schema fields for C1–C4 were inspected
   directly [PUBD, R32–R34, R37]. No downloadable file was opened, so actual file
   header rows remain unverified. The fifth pass (B6) added platform field types

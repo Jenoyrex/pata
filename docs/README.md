@@ -8,7 +8,12 @@
 
 Planned with milestone M0 (added when written, not before):
 
-- `schema.md`: PataBench annotation schema (versioned).
+- `schema.md`: PataBench annotation schema (versioned). It is also the
+  normative owner of every machine-readable format listed in ADR-0007 E3:
+  address-source manifests, focus-state lists, split configurations,
+  split-file fields and release manifests, including the held-out publisher
+  list. ADR-0006 and ADR-0007 keep policy and required information, and each
+  release ADR records that release's values; all reference the schema.
 - `datasheet.md`: dataset documentation in the style of *Datasheets for Datasets*.
 
 ## Writing an ADR
