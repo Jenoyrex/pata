@@ -2466,6 +2466,9 @@ UTC; responses saved outside the repository and hashed.
 - **G9. Operators.** No `operator_published` source with a licence was found.
 - **G10. Reproducibility.** The gazetteer table came from an ad-hoc script that is
   not in the repository. ADR-0007 §4 requires a versioned procedure.
+  **2026-10-26:** a procedure is drafted as ADR-0008 (Proposed), not
+  implemented and not run. Until it is, the ad-hoc figures stay as they are
+  and cannot go into a selection record.
 - **G11. Coverage of this inventory.** Not exhaustive; see "Identified but not
   researched" and, for the eighth pass, "Not assessable or not pursued".
 - **G12. Schemas of state-instance files.** Most C8 and C9 resources have no
