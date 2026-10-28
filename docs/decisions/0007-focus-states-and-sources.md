@@ -134,9 +134,9 @@ changes no manifest.
 
 - A record's **focus-state membership** is its own **step-1 state** from the
   versioned split key procedure (ADR-0006 §17, `split_key_procedure_version`),
-  computed for that record before any merge:
-  - the allowlisted state column takes precedence, matched by exact `name_key` as
-    ADR-0006 §17 step 1 says
+  computed for that record before duplicate classes are formed:
+  - the declared state column takes precedence. It is matched by exact `name_key`,
+    after missing-value tokens and value aliases, as ADR-0006 §17 step 1 says.
   - otherwise the manifest's `coverage_state` (section 5), which is already an
     `lgd:state:` ID and needs no name matching
   - a column value that matches no state never falls back to `coverage_state`

@@ -451,8 +451,9 @@ step fixes the status):
 2. **Name stage.**
    - Strip the cue-table designators from the span text.
    - Collect every unit whose `name_key` equals the `name_key` of the remainder, at
-     the role's claimed level. A `place_unspecified` role without a designator
-     uses all four levels.
+     the role's level: its designator's claimed level or, without a designator,
+     its label's level. A `place_unspecified` role without a designator uses all
+     four levels.
    - Output: `candidates.name`.
    - If it is empty, the status is `not_in_gazetteer` / `no_match_in_snapshot`.
      The gate is not checked. A reconciliation addition can still widen the
@@ -512,8 +513,10 @@ step fixes the status):
    - It is derived, never typed in.
    - Exception: when either gate failed, `final_set` is `[]`. Additions and
      prunings on such a role are recorded for audit only and have no effect.
-   - One unit gives `linked`; two or more give `ambiguous`; none gives
-     `not_in_gazetteer` / `no_supported_match`.
+   - One unit gives `linked`; two or more give `ambiguous`.
+   - None gives `not_in_gazetteer` / `no_supported_match`, or keeps
+     `no_match_in_snapshot` if the name stage was empty and nothing was added
+     (step 2).
 9. **Anchor invalidation**, on the adjudicated Layer C (and on each annotator's
    reconciliation C, section 14).
    - It is one pass from the top level down. Every anchor is at a higher level
@@ -568,7 +571,9 @@ A `place_unspecified` role with an empty `final_set` is a role at no level. So i
 one whose `final_set` spans several levels; that is a documented limitation.
 
 Generated candidate lists of a role that is `not_in_gazetteer` (gated, invalidated
-or unmatched) never feed any Layer D status or `basis`. Roles with no LGD level (`city`, `post_office`, `locality`,
+or unmatched) never feed any Layer D status or `basis`.
+
+Roles with no LGD level (`city`, `post_office`, `locality`,
 `street`, `landmark`, `pincode` and the `not_applicable` labels) are never roles at
 any `L`. Their Layer C status and reason (section 7) already record that the
 gazetteer cannot represent them, and they do not change any Layer D status.
@@ -1272,7 +1277,8 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
   linked only as the village-level verification record establishes (ADR-0007 §8).
   - Their meaning and their matching behaviour, including whether the name stage
     strips the suffix, are not assumed.
-  - Revision 5 linked `(Ct)` units as villages without evidence.
+  - Revision 5 linked `(Ct)` units as villages whenever the text had a village
+    designator.
 
 ### 20. Extending the schema beyond v0
 
@@ -1344,7 +1350,7 @@ annotations.
 | L2 | new | Task and metric definitions; whether an "open" track exists | A task-definition document |
 | L3 | U18 (rest) | LGD semantics of the state, district, sub-district and village levels, national or per state; whether to enable `block`; verifying cue-table entries | Evidence standard: ADR-0007 §8 (S9). Outcomes and enabling `block`: a new ADR or the relevant source ADR (ADR-0007 E1). Must be completed, or frozen as unverified, before the guidelines freeze (section 14). Revision 4 said "together with the focus-state ADR"; revision 5 covered the sub-district level only. |
 | L4 | U4 | Annotator recruitment, consent, compensation. Consent is required either way. | An annotation-protocol document |
-| L5 | new | How split assignments carry over between releases when new sources or records change duplicate merges (section 17, step 4). Unresolved; no policy is chosen here. Must be decided before any second release, or any change to the source set after a split is first computed. | An ADR amending section 17 (or a revision of this ADR while it is Proposed) |
+| L5 | new | How split assignments carry over between releases when new sources or records change duplicate classes (section 17, step 4). Unresolved; no policy is chosen here. Must be decided before any second release, or any change to the source set after a split is first computed. | An ADR amending section 17 (or a revision of this ADR while it is Proposed) |
 | L6 | G2/B5 (revision 5) | Whether text not published as one address string (a concatenation of published components, or text extracted from a PDF or other document) can ever be `raw_text`, and by which versioned procedure. Until decided, it cannot (section 2). | A new ADR, or a revision of this ADR while it is Proposed |
 
 #### 21.4 Removed from ADR-0006

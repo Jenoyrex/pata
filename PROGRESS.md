@@ -173,7 +173,27 @@ Each needs maintainer input.
   - `admission.screened_by` records both screen stages
   - the T5 test vectors are copied into §17
   - §20 clarifies that `schema_version` and `benchmark_version` are separate
-- Not yet done: a full line-by-line review of the diff against every ruling.
+- **Review completed** (2026-10-28, second checkpoint on the branch). Both diffs
+  were read in full against the edit map and the rulings. Fixes:
+  - ADR-0007 §3 still said "allowlisted state column" and "before any merge".
+    Now: the declared column, matched after tokens and aliases, before duplicate
+    classes are formed.
+  - ADR-0006 §7 step 2: the level of a role without a designator was undefined.
+    Now: its label's level.
+  - ADR-0006 §7 step 8: an empty result could override `no_match_in_snapshot`.
+    It is now kept.
+  - ADR-0006 §8: a paragraph that had run into the next one was split.
+  - ADR-0006 L5: outdated "duplicate merges" wording.
+  - ADR-0006 §19: the history note on revision 5 is now factual.
+- Cross-reference check:
+  - Every cited section exists: ADR-0006 §2, §3, §7, §10, §12, §14, §17, §18;
+    ADR-0007 §2, §5, §6, §8.
+  - The only remaining "merged group" text is in the revision notes.
+  - ADR-0006, ADR-0007 and ADR-0008 are all Proposed. ADR-0008 is unchanged.
+- **Re-approval list**, from the diff:
+  - ADR-0006: F1, F3, F5, F9, F10, F12, new F14, new F15. Deferred rows reworded:
+    L3, L5.
+  - ADR-0007: S6, S9. Deferred rows reworded: E1, E3.
 
 ## Next action
 
