@@ -55,8 +55,8 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
 | T5 | Blocker 4: freeze point, salt, bucket mapping | VERIFIED (2026-10-28) | — | ADR-0006 §17, F5 | — (D5.1, D5.2 ruled) | mapping fully specified; freeze point testable |
 | T6 | Blocker 6: `raw_text` eligibility and decoding | VERIFIED (2026-10-28) | — | ADR-0006 §2, §11, L6 | — (D6.1, D6.2, D4.4 ruled) | eligibility decidable from documentation alone |
 | T7 | Blocker 10: screening before the split | VERIFIED (2026-10-28) | — | ADR-0006 §12, §14; ADR-0007 §5; ADR-0001 §2 | — (D7.1′ (a) ruled) | no unrecorded pre-split exposure |
-| T8 | Blocker 3: withdrawal, denylist, errata | BLOCKED (maintainer: D8.1–D8.4) | T6, Blocker 1, T7 | ADR-0006 §12, §13, §18 | D8.1–D8.4 | a rebuild can't silently re-admit a withdrawn or human-screen-excluded record, or the limitation is documented |
-| T9 | Blocker 7: release-manifest fields | BLOCKED (T1–T8) | T1–T8 | ADR-0006 §18 | `benchmark_version` major/minor rules | every version input is listed |
+| T8 | Blocker 3: withdrawal, denylist, errata | VERIFIED (2026-10-28) | T6, Blocker 1, T7 | ADR-0006 §12, §13, §18 | — (D8.1–D8.4 ruled) | a rebuild can't silently re-admit a withdrawn or human-screen-excluded record, or the limitation is documented |
+| T9 | Blocker 7: release-manifest fields | BLOCKED (maintainer: D9.1, D9.2) | T1–T8 (met) | ADR-0006 §2, §18, §20 | D9.1, D9.2 | every version input is listed |
 | T10 | Blocker 11: acceptance condition and ordering | BLOCKED (T9) for ordering. The acceptance condition can be ruled any time. | T9 | ADR-0006 status line, Consequences; ADR-0007 Consequences | what counts as acceptance | both ADRs give one consistent order |
 | T11 | Coordinated revision: ADR-0006 rev 6, ADR-0007 rev 4 | BLOCKED (T1–T10) | T1–T10 | as above | approval of the drafted diff | full diff reviewed; cross-references checked |
 | T12 | Follow-up implementation (`docs/schema.md`, procedures, validator) | BLOCKED (acceptance) | ADR acceptance | per ADR-0006 Consequences | — | per ADR |
@@ -902,5 +902,151 @@ record or class identifiers.
 - *Alternative:* replace them with counts at exclusion, which loses the exposure
   audit for those classes.
 
-**Status:** BLOCKED on D8.1–D8.4. When they are ruled, T9 waits only on T8, which
-would then be done.
+**Status:** VERIFIED 2026-10-28 (see "T8 rulings").
+
+### T8 rulings (maintainer, 2026-10-28; not yet in the ADRs)
+
+**Accepted exactly as recommended:** D8.1 (a), D8.2, D8.3, D8.4.
+- **D8.1 denylist.**
+  - Internal and unreleased, in private maintainer storage. Never committed, never
+    released.
+  - It covers withdrawals and D7.1′ human-screen exclusions.
+  - Fields: `source_id`, `source_record_ref`, `raw_text_sha256`, a reason category,
+    the date.
+  - It is applied as a versioned screen rule, and every change bumps
+    `screen_version`.
+- **D8.2.** Withdrawals and human-screen failures exclude the whole Blocker 1
+  duplicate class, counted separately. A failure caused only by `source_context`
+  stays per record.
+- **D8.3.** An append-only errata log outside releases (for example
+  `docs/errata.md`).
+  - Entries have no raw text, record IDs or hashes.
+  - Each release manifest lists only the entries it incorporates.
+- **D8.4.** Individual exposure-log entries are kept in the same private store as
+  the denylist. Only aggregate counts are published.
+
+**Consistency check** (ADR-0001 to ADR-0008, Blockers 1, 2 and 8, D5.1, D7.1′, the
+fixed-assignment rule): **no conflicts found.**
+- **ADR-0001 §2:** the denylist and exposure log are data and are never committed
+  (§2, last bullet).
+  - An entry points to a row in a public source snapshot that is already held
+    locally. It adds no personal data beyond that snapshot, and it holds no text.
+- **ADR-0002 l.70** (a GODL-India provider may withdraw the licence for a dataset):
+  a different kind of withdrawal, which errata could record. See the gap below.
+- **ADR-0003, ADR-0004, ADR-0005, ADR-0008:** nothing on withdrawal, errata,
+  screening or exposure.
+- **ADR-0006 §12** ("only the count of withdrawals is logged"): changed by D8.1, as
+  the request stated. Wording change in T11.
+- **ADR-0006 §18:** errata without text, IDs or hashes is unchanged.
+  - The manifest's `errata` field changes from "entries that affect this release"
+    to "entries this release incorporates". Wording change in T11.
+- **Fixed assignment and Blocker 1:** every member of a class shares the class key
+  and so the same split. A cascade removes the whole class and moves no one else.
+- **D7.1′:** a human-screen failure in staging deletes the whole class from staging
+  (D8.2) and adds denylist entries. Only passing records reach `data/processed/`.
+- **D5.1, D7.3:** "with and without exposed classes" reporting uses the counts
+  D8.4 allows.
+- **Blockers 2 and 8:** anchors and Layer D are per record, so deleting a record's
+  annotations changes no other record's gold.
+
+**Derived** (no new decisions; recorded for T11, overridable):
+- **§13 exception:** withdrawal is the only case where annotation documents are
+  deleted.
+- **Matching.**
+  - A denylist entry matches a record when `source_id`, `source_record_ref` and
+    `raw_text_sha256` are all equal (the recorded fields, read as one key).
+  - D8.2 then excludes the matched record's whole duplicate class in that build.
+  - Rebuilds from the same pinned snapshots are therefore deterministic.
+- **Limitation (documented, not solved):**
+  - A new snapshot can drop the original row or change its text (a `native` ID
+    with new text). A duplicate of a withdrawn text may also appear in another
+    source while the original row has gone.
+  - In those cases no entry matches. Such records are caught only by the human
+    screen, which every new ingestion runs (D7.1′).
+  - External stand-off rebuilds depend on release membership lists (L1).
+- **Gap: the reason-category list isn't defined.** The values are a format for
+  `docs/schema.md` (T12). Candidates include personal data, licence withdrawn
+  (ADR-0002 l.70) and source error. Nothing is chosen here.
+
+**T8 acceptance check:**
+- A same-snapshot rebuild can't re-admit a withdrawn or human-screen-excluded record:
+  the denylist runs as a screen rule, and the class cascades.
+- The cases that remain are documented as limitations.
+- The cascade, the errata location and the exposure-log retention are each defined.
+- **VERIFIED.**
+
+### T9: Blocker 7, release-manifest fields (ADR-0006 §2, §18, §20) — decision requests
+
+**Facts.** The §18 table lacks:
+- the source manifest content
+- `normalization_procedure_version` (§6 calls the procedure "versioned", but there
+  is no field)
+- an ingestion procedure version
+- `focus_state_version` (ADR-0007 §2: "recording ... is a follow-up")
+- the code and Unicode versions that `name_key` depends on
+- a data source for `scripts`
+- rules for `benchmark_version`
+
+**Spec: required fields, derived from approved rules.** Field names and format
+belong to `docs/schema.md` (E3).
+- `sources`: for each source, the SHA-256 of its **manifest content** next to the
+  snapshot SHA-256.
+  - The manifest carries everything that changes splits: `coverage_state`,
+    `context_columns`, column roles (T4), the alias table (D4.1),
+    `missing_value_tokens` (D4.4), `raw_text_scope` (D6.1), `record_id_scope`.
+- `ingestion_procedure_version` (T6 decoding).
+- `normalization_procedure_version` (§6).
+- `focus_state_version` (ADR-0007 §2).
+- The split configuration: `split_version`, `split_salt` (D5.2), the held-out
+  publisher list, and the **ratio weights** (P6 values, T5 mapping).
+- Code provenance:
+  - the Pata git commit
+  - the Python version
+  - `unicodedata.unidata_version`, because `name_key` and the Script property
+    depend on it (T4: repeated runs give the same key)
+- `screen_version` (exists). It already identifies the denylist state (D8.1); no
+  denylist hash or contents are published.
+- `errata`: the entries this release incorporates (D8.3).
+- Published aggregate counts go in a release report listed in `files` with its
+  SHA-256, not in the manifest:
+  - exclusions per reason (T6, §17)
+  - cascades (D8.2)
+  - exposure (D7.3, D8.4)
+  - `anchor_invalidated` (R1f)
+  - mechanical statuses (R9, 8.10)
+- Unchanged: L1 (`licence`, `attribution`) stays with the release ADR.
+
+**D9.1 `benchmark_version` rules.**
+- *Recommended:*
+  - **MAJOR** for anything that makes scores not directly comparable (§18 point
+    4): any change to records (additions, withdrawals), to splits (`split_version`),
+    to `gazetteer_version` (§10 migration), or to gold semantics (labels, statuses
+    including a new Layer D status, procedures that change gold).
+  - **MINOR** for additive release content that changes no gold, split or record
+    (for example a new derived stratification field, or new report counts).
+  - **PATCH** for documentation or packaging fixes where every gold and split file
+    keeps the same SHA-256.
+- This **conflicts with §20's current wording**, which allows a new Layer D status
+  as a minor version. The earlier non-blocking note flagged this. Changed in T11 if
+  accepted.
+- *Alternative:* keep §20 and define MAJOR only for removals and incompatible schema
+  changes. Then score comparability across minor versions isn't guaranteed.
+
+**D9.2 Data source for `scripts`** (§2: "sorted ISO 15924 codes from the Unicode
+Script property of letters"; Python's standard library has no Script property).
+- *Recommended (a):* pin the Unicode Character Database file `Scripts.txt` for the
+  same Unicode version as `unicodedata.unidata_version`.
+  - Its SHA-256 goes in the manifest.
+  - It needs a provenance manifest and a licence check (Unicode's data licence)
+    before use.
+  - No new Python dependency.
+- *(b)* a pinned third-party dependency exposing `\p{Script}` (for example
+  `regex`), locked in `uv.lock`. Its Unicode version must match, or both must be
+  recorded.
+- *(c)* derive the script from character names. That's a heuristic, and not
+  recommended.
+- **Evidence gap:** neither the licence nor a specific UCD version was checked
+  in this run.
+
+**Status:** BLOCKED on D9.1 and D9.2. T10's ordering part becomes READY once T9 is
+VERIFIED.

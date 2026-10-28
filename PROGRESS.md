@@ -51,7 +51,19 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
   - **T7 VERIFIED.**
   - New coupling: human-screen exclusions aren't reproducible on rebuild, so T8's
     denylist must cover them.
-- **T8 decision requests D8.1–D8.4 prepared.** T8 is BLOCKED on them.
+- T8 decision requests D8.1–D8.4 prepared. Commit `6ae0221`.
+- **T8 rulings (2026-10-28): D8.1–D8.4 accepted as recorded.**
+  - Checked against ADR-0001–0008, Blockers 1, 2 and 8, D5.1, D7.1′ and fixed
+    assignment: no conflicts.
+  - Derived:
+    - the §13 deletion exception
+    - denylist matching on all three fields
+    - a documented limitation for new snapshots and duplicates across sources
+    - the reason-category list left to `docs/schema.md` (gap)
+  - **T8 VERIFIED.**
+- **T9 decision requests D9.1–D9.2 prepared.**
+  - The required manifest fields are specified from approved rules.
+  - T9 is BLOCKED on the two decisions.
   - No file-level evidence exists for any source field (B6), so per-source
     eligibility stays pending. This isn't a T6 criterion.
 
@@ -83,6 +95,11 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 | | `uv run ruff check .` | All checks passed, exit 0 |
 | | status audit | T0–T7 VERIFIED, T8 BLOCKED (D8.1–D8.4), T9–T12 BLOCKED |
 | | `uv run pytest` | not rerun (docs-only change) |
+| 2026-10-28, T8 rulings + T9 requests | `git diff --check` | no output, exit 0 |
+| | `uv run ruff format --check .` | 23 files already formatted, exit 0 |
+| | `uv run ruff check .` | All checks passed, exit 0 |
+| | status audit | T0–T8 VERIFIED, T9 BLOCKED (D9.1, D9.2), T10–T12 BLOCKED; no stale lines |
+| | `uv run pytest` | not rerun (docs-only change) |
 
 ## Failed attempts
 
@@ -101,13 +118,12 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 
 Each needs maintainer input.
 
-- Blocker 3 (T8, BLOCKED: D8.1 denylist, D8.2 cascade to the duplicate class, D8.3
-  errata location, D8.4 exposure-log retention)
-- Blocker 7 (T9, BLOCKED on T8)
+- Blocker 7 (T9, BLOCKED: D9.1 `benchmark_version` rules, D9.2 data source for
+  `scripts`)
 - Blocker 11 (T10). Its ordering part is BLOCKED on T9. The acceptance condition
   can be ruled at any time.
 
 ## Next action
 
-**Maintainer rulings on D8.1–D8.4** (graph, "T8 ... decision requests"). Then T9
-(release-manifest fields) becomes READY. No ADR edits until T1–T10 are decided.
+**Maintainer rulings on D9.1–D9.2** (graph, "T9 ... decision requests"). Then T10
+becomes READY. No ADR edits until T1–T10 are decided.
