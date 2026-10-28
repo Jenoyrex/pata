@@ -57,8 +57,8 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
 | T7 | Blocker 10: screening before the split | VERIFIED (2026-10-28) | — | ADR-0006 §12, §14; ADR-0007 §5; ADR-0001 §2 | — (D7.1′ (a) ruled) | no unrecorded pre-split exposure |
 | T8 | Blocker 3: withdrawal, denylist, errata | VERIFIED (2026-10-28) | T6, Blocker 1, T7 | ADR-0006 §12, §13, §18 | — (D8.1–D8.4 ruled) | a rebuild can't silently re-admit a withdrawn or human-screen-excluded record, or the limitation is documented |
 | T9 | Blocker 7: release-manifest fields | VERIFIED (2026-10-28) | T1–T8 (met) | ADR-0006 §2, §18, §20 | — (D9.1, D9.2 ruled; D9.2 evidence verified) | every version input is listed |
-| T10 | Blocker 11: acceptance condition and ordering | BLOCKED (maintainer: D10.1, D10.2) | T9 (met) | ADR-0006 status line, Consequences; ADR-0007 status line, Consequences; ADR-0008 | D10.1, D10.2 | both ADRs give one consistent order, and acceptance is defined |
-| T11 | Coordinated revision: ADR-0006 rev 6, ADR-0007 rev 4 | BLOCKED (T1–T10) | T1–T10 | as above | approval of the drafted diff | full diff reviewed; cross-references checked |
+| T10 | Blocker 11: acceptance condition and ordering | VERIFIED (2026-10-28) | T9 (met) | ADR-0006 status line, Consequences; ADR-0007 status line, Consequences; ADR-0008 | — (D10.1, D10.2 ruled) | both ADRs give one consistent order, and acceptance is defined |
+| T11 | Coordinated revision: ADR-0006 rev 6, ADR-0007 rev 4 | READY (edit map prepared; drafting not started) | T1–T10 (met) | see "T11 edit map" | review of the drafted diff; acceptance per D10.1 | every ruling incorporated; full diff reviewed; changed decision items re-approved by name; cross-references checked |
 | T12 | Follow-up implementation (`docs/schema.md`, procedures, validator) | BLOCKED (acceptance) | ADR acceptance | per ADR-0006 Consequences | — | per ADR |
 
 Other open records outside this graph: ADR-0003 (NAPIX permission pending), ADR-0008
@@ -1212,5 +1212,123 @@ Consequences lists in T11):
   - Verification runs in parallel instead of after the first split (ADR-0007
     step 6).
 
-**Status:** BLOCKED on D10.1 and D10.2. Once both are ruled, T11 (the coordinated
-revision) becomes READY.
+**Status:** VERIFIED 2026-10-28 (see "T10 rulings").
+
+### T10 rulings (maintainer, 2026-10-28; not yet in the ADRs)
+
+**D10.1 accepted.**
+- ADR-0006 rev 6 and ADR-0007 rev 4 are accepted **together**, by explicit, dated
+  maintainer acceptance recorded in both status lines.
+- Before acceptance:
+  - T11 incorporates every approved ruling
+  - the maintainer reviews the complete diff
+  - every changed decision item is re-approved **by name**
+  - cross-reference checks pass
+- Deferred P, L, O and E items don't block acceptance where the ADRs explicitly
+  defer them.
+- ADR-0008 is a separate acceptance decision. It must be accepted before selection
+  records are computed.
+- The 2026-10-26 approval in principle is **not** approval of revised decision text.
+
+**D10.2 accepted, in the maintainer's wording** (this order replaces both
+Consequences lists in T11):
+1. Complete and review the coordinated ADR revisions and acceptance.
+2. Start LGD verification in parallel where possible. Finish it, or explicitly
+   freeze unresolved levels as unverified, before the guidelines are finalized.
+3. Complete the source inventory, eligibility, documentation and licence
+   assessments before accepting any source.
+4. Define `docs/schema.md` before implementing procedures that depend on its
+   formats.
+5. Complete source ADRs and provenance manifests before ingesting their data.
+6. Implement ingestion, split-key step 1 and the required statistics. Accept
+   ADR-0008 before computing selection records.
+7. Finalize the focus-state ADR and the split configuration: salt, held-out
+   publishers, ratio weights.
+8. Run the rules-only privacy screen, then compute and freeze the split in staging.
+9. Conduct the role-restricted human screen, applying the approved denylist and
+   duplicate-class rules.
+10. Build the reference list, normalization table and cue table under the approved
+    data and dev-pool restrictions.
+11. Implement the candidate and resolution procedures, then finalize and freeze the
+    guidelines.
+12. Implement and run the validator.
+13. Conduct the dev-pool pilot and resolve the pilot decisions. Only then proceed to
+    gold annotation.
+
+**Derived:**
+- Source-ADR manifests use `docs/schema.md`'s manifest format, so step 4 precedes
+  the manifests in step 5.
+
+**Consistency:**
+- D10.2 keeps:
+  - verification-before-freeze (decision 5)
+  - the salt before the first split (D5.2)
+  - staging (D7.1′)
+  - the denylist and cascade (D8.1, D8.2)
+  - dev-only guidance (D7.2)
+  - ADR-0007 §5's no-reading-before-the-split
+- No conflicts found.
+
+**T10 acceptance check:** acceptance is defined (D10.1), and one consistent order is
+decided (D10.2). Writing them into the ADRs is T11. **VERIFIED.**
+
+### T11 edit map: ADR-0006 rev 6 and ADR-0007 rev 4 (prepared 2026-10-28; nothing drafted yet)
+
+Each entry maps an ADR section to the rulings it must incorporate. The draft must
+add no rule beyond these. Wording changes listed as "derived" in this graph are
+included.
+
+**ADR-0006 rev 6**
+
+| Section | Incorporate |
+|---|---|
+| Status, Revision | rev 6 note; stays Proposed; acceptance per D10.1 |
+| Context l.75–81 | verification of all four levels (C); suffixes `(Ct)`, `(Og)`, `(Part)` without assumed meaning (V) |
+| §1 l.94–97 | Layer A records the role as written; verification gates only C and D (4) |
+| §2 | `raw_text_scope` (D6.1); duplicate native IDs (D6.2); missing tokens for `raw_text` (D4.4); the `scripts` source, pinned `Scripts.txt` matching `unidata_version` (D9.2) |
+| §3 l.170–188 | cue-table entry: written role, claimed level, verified scope (national, or states with exceptions), evidence reference, `pending_level` (R2, R8, R8b, R5, R5b); drop "for the state concerned"; l.187–188 sources for `pending_level` (R8b) |
+| §4 | labels as written (4, R6); rows l.207, l.209, l.215; overlap table l.225; the block paragraph l.233–239 (F10 exceptions kept) |
+| §7 | precedence steps 0–9: gate after hierarchy and before PIN (R1a–R1c); R1e; reconciliation gate (R1d); edits audit-only on gated roles (R1g); anchors (8.5, 8.6) and invalidation (R1f, 8.9); stage flag `level_mapping_unverified`; reason `anchor_invalidated`; the l.328 invariant; the l.379 `final_set` exception; l.345 rewritten; R3 limitation |
+| §8 | role at L requires a non-empty `final_set` (8.7); `basis` precedence and what `conflicting` counts (8.2); `not_in_gazetteer` reasons include `anchor_invalidated` (8.8); `deferred_coverage` via `pending_level` (R2); gated lists never feed D; l.407 verified-designator wording |
+| §9 | `pincode_role`: `not_applicable` includes "PIN stage did not run" (R7); `decisive` and `narrowing` (8.3); valid PIN (8.4); drop "a conflict always gives inconsistent" (8.1); `not_checkable` cause order (R4); the mixed-level PIN stage (R4a) |
+| §10 | a verification change after the guidelines freeze is handled as a migration with a new `cue_table_version` (5) |
+| §12 | staging order (D7.1′); human screen role restrictions (D7.1); denylist replaces "only the count" (D8.1); class cascade (D8.2); exposure log retention (D8.4) |
+| §13 | the deletion exception for withdrawal (T8 derived); `visible_inputs` unchanged |
+| §14 | agreement table: R9 exclusions, 8.10 Jaccard, D row (D3.1 and its derived scope); dev-only guideline examples (D7.2); verification before the freeze (5); independent C set (D3.2) |
+| §15 | adjudication `merge` = union on edits, then the gates and invalidation (D3.3) |
+| §16 | no change expected; confirm that the cue-table scope and the gate stay reproducible from system inputs |
+| §17 | step 1: column roles, missing tokens, aliases, one state column (D4.1–D4.4); step 2: district rules and the ambiguous case (D4.5 and derived); step 4: Blocker 1 wording (drop "union-find"); step 5: bucket mapping and test vectors (T5); freeze at first exposure and the exposure log (D5.1); salt (D5.2); fixed per-record assignment; staging (D7.1′) |
+| §18 | manifest fields (T9); the `errata` field = entries incorporated, plus the append-only log (D8.3); `benchmark_version` rules (D9.1) |
+| §19 | suffix handling follows the village verification record (V) |
+| §20 | versioning per D9.1 (a new Layer D status is MAJOR) |
+| §21 | revised F1, F3, F5, F9, F10, F12; new item(s) for the verification gate and staging/denylist (numbering at drafting); L3 extended to all levels; known limitations (R3 inversion, 8.7 multi-level, T8 rebuild limits) |
+| Consequences | the D10.2 order |
+
+**ADR-0007 rev 4**
+
+| Section | Incorporate |
+|---|---|
+| Status, Revision | rev 4 note; acceptance together with ADR-0006 (D10.1) |
+| Context l.58–61 | verification of all four levels (C) |
+| §3 l.139 | Blocker 1 wording; step-1 state is never an input to verification (R1) |
+| §4 step 3 l.184, table l.202 | verification status for all levels (C) |
+| §5 | manifest fields: column roles, aliases, missing tokens, `raw_text_scope`, decoding (D4.1–D4.4, D6.1, T6); evidence for column roles (D4.2); distinct-value lists count as aggregate statistics, not exposure (T5 derived) |
+| §6 l.301 | duplicate classes (Blocker 1) |
+| §8 | evidence standard for all levels, national or per-state scope, the conflict rules (R5, R5b), the village record (V), evidence for `pending_level` (R8b) |
+| §10.1 | revised S6, S9 |
+| §10.3 | E1 extended to all levels; the E3 format list extended |
+| Consequences | the D10.2 order |
+
+**Re-approval list (D10.1):** the decision items whose text changes. Expected:
+ADR-0006 F1, F3, F5, F9, F10, F12 and the new items; ADR-0007 S6, S9. The final
+list is taken from the actual diff, not from this plan.
+
+**Preserved gaps** (must not be filled while drafting):
+- no source accepted (B1–B20 open as recorded)
+- B6 (no files)
+- B14–B17 (licences)
+- `Address_Original_First_Line` documentation
+- the reason-category list (`docs/schema.md`)
+- L1 stand-off
+- the `Scripts.txt` provenance manifest (T12)
+- P1–P7 data-dependent values

@@ -76,8 +76,17 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
     - the file is in scratch only (not vendored or committed)
     - using it needs a `data/manifests/` entry
   - **T9 VERIFIED.**
-- **T10 decision requests D10.1 (acceptance) and D10.2 (single implementation
-  order) prepared.** T10 is BLOCKED on them.
+- T10 decision requests D10.1 and D10.2 prepared. Commit `5c71642`.
+- **T10 rulings (2026-10-28).**
+  - D10.1 accepted: joint, explicit, dated acceptance after T11; re-approval of
+    changed items by name. The approval in principle doesn't cover revised text.
+  - D10.2 accepted in the maintainer's 13-step wording.
+  - No conflicts. **T10 VERIFIED.**
+- **T11 READY.**
+  - Section-by-section edit map prepared in the graph, mapping every ADR-0006 and
+    ADR-0007 section to the rulings it must incorporate.
+  - Also prepared: a re-approval list and the preserved gaps.
+  - No ADR text drafted yet.
   - No file-level evidence exists for any source field (B6), so per-source
     eligibility stays pending. This isn't a T6 criterion.
 
@@ -122,6 +131,12 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 | | `uv run ruff check .` | All checks passed, exit 0 |
 | | status audit | T0–T9 VERIFIED, T10 BLOCKED (D10.1, D10.2), T11–T12 BLOCKED; no stale lines |
 | | `uv run pytest` | not rerun (docs-only change) |
+| 2026-10-28, T10 rulings + T11 edit map | `git diff --check` | no output, exit 0 |
+| | `uv run ruff format --check .` | 23 files already formatted, exit 0 |
+| | `uv run ruff check .` | All checks passed, exit 0 |
+| | `git diff --stat -- docs/decisions src scripts tests` | empty (no ADR or code changes) |
+| | status audit | T0–T10 VERIFIED, T11 READY, T12 BLOCKED |
+| | `uv run pytest` | not rerun (docs-only change) |
 
 ## Failed attempts
 
@@ -140,11 +155,15 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 
 Each needs maintainer input.
 
-- Blocker 11 (T10, BLOCKED: D10.1 what counts as acceptance, D10.2 one
-  implementation order)
+- No blocker decisions open. Remaining: reviewing the T11 draft, then acceptance of
+  ADR-0006, ADR-0007 and ADR-0008 by the maintainer.
+- Evidence gaps preserved: no source accepted; B6, B14–B17; the C1a field
+  documentation; reason categories; L1; the `Scripts.txt` manifest; P1–P7.
 
 ## Next action
 
-**Maintainer rulings on D10.1–D10.2** (graph, "T10 ... decision requests"). Then
-T11 (the coordinated ADR-0006 rev 6 / ADR-0007 rev 4 revision) becomes READY. No
-ADR edits until then.
+**T11: draft ADR-0007 rev 4 and ADR-0006 rev 6** from the graph's "T11 edit map".
+- Commit them as one reviewable batch with status Proposed.
+- Don't accept them. Acceptance follows D10.1.
+- Start from a fresh session if context is low: read `CLAUDE.md`, this file and the
+  graph first.
