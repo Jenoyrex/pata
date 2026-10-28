@@ -41,9 +41,9 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
 | ID | Task | Status | Prerequisites | Affected text | Needs from maintainer | Done when |
 |---|---|---|---|---|---|---|
 | T0 | Workflow files (`CLAUDE.md`, `PROGRESS.md`, this note) | VERIFIED | — | these files | — | CI checks and `git diff --check` pass. Committed. |
-| T1 | Close Blocker 2 | VERIFIED (2026-10-28) | — | ADR-0006 §3, §4, §7–§9, §14, F9, F10; ADR-0007 §8, S9 | — (R1f, R1g, R8b ruled) | every item ruled. The R1f procedure details that depend on Blocker 8 moved to T2 (items 8.6–8.9). |
-| T2 | Blocker 8: PIN, `basis` and anchor semantics | READY | T1 | ADR-0006 §7–§9 | items 8.1–8.10 below | every case has exactly one outcome |
-| T3 | Blocker 9: Layer D reliability method | BLOCKED (T2) | T2 | ADR-0006 §1, §14, §15 | derivation inputs; independent C set for `ambiguous`; meaning of `merge` | method computable from stored documents |
+| T1 | Close Blocker 2 | VERIFIED (2026-10-28) | — | ADR-0006 §3, §4, §7–§9, §14, F9, F10; ADR-0007 §8, S9 | — (all ruled) | every item ruled. The R1f details were settled with T2 (8.6, 8.9). |
+| T2 | Blocker 8: PIN, `basis` and anchor semantics | VERIFIED (2026-10-28) | T1 | ADR-0006 §7–§9, §14 | — (8.1–8.10 ruled) | every case has exactly one outcome (consistency check below) |
+| T3 | Blocker 9: Layer D reliability method | READY | T2 | ADR-0006 §1, §14, §15 | derivation inputs; independent C set for `ambiguous`; meaning of `merge` | method computable from stored documents |
 | T4 | Blocker 5: split-key inputs | READY | — | ADR-0006 §17 steps 1–2; ADR-0007 §5 | alias table and its evidence; one state column; district-column rules | two engineers derive the same step-1/2 result |
 | T5 | Blocker 4: freeze point, salt, bucket mapping | READY | — (edit with T4) | ADR-0006 §17, F5 | freeze at first human exposure; salt provenance | mapping fully specified; freeze point testable |
 | T6 | Blocker 6: `raw_text` eligibility and decoding | READY | — | ADR-0006 §2, §11, L6 | whether documented partial address lines qualify | eligibility decidable from documentation alone |
@@ -66,7 +66,7 @@ Other open records outside this graph: ADR-0003 (NAPIX permission pending), ADR-
 - No district-level transitive grouping.
 - Drop "union-find" from ADR-0006 §17 step 4 and ADR-0007 §3 and §6.
 
-**Blocker 2: decided so far.**
+**Blocker 2: decided (2026-10-27 and 2026-10-28).**
 - **Evidence standard (C).** LGD-side evidence, with URL and retrieval date, for all
   four levels, national or per state as the evidence supports.
   - State-government material only corroborates (S9).
@@ -116,14 +116,12 @@ Other open records outside this graph: ADR-0003 (NAPIX permission pending), ADR-
   permits, with nothing assumed.
 - **Out of scope here.** Bare-name state/district matching (P5).
 
-**Blocker 2: ruled 2026-10-28.**
 - **R1f, option (a).** If a higher-level role's final outcome no longer supports
   the unit it anchored, every lower role that depended on that anchor becomes
   `not_in_gazetteer` / `anchor_invalidated`.
   - No link that depends on the anchor survives.
   - The count is recorded and reported.
-  - Determinism, timing, multiple anchors and the Blocker 8 interactions are
-    checked under T2, items 8.6–8.9.
+  - Procedure: Blocker 8 items 8.5, 8.6, 8.8 and 8.9, and Layer C step 9 below.
 - **R1g: yes.** For roles that fail either gate, additions and prunings are recorded
   for audit only.
   - They never change the effective set or bypass verification.
@@ -135,8 +133,8 @@ Other open records outside this graph: ADR-0003 (NAPIX permission pending), ADR-
     qualify.
   - `pending_level`, `not_specified` and a verified mapping stay distinct.
 
-**Consistency check of the 2026-10-28 rulings against the ADR text**
-(findings; the ADRs are unchanged):
+**Findings from checking the R1f/R1g/R8b rulings against the ADR text**
+(the ADRs are unchanged; each gap is closed by the Blocker 8 item named):
 - **R8b vs. S9 (ADR-0007 §8, l.378).**
   - No conflict: S9 governs verification only, and R8b assigns no verification.
   - ADR-0006 §3 l.187–188 says cue-table contents "come from dev-pool observation
@@ -168,9 +166,10 @@ Other open records outside this graph: ADR-0003 (NAPIX permission pending), ADR-
     needs a precedence rule. → T2 item 8.9.
 - **R1g vs. §14 agreement.** A generation-gate failure always has `final_set` `[]`.
   Whether it is excluded from the final-set Jaccard, as R9 excludes it from status
-  kappa, isn't ruled. → T2 item 8.10.
+  kappa, was unruled. → T2 item 8.10.
 
-**Proposed Layer C precedence**, one linkable role (to confirm with T2):
+**Layer C precedence for one linkable role** (decided; still to be written into
+ADR-0006 §7 in T11):
 0. A non-linkable label gets the §4 default.
 1. A designator unverified everywhere gets `level_mapping_unverified`, with lists
    `null` and no flag.
@@ -182,15 +181,22 @@ Other open records outside this graph: ADR-0003 (NAPIX permission pending), ADR-
 7. The reconciliation gate.
 8. `final_set` = stage + additions − prunings, unless a gate failed, in which case
    it's `[]`. Its size then gives `linked`, `ambiguous` or `no_supported_match`.
-9. (R1f) Anchor invalidation, after the Layer C gold is adjudicated.
-   - One pass from the top level down, so cascades resolve in one direction.
-   - Also run on each annotator's C, for Blocker 9.
+9. (R1f) Anchor invalidation, run on the adjudicated Layer C (and on each
+   annotator's reconciliation C; see 8.10).
+   - One pass from the top level down. Every anchor is at a higher level and has
+     already been settled, so cascades resolve in one deterministic pass.
    - Part of the Layer C derivation (`candidate_procedure_version`).
-   - The dependence test and precedence are open: T2 items 8.6 and 8.9.
+   - Anchor A, whose single generated candidate is u, "supports" its anchor only if
+     A's final status is `linked` with `entity_id` u.
+   - Every role that depends on an unsupporting A (8.6) becomes `not_in_gazetteer` /
+     `anchor_invalidated` with `final_set` `[]`. That includes `linked`,
+     `ambiguous` and `no_supported_match` roles.
+   - Exception: roles that failed either gate keep `level_mapping_unverified`,
+     because a gated outcome is terminal (R1g).
 
 Gated lists never feed Layer D.
 
-**T2 / Blocker 8 items** (recommended defaults; the maintainer rules):
+**Blocker 8: decided 2026-10-28** (all ten defaults accepted as specified):
 - 8.1 `pincode_consistency`: drop "a `conflict` always gives `inconsistent`".
   - A `conflict` with a linked village is already `inconsistent` (the linked unit
     isn't under the PIN).
@@ -228,3 +234,35 @@ Gated lists never feed Layer D.
 - 8.10 Generation-gate failures are excluded from the final-set Jaccard and counted.
   - R1d failures and `anchor_invalidated` roles stay in, because they come from human
     decisions.
+
+**Consistency check of the Blocker 8 rulings with R1f, Layer D and §14.**
+These are consequences of rulings already made, not new decisions.
+- **8.5 + 8.6:** removing a redundant anchor (a state whose district also anchors)
+  leaves the intersection unchanged, so nothing depends on it.
+  - When the last anchor is removed, the comparison is with `candidates.name`.
+  - Removing a constraint only grows the intersection, so a dependence test can
+    never turn a stage into a skip.
+- **R1f + 8.7:** an `anchor_invalidated` `place_unspecified` role has an empty
+  `final_set`, so it is a role at no level.
+  - Layer D treats it like any other unlinked `place_unspecified` role
+    (`not_specified` unless something else constrains L).
+  - It still appears in the R1f count.
+  - 8.8 applies to labelled roles at L.
+- **8.8 + §8 order:** `not_in_gazetteer` (now including `anchor_invalidated`) still
+  comes before `deferred_coverage` in the existing first-match order. No existing
+  precedence changes.
+- **R1f audit:** the set a role had before invalidation isn't stored, because the
+  `not_in_gazetteer` invariant requires an empty `final_set`. It can be rebuilt
+  from the stored stages, additions and prunings, so no new field is needed.
+- **8.10 + step 9:** the final-set Jaccard compares each annotator's
+  reconciliation `final_set` after invalidation has been applied to that
+  annotator's C.
+  - Generation-gate failures are identical for every annotator, so they're excluded
+    and counted.
+  - R9's status kappa uses the independent round, which comes before invalidation,
+    so it's unaffected.
+- **8.1 + 8.3 + 8.4:** a valid PIN absent from `village_pincode` gives
+  `pincode_conflict`. A linked village then gives `inconsistent`, and no village
+  link gives `not_checkable` (R4 cause 2 if the village level is
+  `deferred_coverage`, otherwise cause 3).
+  - The PIN never anchors and never sets verification scope.
