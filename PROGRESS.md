@@ -21,7 +21,13 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 ## Completed
 
 - **T0, workflow setup.** Added `CLAUDE.md`, this file, and the dependency graph.
-  No ADR or code changes.
+  No ADR or code changes. Commit `f18c35a`.
+- **T1, Blocker 2 rulings.** R1f (a), R1g (yes) and R8b (accepted) recorded in the
+  graph ledger, with a consistency check against the ADR text.
+  - It found one pre-existing defect (ADR-0006 §8 l.407: an empty `final_set`
+    counts as "entirely at L") and three gaps.
+  - All four are open under T2.
+  - These rulings are **not yet incorporated into the ADRs** (T11).
 
 ## Verification (2026-10-28, before the T0 commit)
 
@@ -37,15 +43,17 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 
 None.
 
+T1 checkpoint (2026-10-28): docs-only change. `git diff --check`: no output,
+exit 0. Python checks not rerun, because no code changed.
+
 ## Open decisions
 
-- Blocker 2: R1f, R1g, R8b (T1).
-- Blockers 3–11 (T2–T10).
+- Blocker 8, items 8.1–8.10 (T2). These include the R1f procedure details.
+- Blockers 3–7 and 9–11 (T3–T10).
 
 Details are in the graph.
 
 ## Next action
 
-**T1:** maintainer rulings on R1f, R1g and R8b. Once ruled, T2 (Blocker 8) becomes
-READY. T4–T7 are also READY and need maintainer input. No ADR edits until T1–T10
-are decided.
+**T2:** maintainer rulings on Blocker 8 items 8.1–8.10. T4–T7 are also READY and
+need maintainer input. No ADR edits until T1–T10 are decided.
