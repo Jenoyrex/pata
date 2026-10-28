@@ -61,9 +61,23 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
     - a documented limitation for new snapshots and duplicates across sources
     - the reason-category list left to `docs/schema.md` (gap)
   - **T8 VERIFIED.**
-- **T9 decision requests D9.1–D9.2 prepared.**
-  - The required manifest fields are specified from approved rules.
-  - T9 is BLOCKED on the two decisions.
+- T9 decision requests D9.1–D9.2 prepared. Commit `32deeb4`.
+- **T9 rulings (2026-10-28).**
+  - D9.1 accepted. §20 is to be revised in T11.
+  - D9.2 (a) accepted subject to verification, then **verified**: UCD 15.0.0
+    `Scripts.txt`, which matches `unidata_version` 15.0.0.
+    - official URL, HTTP 200 retrieved 2026-10-28T14:20:02Z
+    - SHA-256 `cca85d83…ea4b0`
+    - the code-point set matches Python's assigned characters exactly
+    - Unicode License v3 (`copyright.html` §2.2/§3.3, `license.txt`), retrieved
+      2026-10-28
+  - Kept explicit:
+    - no publisher-published checksum was found or checked
+    - the file is in scratch only (not vendored or committed)
+    - using it needs a `data/manifests/` entry
+  - **T9 VERIFIED.**
+- **T10 decision requests D10.1 (acceptance) and D10.2 (single implementation
+  order) prepared.** T10 is BLOCKED on them.
   - No file-level evidence exists for any source field (B6), so per-source
     eligibility stays pending. This isn't a T6 criterion.
 
@@ -100,6 +114,14 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 | | `uv run ruff check .` | All checks passed, exit 0 |
 | | status audit | T0–T8 VERIFIED, T9 BLOCKED (D9.1, D9.2), T10–T12 BLOCKED; no stale lines |
 | | `uv run pytest` | not rerun (docs-only change) |
+| 2026-10-28, T9 rulings + T10 requests | `uv run python -I -c` (versions) | Python 3.12.14, `unidata_version` 15.0.0 |
+| | `curl` Scripts.txt to scratch | HTTP 200, exit 0, 2026-10-28T14:20:02Z; `sha256sum` `cca85d830f46aece2e7c1459ef1249993dca8f2e46d51e869255be140d7ea4b0` |
+| | `uv run python -I` (scratch version-match script) | listed 149,251 = assigned 149,251; asserts ok, exit 0 |
+| | `git diff --check` | no output, exit 0 |
+| | `uv run ruff format --check .` | 23 files already formatted, exit 0 |
+| | `uv run ruff check .` | All checks passed, exit 0 |
+| | status audit | T0–T9 VERIFIED, T10 BLOCKED (D10.1, D10.2), T11–T12 BLOCKED; no stale lines |
+| | `uv run pytest` | not rerun (docs-only change) |
 
 ## Failed attempts
 
@@ -118,12 +140,11 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 
 Each needs maintainer input.
 
-- Blocker 7 (T9, BLOCKED: D9.1 `benchmark_version` rules, D9.2 data source for
-  `scripts`)
-- Blocker 11 (T10). Its ordering part is BLOCKED on T9. The acceptance condition
-  can be ruled at any time.
+- Blocker 11 (T10, BLOCKED: D10.1 what counts as acceptance, D10.2 one
+  implementation order)
 
 ## Next action
 
-**Maintainer rulings on D9.1–D9.2** (graph, "T9 ... decision requests"). Then T10
-becomes READY. No ADR edits until T1–T10 are decided.
+**Maintainer rulings on D10.1–D10.2** (graph, "T10 ... decision requests"). Then
+T11 (the coordinated ADR-0006 rev 6 / ADR-0007 rev 4 revision) becomes READY. No
+ADR edits until then.

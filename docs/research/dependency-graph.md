@@ -56,8 +56,8 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
 | T6 | Blocker 6: `raw_text` eligibility and decoding | VERIFIED (2026-10-28) | — | ADR-0006 §2, §11, L6 | — (D6.1, D6.2, D4.4 ruled) | eligibility decidable from documentation alone |
 | T7 | Blocker 10: screening before the split | VERIFIED (2026-10-28) | — | ADR-0006 §12, §14; ADR-0007 §5; ADR-0001 §2 | — (D7.1′ (a) ruled) | no unrecorded pre-split exposure |
 | T8 | Blocker 3: withdrawal, denylist, errata | VERIFIED (2026-10-28) | T6, Blocker 1, T7 | ADR-0006 §12, §13, §18 | — (D8.1–D8.4 ruled) | a rebuild can't silently re-admit a withdrawn or human-screen-excluded record, or the limitation is documented |
-| T9 | Blocker 7: release-manifest fields | BLOCKED (maintainer: D9.1, D9.2) | T1–T8 (met) | ADR-0006 §2, §18, §20 | D9.1, D9.2 | every version input is listed |
-| T10 | Blocker 11: acceptance condition and ordering | BLOCKED (T9) for ordering. The acceptance condition can be ruled any time. | T9 | ADR-0006 status line, Consequences; ADR-0007 Consequences | what counts as acceptance | both ADRs give one consistent order |
+| T9 | Blocker 7: release-manifest fields | VERIFIED (2026-10-28) | T1–T8 (met) | ADR-0006 §2, §18, §20 | — (D9.1, D9.2 ruled; D9.2 evidence verified) | every version input is listed |
+| T10 | Blocker 11: acceptance condition and ordering | BLOCKED (maintainer: D10.1, D10.2) | T9 (met) | ADR-0006 status line, Consequences; ADR-0007 status line, Consequences; ADR-0008 | D10.1, D10.2 | both ADRs give one consistent order, and acceptance is defined |
 | T11 | Coordinated revision: ADR-0006 rev 6, ADR-0007 rev 4 | BLOCKED (T1–T10) | T1–T10 | as above | approval of the drafted diff | full diff reviewed; cross-references checked |
 | T12 | Follow-up implementation (`docs/schema.md`, procedures, validator) | BLOCKED (acceptance) | ADR acceptance | per ADR-0006 Consequences | — | per ADR |
 
@@ -1048,5 +1048,169 @@ Script property of letters"; Python's standard library has no Script property).
 - **Evidence gap:** neither the licence nor a specific UCD version was checked
   in this run.
 
-**Status:** BLOCKED on D9.1 and D9.2. T10's ordering part becomes READY once T9 is
-VERIFIED.
+**Status:** VERIFIED 2026-10-28 (see "T9 rulings").
+
+### T9 rulings (maintainer, 2026-10-28; not yet in the ADRs)
+
+- **D9.1 accepted as recommended.**
+  - MAJOR for any change that makes scores not directly comparable: records,
+    splits, `gazetteer_version`, or gold semantics (labels, statuses, procedures
+    that change gold).
+  - MINOR for additive content that changes no record, split or gold.
+  - PATCH only when every gold and split file keeps its SHA-256.
+  - **ADR-0006 §20 needs a matching revision in T11.** Today it allows a new
+    Layer D status as a minor version.
+- **D9.2 option (a), accepted in principle, subject to verification. Verified
+  2026-10-28:**
+
+| Item | Evidence |
+|---|---|
+| Version to match | `unicodedata.unidata_version` = `15.0.0` under the locked Python 3.12.14 (`uv run python -I`, 2026-10-28) |
+| Official source URL | `https://www.unicode.org/Public/15.0.0/ucd/Scripts.txt`. Retrieved 2026-10-28T14:20:02Z: HTTP 200, `text/plain; charset=utf-8`, `Last-Modified: Wed, 27 Apr 2022 15:40:26 GMT` |
+| Exact version | File header `# Scripts-15.0.0.txt`, `# Date: 2022-04-26, 23:15:02 GMT` |
+| Version match, independent check | The code points listed in the file (149,251) equal exactly the code points that Python's `unicodedata` 15.0.0 assigns, excluding categories Cn, Co and Cs (scratch script, asserts passed) |
+| Integrity | SHA-256 `cca85d830f46aece2e7c1459ef1249993dca8f2e46d51e869255be140d7ea4b0`, 184,112 bytes, 3,031 lines |
+| Licence | Unicode Terms of Use (`https://www.unicode.org/copyright.html`, retrieved 2026-10-28). §2.2: "Data Files" include all computer data files under `https://www.unicode.org/Public/`. §3.3: they are governed by the Unicode License v3 unless otherwise indicated at release. The file names no other licence; its header points to `https://www.unicode.org/terms_of_use.html`, retrieved 2026-10-28, which also names the Unicode License v3 in §3.3. |
+| Licence terms | `https://www.unicode.org/license.txt` (retrieved 2026-10-28): "UNICODE LICENSE V3". Free permission to use, copy, modify, merge, publish and distribute, provided the copyright and permission notice appears with all copies. |
+
+**Limits and conditions, kept explicit:**
+- No publisher-published checksum was found or checked. Integrity rests on HTTPS
+  from the official host plus the independent code-point match. The SHA-256 above
+  is ours, taken at retrieval.
+- The file was fetched only to a session scratch directory, to hash and check it.
+  It wasn't vendored, committed or used by any code.
+- Using it later (T12) needs a provenance manifest under `data/manifests/`
+  (ADR-0001 §5), with the URL, retrieval date, SHA-256 and licence above.
+- Any redistributed copy must carry the Unicode copyright and permission notice.
+- **Derived:** a build fails if `unicodedata.unidata_version` differs from the
+  `Scripts.txt` version. The release manifest records the `Scripts.txt` SHA-256
+  next to `unidata_version`.
+- If the Python minor version changes, the bundled Unicode version can change too.
+  That would be a new pin and, under D9.1, a MAJOR release if gold changes.
+
+**T9 manifest-field check** against ADR-0001 to ADR-0008 and the approved rulings:
+- **ADR-0001 §5:** every data source has a manifest, so `Scripts.txt` needs one
+  (above).
+- **ADR-0002, ADR-0004, ADR-0005:** `gazetteer_version` and the table hashes are
+  already in §18.
+- **ADR-0007:** `focus_state_version` (§2), the held-out publisher list (§6) and
+  the E3 format owner are listed.
+- **ADR-0008:** its procedure version belongs to selection records, not the release
+  manifest. ADR-0008 is still Proposed.
+- **ADR-0003:** no field (no NAPIX source).
+- **Approved rulings:** each is covered by an existing version field or by the T9
+  spec list:
+  - cue-table scope → `cue_table_version`
+  - the gate and anchor invalidation → `candidate_procedure_version`
+  - the denylist → `screen_version`
+  - errata (D8.3)
+  - aliases, missing tokens, column roles and `raw_text_scope` → the
+    source-manifest hash
+  - decoding → `ingestion_procedure_version`
+  - salt and weights → the split configuration
+  - counts → the release report
+- **Result:** every version input is listed. **T9 VERIFIED.**
+
+### T10: Blocker 11, acceptance condition and ordering — decision requests
+
+**Facts.**
+- **ADR-0006's status line:** "Not accepted until the decisions in section 21.1
+  are approved ... F1 to F13 were approved in principle on 2026-10-26. The ADR
+  stays Proposed until revision 5 is reviewed."
+  - The approval date is the rev 5 date, so it isn't recorded whether it covered
+    rev 5's rewritten §17.
+  - Rev 6 will change the text behind F3, F5, F9 and F10, and add rules (R1f, the
+    gate, staging).
+- **ADR-0007's status line:** it can't be accepted before ADR-0006. Its 10.1
+  decisions S1–S10 need approval.
+- **ADR-0006 Consequences order:**
+  1. focus-state and source ADRs
+  2. `docs/schema.md`
+  3. the table procedures
+  4. the candidate and resolution procedures
+  5. the split key procedure
+  6. the guidelines
+  7. the validator
+  8. the pilot
+- **ADR-0007 Consequences order:**
+  1. inventory and assessments
+  2. source ADR
+  3. ingestion-time statistics and selection records
+  4. focus-state ADR
+  5. ingestion, screening and the first split
+  6. sub-district verification
+  7. ADR-0006's list from `docs/schema.md` onward
+- **Contradictions:**
+  - ADR-0007 runs the first split (step 5) before `docs/schema.md` and the split
+    key procedure (step 7), but the split file and configuration formats belong to
+    `docs/schema.md` (E3).
+  - ADR-0007 step 3 needs split-key step 1 implemented (counts per step-1 state)
+    and the ADR-0008 procedure (selection records).
+  - Neither order has a place for the D5.2 salt, the D8.1 denylist (an empty
+    initial state), the D7.1′ staging steps, or decision C's verification for all
+    levels before the guidelines freeze.
+
+**D10.1 What counts as acceptance.**
+- *Recommended:*
+  - ADR-0006 rev 6 and ADR-0007 rev 4 are accepted **together**, by an explicit,
+    dated maintainer acceptance recorded in each status line.
+  - Acceptance comes only after:
+    1. T11 has incorporated every ruling in this graph
+    2. the maintainer has reviewed the full diff
+    3. every 21.1 item whose text changed (F3, F5, F9, F10 and new items such as
+       F14) has been re-approved by name, along with S1–S10
+    4. a cross-reference check passes
+  - Items deferred by design (P1–P7, L1–L6, O1–O7, E1–E5) don't block acceptance.
+  - ADR-0008 is accepted separately, on its own 8.1 decisions. It must be accepted
+    before the selection records are computed.
+- *Alternatives:*
+  - Accept ADR-0006 alone first. ADR-0007 already allows that order, but the
+    shared rulings would sit in one accepted ADR and one Proposed ADR.
+  - Treat the 2026-10-26 approval in principle as carrying over. That doesn't
+    cover the changed F-items.
+
+**D10.2 One implementation order** (derived from dependencies; replaces both
+Consequences lists in T11):
+1. Accept ADR-0006 rev 6 and ADR-0007 rev 4 (D10.1). Accept ADR-0008 when ready.
+2. **LGD level verification** for all four levels (decision C, ADR-0007 §8, E1).
+   - It needs no address records, so it can start now and run in parallel.
+   - It must be complete or frozen as unverified before step 11.
+3. **Source inventory and assessments**: documentation, headers, scripted aggregate
+   statistics. This includes column-role evidence (D4.2), missing-token
+   documentation (D4.4) and alias distinct-value lists (D4.1).
+4. **`docs/schema.md`**: every E3 format, plus the new fields:
+   - the independent C set (D3.2)
+   - the stage flag (R1c)
+   - the reasons `anchor_invalidated`, `district_column_ambiguous` and the T6 ones
+   - the errata and denylist entry formats
+   - the reason categories
+   - release-manifest fields (T9)
+5. **Source ADR(s)** accepting sources, with manifests: column roles, aliases,
+   tokens, `raw_text_scope`, decoding, `record_id_scope`.
+6. **Ingestion procedure** (T6) and **split-key step 1**, then the ingestion-time
+   aggregate statistics (O3, O4, O5, P6 inputs) and the ADR-0008 gazetteer
+   properties, which give the **selection records**.
+7. **Focus-state ADR** (O1, O3, O4, O5). Then the **split configuration**:
+   - the salt generated and committed (D5.2)
+   - the held-out publishers
+   - the P6 weights
+8. **Rules screen** (`screen_version`, empty denylist), then **split-key steps
+   2–5**. The first split is computed and frozen in staging (D7.1′). The exposure
+   log starts.
+9. **Role-restricted human screen**. Passing records go to `data/processed/`;
+   failures go to the denylist with the class cascade (D8.1, D8.2).
+10. **Reference list, normalization table, and cue table procedures.** The cue
+    table comes from dev-pool observation (§3), so it needs step 9.
+11. **Candidate and resolution procedures**, then the **guidelines** (dev-only
+    examples, D7.2), then the **freeze** of the guidelines and cue table.
+12. **Validator.**
+13. **Pilot** on dev (P1–P5, P7), then gold annotation.
+
+- *Choices inside this order that the maintainer may change:*
+  - `docs/schema.md` comes before the source ADRs, because manifests need its
+    field format. ADR-0006 put it second, after the source ADRs.
+  - Verification runs in parallel instead of after the first split (ADR-0007
+    step 6).
+
+**Status:** BLOCKED on D10.1 and D10.2. Once both are ruled, T11 (the coordinated
+revision) becomes READY.
