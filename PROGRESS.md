@@ -32,15 +32,19 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
   - The derived consequences are listed in the graph.
 - None of the Blocker 1, 2 or 8 rulings is **incorporated into the ADRs** yet. That
   happens in T11, after every blocker is decided.
-- **T3–T7 analysis (2026-10-28), none VERIFIED.**
-  - For each task the graph now records facts, specs derived from approved rules,
-    and decision requests D3.1–D7.3. All five are BLOCKED on maintainer decisions.
-  - The T5 bucket mapping is fully specified, with synthetic test vectors.
-  - The T6 decoding rules are specified.
-  - Finding: the publishers' documented "NA" markers conflict with the "has a
-    value" rule (D4.4).
-  - No file-level evidence exists for any source field (B6), so T6 eligibility stays
-    pending per source.
+- **T3–T7 analysis.** Commit `2858a73`: facts, specs and decision requests
+  D3.1–D7.3.
+- **T3–T7 rulings (2026-10-28).**
+  - The maintainer accepted every D, with explicit wording for D4.4.
+  - Checking against the ADR text found one conflict. D7.1 (human screening after
+    the split) contradicts **ADR-0001 §2 (Accepted)**: personal identifiers "are
+    removed during ingestion, before anything is written to `data/processed/`".
+    D7.1 is therefore **not recorded**. Options are listed as D7.1′.
+  - **T3, T4, T5, T6 VERIFIED** against their criteria.
+  - **T7 BLOCKED** on D7.1′.
+  - **T8 READY**: its prerequisites, T6 and Blocker 1, are met.
+  - No file-level evidence exists for any source field (B6), so per-source
+    eligibility stays pending. This isn't a T6 criterion.
 
 ## Verification
 
@@ -61,6 +65,10 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 | | `uv run ruff format --check .` | 23 files already formatted, exit 0 |
 | | `uv run ruff check .` | All checks passed, exit 0 |
 | | `uv run pytest` | not rerun (docs-only change) |
+| 2026-10-28, T3–T7 rulings | `git diff --check` | no output, exit 0 |
+| | `uv run ruff format --check .` | 23 files already formatted, exit 0 |
+| | `uv run ruff check .` | All checks passed, exit 0 |
+| | status audit (grep of the graph table and per-task status lines) | T0–T6 VERIFIED, T7 BLOCKED, T8 READY, T9–T12 BLOCKED; no stale or contradictory lines |
 
 ## Failed attempts
 
@@ -77,19 +85,18 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 
 ## Open decisions
 
-Each needs maintainer input. Accepting Blocker 8 resolves none of them.
+Each needs maintainer input.
 
-- Blocker 9 (T3, BLOCKED: D3.1–D3.3)
-- Blocker 5 (T4, BLOCKED: D4.1–D4.5)
-- Blocker 4 (T5, BLOCKED: D5.1, D5.2; decide D5.1 with D7.1)
-- Blocker 6 (T6, BLOCKED: D6.1, D6.2, D4.4)
-- Blocker 10 (T7, BLOCKED: D7.1–D7.3)
-- Blocker 3 (T8, BLOCKED on T6)
-- Blocker 7 (T9, BLOCKED on T3–T8)
+- Blocker 10 (T7, BLOCKED: D7.1′, the conflict with ADR-0001 §2; staging
+  recommended)
+- Blocker 3 (T8, READY: denylist option, cascade to the duplicate class, errata
+  location; coordinate with D7.1′)
+- Blocker 7 (T9, BLOCKED on T7 and T8)
 - Blocker 11 (T10). Its ordering part is BLOCKED on T9. The acceptance condition
   can be ruled at any time.
 
 ## Next action
 
-**Maintainer rulings on D3.1–D7.3**, in the graph's "T3–T7 workstream" section.
-No task is READY for agent work until then. No ADR edits until T1–T10 are decided.
+**Maintainer ruling on D7.1′** (graph, "T3–T7 rulings"). T8 is READY to be written
+up as a decision request; whether withdrawals happen inside the staging area
+depends on D7.1′. No ADR edits until T1–T10 are decided.

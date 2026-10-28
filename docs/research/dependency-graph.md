@@ -33,9 +33,8 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
   decoding.
 - T4, T5, T6, T7 have no prerequisites. The order below is a recommendation, not a
   dependency.
-- T5 ↔ T7: D5.1 (freeze point) and D7.1 (when humans screen) must be decided
-  together. Human screening before the split would come before the first split, so
-  the split couldn't be frozen at first exposure.
+- T5 ↔ T7: D5.1 (freeze point, approved) constrains D7.1′. Human screening must
+  stay after the split, while also satisfying ADR-0001 §2.
 - T4 ↔ T6: D4.4 (publisher missing-value tokens) applies both to split-key columns
   and to `raw_text`.
 - T11 waits for every decision. The maintainer asked for one coordinated
@@ -48,12 +47,12 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
 | T0 | Workflow files (`CLAUDE.md`, `PROGRESS.md`, this note) | VERIFIED | — | these files | — | CI checks and `git diff --check` pass. Committed. |
 | T1 | Close Blocker 2 | VERIFIED (2026-10-28) | — | ADR-0006 §3, §4, §7–§9, §14, F9, F10; ADR-0007 §8, S9 | — (all ruled) | every item ruled. The R1f details were settled with T2 (8.6, 8.9). |
 | T2 | Blocker 8: PIN, `basis` and anchor semantics | VERIFIED (2026-10-28) | T1 | ADR-0006 §7–§9, §14 | — (8.1–8.10 ruled) | every case has exactly one outcome (consistency check below) |
-| T3 | Blocker 9: Layer D reliability method | BLOCKED (maintainer: D3.1–D3.3) | T2 | ADR-0006 §1, §14, §15 | D3.1–D3.3 | method computable from stored documents |
-| T4 | Blocker 5: split-key inputs | BLOCKED (maintainer: D4.1–D4.5) | — | ADR-0006 §17 steps 1–2; ADR-0007 §5 | D4.1–D4.5 | two engineers derive the same step-1/2 result |
-| T5 | Blocker 4: freeze point, salt, bucket mapping | BLOCKED (maintainer: D5.1, D5.2) | — (decide with T4 and T7) | ADR-0006 §17, F5 | D5.1, D5.2 | mapping fully specified (done); freeze point testable |
-| T6 | Blocker 6: `raw_text` eligibility and decoding | BLOCKED (maintainer: D6.1, D6.2) | — | ADR-0006 §2, §11, L6 | D6.1, D6.2 (and D4.4) | eligibility decidable from documentation alone |
-| T7 | Blocker 10: screening before the split | BLOCKED (maintainer: D7.1–D7.3) | — (decide with T5) | ADR-0006 §12, §14; ADR-0007 §5 | D7.1–D7.3 | no unrecorded pre-split exposure |
-| T8 | Blocker 3: withdrawal, denylist, errata | BLOCKED (T6) | T6, Blocker 1 | ADR-0006 §12, §13, §18 | denylist (a), (b) or (c); cascade to duplicate class; errata location | a rebuild can't silently re-admit a withdrawn record, or the limitation is documented |
+| T3 | Blocker 9: Layer D reliability method | VERIFIED (2026-10-28) | T2 | ADR-0006 §1, §14, §15 | — (D3.1–D3.3 ruled) | method computable from stored documents |
+| T4 | Blocker 5: split-key inputs | VERIFIED (2026-10-28) | — | ADR-0006 §17 steps 1–2; ADR-0007 §5 | — (D4.1–D4.5 ruled) | two engineers derive the same step-1/2 result |
+| T5 | Blocker 4: freeze point, salt, bucket mapping | VERIFIED (2026-10-28) | — | ADR-0006 §17, F5 | — (D5.1, D5.2 ruled) | mapping fully specified; freeze point testable |
+| T6 | Blocker 6: `raw_text` eligibility and decoding | VERIFIED (2026-10-28) | — | ADR-0006 §2, §11, L6 | — (D6.1, D6.2, D4.4 ruled) | eligibility decidable from documentation alone |
+| T7 | Blocker 10: screening before the split | BLOCKED (D7.1 conflicts with ADR-0001 §2) | — | ADR-0006 §12, §14; ADR-0007 §5; ADR-0001 §2 | ruling on D7.1′ | no unrecorded pre-split exposure |
+| T8 | Blocker 3: withdrawal, denylist, errata | READY (T6 VERIFIED, Blocker 1 decided) | T6, Blocker 1 | ADR-0006 §12, §13, §18 | denylist (a), (b) or (c); cascade to duplicate class; errata location | a rebuild can't silently re-admit a withdrawn record, or the limitation is documented |
 | T9 | Blocker 7: release-manifest fields | BLOCKED (T1–T8) | T1–T8 | ADR-0006 §18 | `benchmark_version` major/minor rules | every version input is listed |
 | T10 | Blocker 11: acceptance condition and ordering | BLOCKED (T9) for ordering. The acceptance condition can be ruled any time. | T9 | ADR-0006 status line, Consequences; ADR-0007 Consequences | what counts as acceptance | both ADRs give one consistent order |
 | T11 | Coordinated revision: ADR-0006 rev 6, ADR-0007 rev 4 | BLOCKED (T1–T10) | T1–T10 | as above | approval of the drafted diff | full diff reviewed; cross-references checked |
@@ -277,7 +276,8 @@ These are consequences of rulings already made, not new decisions.
 Labels:
 - **Spec** is derived from approved rules or existing ADR text. It's recorded under
   existing authority, and the maintainer may override it.
-- **D** is a decision request. Nothing marked D is approved.
+- **D** is a decision request. Rulings are in "T3–T7 rulings" at the end of this
+  section. Every D was accepted except D7.1.
 - Nothing here is in the ADRs yet (T11).
 
 ### T3: Blocker 9, Layer D reliability (ADR-0006 §1, §13, §14, §15)
@@ -347,7 +347,7 @@ Labels:
   - Gated roles are never adjudicated, because they are terminal.
 - This changes adjudication semantics, so it **needs the maintainer**.
 
-**Status:** BLOCKED on D3.1–D3.3. No dependency on T4–T7.
+**Status:** VERIFIED 2026-10-28 (see "T3–T7 rulings"). No dependency on T4–T7.
 
 ### T4: Blocker 5, split-key inputs (ADR-0006 §17 steps 1–2, ADR-0007 §5, §12)
 
@@ -438,7 +438,7 @@ Labels:
     unknown.
   - Otherwise a cross-state district would contradict step 1.
 
-**Status:** BLOCKED on D4.1–D4.5.
+**Status:** VERIFIED 2026-10-28 (see "T3–T7 rulings", including the D4.4 wording).
 
 ### T5: Blocker 4, freeze point, salt, bucket mapping (ADR-0006 §17, F5)
 
@@ -524,7 +524,7 @@ reproduce this table (T12).
 - *Alternative:* a salt derived from a public value (for example, a commit hash).
   That is reproducible but predictable before commitment.
 
-**Status:** BLOCKED on D5.1 and D5.2. The mapping spec is complete.
+**Status:** VERIFIED 2026-10-28 (see "T3–T7 rulings").
 
 ### T6: Blocker 6, `raw_text` eligibility and decoding (ADR-0006 §2, §11, L6)
 
@@ -535,7 +535,7 @@ reproduce this table (T12).
 
 | Source | Field (documented) | Eligibility now | Evidence gap |
 |---|---|---|---|
-| C1a | `Address_Original_First_Line` | pending D6.1 (documented as a first line) | file header; licence (B14) |
+| C1a | `Address_Original_First_Line` | can qualify as `address_line` (D6.1); pending | publisher documentation ("Procedural position"); file header; licence (B14) |
 | C1b | `Address` | single string per schema; pending | licence (B15); file |
 | C2 | `Facility Address` | single string per schema; pending | licence (B14); file |
 | C3 | `DiagnosticCentreAddress` | single string per schema; pending | licence (B14); file; no state (O4) |
@@ -585,7 +585,7 @@ reproduce this table (T12).
   counted.
 - *Alternative:* demote the whole source to `snapshot` scope.
 
-**Status:** BLOCKED on D6.1, D6.2 and D4.4. File-level checks also wait for B6 and
+**Status:** VERIFIED 2026-10-28 (see "T3–T7 rulings"). File-level checks wait for B6 and
 the licences, not for T6.
 
 ### T7: Blocker 10, screening and test exposure (ADR-0006 §12, §14; ADR-0007 §5)
@@ -646,7 +646,8 @@ guidelines or the cue table, outside test annotation.
 - Publisher holdout: `test_source_holdout` is treated like `test`.
 - Withdrawal: T8, not started.
 
-**Status:** BLOCKED on D7.1–D7.3, which must be decided with D5.1.
+**Status:** BLOCKED on D7.1′ (the conflict with ADR-0001 §2; see "T3–T7 rulings").
+D7.2 and D7.3 are accepted.
 
 ### Cross-task consistency (checked 2026-10-28)
 
@@ -655,5 +656,105 @@ guidelines or the cue table, outside test annotation.
 - T3 needs nothing from T4–T7.
 - No T3–T7 item touches the Blocker 2 or Blocker 8 rulings, except D3.3, which reuses
   R1d and step 9 unchanged.
-- Nothing here is marked VERIFIED. No ADR, code, dataset or split was changed or
-  created.
+- No ADR, code, dataset or split was changed or created.
+
+### T3–T7 rulings (maintainer, 2026-10-28; not yet in the ADRs)
+
+**Accepted as recommended above:** D3.1, D3.2, D3.3, D4.1, D4.2, D4.3, D4.5, D5.1,
+D5.2, D6.1, D6.2, D7.2, D7.3.
+
+**D4.4, accepted with explicit wording:**
+- Publisher-documented missing-value tokens are recognized **before** the generic
+  presence rule `name_key(v) != ""`.
+- The token list is per source and per column, cited from publisher documentation,
+  and versioned with the manifest.
+  - It applies to split-key columns, and to `raw_text` only where the publisher
+    documents the token for that field.
+- `NA` is not a value where the publisher defines it as "Not Available".
+- Source values are never rewritten. `source_context` keeps the value as published,
+  and presence is derived.
+
+**D7.1: not recorded. Conflicts with ADR-0001 §2 (Accepted).**
+- ADR-0001 §2: "If a public source contains them [names of individuals, phone
+  numbers, emails, ID numbers], they are removed during ingestion, before anything
+  is written to `data/processed/`."
+- D7.1 puts human screening *after* the split. But the split step writes retained
+  records to `data/processed/` (ADR-0006 §17 step 1, ADR-0007 §3).
+  - So an identifier that only a human would catch is in `data/processed/` *by
+    design* before the human screen runs.
+- ADR-0006 §12's withdrawal mechanism already tolerates *accidental* misses. D7.1
+  would make it planned.
+- Options (**D7.1′**, needs the maintainer):
+  - (a) **Staging, recommended.**
+    1. Rules-only screen.
+    2. Split computed and frozen in a staging area outside `data/processed/` (for
+       example `data/interim/`, ignored by git like `data/*`).
+    3. Role-restricted human screen on the staged records (D7.1 restrictions
+       unchanged).
+    4. Only records that pass are written to `data/processed/`.
+    - This satisfies ADR-0001 §2 literally, keeps D5.1, and makes "ingestion" end
+      at the write to `data/processed/`.
+  - (b) A new ADR superseding ADR-0001 §2's timing. Accepted ADRs are never
+    rewritten.
+  - (c) Human screening before the split. **Contradicts the approved D5.1**, so not
+    viable without reopening D5.1.
+
+**Derived consequences** (no new decisions; recorded for T11, overridable):
+- **T3, metric scope.**
+  - Agreement uses only records with two independent C documents (dev pool, §14).
+  - A status disagreement at L is counted only by the status kappa.
+  - `entity_id`, Jaccard and `basis` comparisons apply only to pairs with the same
+    status.
+  - `reason` agreement is reported for pairs that are both `not_in_gazetteer` or
+    both `deferred_coverage`.
+- **T4, order inside a column.**
+  1. Missing token (D4.4).
+  2. Alias (D4.1).
+  3. Exact LGD `name_key` match.
+  - An alias entry for a value that already matches LGD exactly is invalid.
+- **T4, ambiguous district column.** A district column that matches **more than
+  one** district (state unknown, India-wide not unique) is handled like D4.5(a).
+  - The district is unknown, with no fall-through to text, counted as
+    `district_column_ambiguous`.
+  - Same rationale as D4.5: text must not override the publisher's field.
+- **T5, what "first human exposure" means:** a person viewing `raw_text` or
+  `source_context` values of an individual record.
+  - Scripted aggregate statistics and the D4.1 distinct-value lists for state and
+    district columns are not exposure (ADR-0007 §5).
+  - So aliases can be approved before the split.
+- **T5 + D7.1:** whatever D7.1′ decides must keep human exposure after the split
+  (D5.1 is approved).
+- **T6, C1a.** `Address_Original_First_Line` can qualify as `address_line` (D6.1),
+  but only on publisher documentation, which needs the pending "Procedural
+  position" confirmation or other documentation.
+  - It is still pending, with that gap and B6/B14 named.
+- **T8 readiness.** Its listed prerequisites (T6, Blocker 1) are met.
+  - Post-split exclusion of a withdrawn record uses the T5 fixed-assignment spec.
+  - Where withdrawals happen relative to `data/processed/` should be decided
+    together with D7.1′.
+
+**Acceptance criteria re-check:**
+- **T3 VERIFIED.**
+  - Inputs are defined (D3.1).
+  - The minimum stored data is defined (D3.2), with the schema field deferred to
+    T12.
+  - Merge is deterministic (D3.3).
+  - Every status pair and set comparison is defined (derived above).
+  - It is recomputable from stored documents.
+- **T4 VERIFIED.**
+  - Every step-1 and step-2 case has one outcome: state column present, missing
+    token, alias, unmatched, disagreement with `coverage_state`, absent; district
+    column matched, missing token, unmatched, ambiguous, absent; text matching
+    0, 1 or more districts.
+  - The inputs are pinned.
+- **T5 VERIFIED.**
+  - The freeze point is observable (exposure defined, log kept).
+  - Salt provenance and immutability are defined.
+  - The mapping is complete, with boundaries and vectors.
+- **T6 VERIFIED.**
+  - Every candidate field has a decision or a named gap.
+  - Decoding is versioned.
+  - Malformed, missing and empty inputs are handled explicitly.
+  - Counts are per reason.
+  - No source is accepted.
+- **T7 BLOCKED** on D7.1′. D7.2 and D7.3 are recorded.
