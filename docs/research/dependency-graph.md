@@ -33,6 +33,11 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
   decoding.
 - T4, T5, T6, T7 have no prerequisites. The order below is a recommendation, not a
   dependency.
+- T5 ↔ T7: D5.1 (freeze point) and D7.1 (when humans screen) must be decided
+  together. Human screening before the split would come before the first split, so
+  the split couldn't be frozen at first exposure.
+- T4 ↔ T6: D4.4 (publisher missing-value tokens) applies both to split-key columns
+  and to `raw_text`.
 - T11 waits for every decision. The maintainer asked for one coordinated
   revision, not piecemeal edits.
 
@@ -43,11 +48,11 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
 | T0 | Workflow files (`CLAUDE.md`, `PROGRESS.md`, this note) | VERIFIED | — | these files | — | CI checks and `git diff --check` pass. Committed. |
 | T1 | Close Blocker 2 | VERIFIED (2026-10-28) | — | ADR-0006 §3, §4, §7–§9, §14, F9, F10; ADR-0007 §8, S9 | — (all ruled) | every item ruled. The R1f details were settled with T2 (8.6, 8.9). |
 | T2 | Blocker 8: PIN, `basis` and anchor semantics | VERIFIED (2026-10-28) | T1 | ADR-0006 §7–§9, §14 | — (8.1–8.10 ruled) | every case has exactly one outcome (consistency check below) |
-| T3 | Blocker 9: Layer D reliability method | READY | T2 | ADR-0006 §1, §14, §15 | derivation inputs; independent C set for `ambiguous`; meaning of `merge` | method computable from stored documents |
-| T4 | Blocker 5: split-key inputs | READY | — | ADR-0006 §17 steps 1–2; ADR-0007 §5 | alias table and its evidence; one state column; district-column rules | two engineers derive the same step-1/2 result |
-| T5 | Blocker 4: freeze point, salt, bucket mapping | READY | — (edit with T4) | ADR-0006 §17, F5 | freeze at first human exposure; salt provenance | mapping fully specified; freeze point testable |
-| T6 | Blocker 6: `raw_text` eligibility and decoding | READY | — | ADR-0006 §2, §11, L6 | whether documented partial address lines qualify | eligibility decidable from documentation alone |
-| T7 | Blocker 10: screening before the split | READY | — | ADR-0006 §12, §14; ADR-0007 §5 | option (a), (b) or (c); dev-only guideline examples | no unrecorded pre-split exposure |
+| T3 | Blocker 9: Layer D reliability method | BLOCKED (maintainer: D3.1–D3.3) | T2 | ADR-0006 §1, §14, §15 | D3.1–D3.3 | method computable from stored documents |
+| T4 | Blocker 5: split-key inputs | BLOCKED (maintainer: D4.1–D4.5) | — | ADR-0006 §17 steps 1–2; ADR-0007 §5 | D4.1–D4.5 | two engineers derive the same step-1/2 result |
+| T5 | Blocker 4: freeze point, salt, bucket mapping | BLOCKED (maintainer: D5.1, D5.2) | — (decide with T4 and T7) | ADR-0006 §17, F5 | D5.1, D5.2 | mapping fully specified (done); freeze point testable |
+| T6 | Blocker 6: `raw_text` eligibility and decoding | BLOCKED (maintainer: D6.1, D6.2) | — | ADR-0006 §2, §11, L6 | D6.1, D6.2 (and D4.4) | eligibility decidable from documentation alone |
+| T7 | Blocker 10: screening before the split | BLOCKED (maintainer: D7.1–D7.3) | — (decide with T5) | ADR-0006 §12, §14; ADR-0007 §5 | D7.1–D7.3 | no unrecorded pre-split exposure |
 | T8 | Blocker 3: withdrawal, denylist, errata | BLOCKED (T6) | T6, Blocker 1 | ADR-0006 §12, §13, §18 | denylist (a), (b) or (c); cascade to duplicate class; errata location | a rebuild can't silently re-admit a withdrawn record, or the limitation is documented |
 | T9 | Blocker 7: release-manifest fields | BLOCKED (T1–T8) | T1–T8 | ADR-0006 §18 | `benchmark_version` major/minor rules | every version input is listed |
 | T10 | Blocker 11: acceptance condition and ordering | BLOCKED (T9) for ordering. The acceptance condition can be ruled any time. | T9 | ADR-0006 status line, Consequences; ADR-0007 Consequences | what counts as acceptance | both ADRs give one consistent order |
@@ -266,3 +271,389 @@ These are consequences of rulings already made, not new decisions.
   link gives `not_checkable` (R4 cause 2 if the village level is
   `deferred_coverage`, otherwise cause 3).
   - The PIN never anchors and never sets verification scope.
+
+## T3–T7 workstream (2026-10-28)
+
+Labels:
+- **Spec** is derived from approved rules or existing ADR text. It's recorded under
+  existing authority, and the maintainer may override it.
+- **D** is a decision request. Nothing marked D is approved.
+- Nothing here is in the ADRs yet (T11).
+
+### T3: Blocker 9, Layer D reliability (ADR-0006 §1, §13, §14, §15)
+
+**Facts.**
+- §14 says to "derive D from each annotator's independent A and C".
+- Independent C is done on **gold** spans (§3, §7). An annotator's own A spans can't
+  be joined to their C entries, so the A half of that sentence can't be computed.
+- Independent C sees no generated lists (§13, F13), and `final_set` exists only
+  after reconciliation. So `ambiguous` has no stored set per annotator today.
+
+**Spec.**
+- Entries that R9 classes as mechanical take the generated outcome, identical for
+  both annotators, wherever per-annotator C is assembled:
+  - non-linkable defaults
+  - designators unverified everywhere
+  - generation-gate failures
+- R1f (anchor invalidation) does not apply to independent C. Anchors are a property
+  of generation, and independent annotators never see generated lists.
+  - So per-annotator D can differ from gold D for that reason. That is acceptable,
+    because the agreement compares annotators with each other, not with gold.
+
+**D3.1 Inputs.**
+- *Recommended:* gold A + each annotator's independent C (with the substitutions
+  above), the cue table and the pinned gazetteer. The §8 procedure is run once per
+  annotator.
+- Agreement per level L:
+  - kappa on `levels.L.status`
+  - exact `entity_id` agreement where both are `linked`
+  - Jaccard on `candidates` where both are `ambiguous` or both `conflicting`
+  - `basis` agreement where both are `linked`
+- *Alternative:* reconciliation C (after invalidation). It is complete, but it was
+  made after exposure to the generated lists, so it isn't independent (F13).
+- *Risk:* the change in wording drops "independent A" from §14. A's own reliability
+  is still measured by span F1 (§14).
+
+**D3.2 What independent C stores.**
+- *Recommended:* when the status is `ambiguous`, the annotator records
+  `independent_set`, the complete sorted list of units found by their own lookups,
+  with at least 2 members.
+- `linked` stores only `entity_id`. `not_in_gazetteer` stores only `reason`.
+- That is the minimum data needed to rerun D3.1.
+- *Burden:* listing every sibling. Lookups already show all matches, so this is
+  recording, not search.
+- *Schema:* a new field in independent C documents (`docs/schema.md`, T12).
+- *Alternative:* no set, which leaves per-annotator `ambiguous` uncomputable.
+
+**D3.3 Adjudication `merge` for candidate sets.** No default has been approved yet.
+- **Union**, defined on edits: generated stage + (A₁ ∪ A₂ additions) − (P₁ ∩ P₂
+  prunings). This equals the union of the two `final_set`s for roles that pass the
+  gate.
+  - It keeps any unit either annotator supported.
+  - Over-inclusion tends to produce `ambiguous`, never a false `linked`.
+- **Intersection:** a unit kept by only one annotator is dropped. That can collapse
+  {a, b} ∩ {a} to {a}, a **false unique link**. Not recommended.
+- **Explicit:** the adjudicator decides each disputed member with a P7 reason. That's
+  already available as `replace`.
+- *Recommended:*
+  - `merge` = union on edits, followed by the reconciliation gate (R1d) and anchor
+    invalidation (step 9). The adjudicator may then apply `replace` with structured
+    prunings or additions.
+  - Defined behaviour:
+    - both empty → `[]`
+    - {a} and {b} → {a, b} → `ambiguous`, unless a reasoned pruning follows
+    - an out-of-scope addition by either annotator → R1d failure
+    - a missing annotation → `merge` is not available; only `accept` or `replace`
+  - Gated roles are never adjudicated, because they are terminal.
+- This changes adjudication semantics, so it **needs the maintainer**.
+
+**Status:** BLOCKED on D3.1–D3.3. No dependency on T4–T7.
+
+### T4: Blocker 5, split-key inputs (ADR-0006 §17 steps 1–2, ADR-0007 §5, §12)
+
+**Facts.**
+- `context_columns` lists names only. Nothing assigns a column to a role (state,
+  district).
+- The research notes list *possible* context columns from platform field lists, not
+  file headers:
+  - C1a `State`/`District`; C1b `State_Name`/`District_Name`; C2 `State Name`/
+    `District Name`; C4 `State`/`District`
+  - no file has been inspected (B6)
+  - whether platform field lists count as publisher documentation is unconfirmed
+    (`focus-state-source-evaluation.md`, "Procedural position")
+- The publishers document missing-value markers ("NA/Blank: Not Available" for C1a
+  and C1b; "NA: Not Available" for C2 and C3; same file, "B6 aggregate
+  inspection").
+  - `name_key("NA")` is `"na"`, so under the rule "has a value ⇔ `name_key(v) != ""`"
+    an `NA` state cell counts as a value. It is then excluded as
+    `state_column_unmatched` instead of being treated as missing.
+  - **This conflicts with the publisher's own semantics.** → D4.4
+- `name_key` maps punctuation and symbols to spaces (`src/pata/normalize.py`). So a
+  source value written with "&" never equals a gazetteer name written with "and".
+  Exact matching rejects such spelling variants. → D4.1
+
+**Spec.**
+- The manifest declares each split-key column's role: `state_column` and
+  `district_column`, at most one column per role, each listed in `context_columns`.
+  - That's required information. Field names belong to `docs/schema.md` (E3).
+  - Without a declared role a column is not used by the split key, whatever its name.
+- Tokens are `name_key(raw_text).split(" ")`. A whole-token sequence matches when
+  the district's `name_key` tokens occur contiguously.
+- Step 2 rule order decides between column and text: a matching district column
+  wins. Disagreements between column and text are counted per source and never
+  change the key.
+- Text rule 2 needs exactly one district. Zero, or two or more distinct districts,
+  means no district from text.
+- Repeated runs give the same key. Every input is pinned: the manifest content, the
+  alias table (if any), the gazetteer, `split_key_procedure_version` and the
+  `name_key` code with its Unicode version (T9).
+- Missing districts don't put unrelated records in a new kind of group.
+  - They fall into `unresolved:lgd:state:{code}` or `unresolved:unknown` by
+    existing design. That is one group per state, which P6 already has to bound.
+  - The earlier non-blocking note recommends a maximum share for a single group.
+
+**D4.1 Alias table.**
+- *Recommended:* allowed, per source and versioned, for state and district columns
+  only.
+- Each entry is: exact `name_key` of a source value → one `lgd:` ID.
+- Evidence:
+  - a scripted distinct-value list with counts for that column (an aggregate
+    statistic, allowed under ADR-0007 §5)
+  - the LGD unit's name
+- Every entry is approved by the maintainer and recorded with the source
+  assessment. No fuzzy matching.
+- A change after the first split is a change to the source set (ADR-0007 §7).
+- *Alternative:* no aliases. Every spelling variant is then excluded as
+  `state_column_unmatched`, which loses coverage silently by source style.
+
+**D4.2 Evidence for assigning a column role.**
+- *Recommended:* publisher documentation naming the field's content, plus a
+  scripted aggregate exact-match rate against LGD names (reported, no threshold).
+- Platform field lists count as documentation only once the maintainer confirms the
+  pending "Procedural position" question.
+- A column name alone is never enough.
+
+**D4.3 Several state-like columns.**
+- *Recommended:* exactly one declared `state_column`. Other state-like columns are
+  not used for split keys.
+
+**D4.4 Missing values.**
+- *Recommended:* a value is present if `name_key(v) != ""` **and** `name_key(v)`
+  isn't in the source's declared `missing_value_tokens`.
+  - The tokens must be cited from publisher documentation (for example `na`,
+    `blank`).
+  - Tokens apply to split-key columns and to `raw_text` (T6).
+- This amends the earlier mechanical rule, so it **needs the maintainer**.
+
+**D4.5 District-column rules.**
+- (a) The column has a value and matches nothing within the known state.
+  - *Recommended:* the district is unknown, with **no fall-through to text**. It's
+    counted as `district_column_unmatched`, and the record is kept with key
+    `unresolved:lgd:state:X`.
+  - *Alternative:* the current text implies falling through to text matching. That
+    lets text override the publisher's own field.
+- (b) The state is known.
+  - *Recommended:* match only within that state, never across India.
+  - Matching across India "if the match is unique" applies only when the state is
+    unknown.
+  - Otherwise a cross-state district would contradict step 1.
+
+**Status:** BLOCKED on D4.1–D4.5.
+
+### T5: Blocker 4, freeze point, salt, bucket mapping (ADR-0006 §17, F5)
+
+**Facts.**
+- §17 says the split is "frozen before any model experiment", and a recompute is
+  allowed "only to fix a bug".
+- Annotation and the pilot happen before any model experiment.
+- The salt has no provenance rule.
+
+**Spec: bucket mapping**, complete. The ratio values stay P6.
+1. Step-5 holdout assignment happens first (existing order). Hashing applies only to
+   the remaining classes, keyed by the class key (Blocker 1).
+2. Message: `group_key + "\n" + split_salt`, encoded UTF-8, with no BOM and no
+   trailing newline. `split_salt` is its 64-character lowercase hex string.
+3. `h` = the first 8 bytes of SHA-256(message), read as an unsigned big-endian
+   integer, 0 ≤ h < 2⁶⁴.
+4. Ratios are positive integer weights `w_train`, `w_dev`, `w_test`, with W =
+   their sum.
+5. `b = (h × W) >> 64`, exact integer arithmetic with no floats, so 0 ≤ b < W.
+6. Intervals are half-open, in the fixed order train, dev, test:
+   - `train` if b < w_train
+   - `dev` if b < w_train + w_dev
+   - otherwise `test`
+7. A zero weight is not allowed (configuration error).
+
+**Synthetic test vectors**, computed 2026-10-28 with `uv run python -I` on a
+scratch script. These are not benchmark data.
+- Salt = SHA-256 hex of the ASCII bytes `pata synthetic test-vector salt` =
+  `c2486d9637f8cc990bec2ea16a39999692387fdddd099c55df427bc6c8745b2a`.
+- Weights 8/1/1 (synthetic, not P6).
+
+| key | h (hex) | bucket |
+|---|---|---|
+| `synthetic:a` | `63b6c9c4c2b75d54` | train |
+| `synthetic:b` | `f5f0f6a861bb0d63` | test |
+| `synthetic:c` | `53526df4c6a3e805` | train |
+| `synthetic:d` | `8c1fd55acbb2aebd` | train |
+| `synthetic:e` | `82e0dbc2971e8e64` | train |
+| `synthetic:f` | `f818bbf49755ac7b` | test |
+
+Boundaries (weights 8/1/1):
+
+| h | bucket |
+|---|---|
+| `0000000000000000` | train |
+| `cccccccccccccccc` | train |
+| `cccccccccccccccd` | dev |
+| `e666666666666666` | dev |
+| `e666666666666667` | test |
+| `ffffffffffffffff` | test |
+
+The script asserted all four boundary transitions. A future implementation must
+reproduce this table (T12).
+
+**Spec: consequence of Blocker 1 and the freeze.**
+- A record removed after the split (by a later screen or withdrawal) can change its
+  duplicate class's smallest key, and so the bucket of the other members.
+- Freeze rule: assignments are fixed per `record_id` at first computation. Removing
+  a record never recomputes another record's key or split.
+- This matches "never moves records after the split is frozen".
+
+**D5.1 Freeze point.**
+- *Recommended:* the split is computed and frozen **before the first human exposure**
+  of any admitted record's text. Exposure means screening, pilot, guideline work or
+  annotation.
+- An exposure log is kept from then on: record or class, person pseudonym, purpose,
+  date.
+- A later bug-fix recompute (new `split_version`) may never move an exposed record
+  into `test` or `test_source_holdout`.
+- Must be decided with D7.1.
+- *Alternative:* the current "before any model experiment". It allows recomputes
+  after people have read records.
+
+**D5.2 Salt.**
+- *Recommended:*
+  - 32 bytes from the operating system's cryptographic random generator, generated
+    once, before the first ingestion run that computes splits
+  - committed to the versioned split configuration before that run
+  - immutable for that `split_version`
+  - published with the release (it isn't secret; test gold is protected separately)
+  - never regenerated after any split result has been seen
+- A new salt means a new `split_version`, and it is recorded with its reason.
+- *Alternative:* a salt derived from a public value (for example, a commit hash).
+  That is reproducible but predictable before commitment.
+
+**Status:** BLOCKED on D5.1 and D5.2. The mapping spec is complete.
+
+### T6: Blocker 6, `raw_text` eligibility and decoding (ADR-0006 §2, §11, L6)
+
+**Facts.**
+- No candidate source file is held locally (B6). So no field's eligibility can be
+  verified at file level now, for any source.
+- Per-candidate state, from documentation only:
+
+| Source | Field (documented) | Eligibility now | Evidence gap |
+|---|---|---|---|
+| C1a | `Address_Original_First_Line` | pending D6.1 (documented as a first line) | file header; licence (B14) |
+| C1b | `Address` | single string per schema; pending | licence (B15); file |
+| C2 | `Facility Address` | single string per schema; pending | licence (B14); file |
+| C3 | `DiagnosticCentreAddress` | single string per schema; pending | licence (B14); file; no state (O4) |
+| C4 | none (components only) | not `raw_text` under rev 5 strict rule (L6) | L6 |
+| C5 | PDF lists | not `raw_text` under rev 5 (L6) | L6; licence (B4) |
+| C6 | search form, field [U] | pending | licence (B4); no bulk file |
+| C8–C12 | [U] | pending | per inventory |
+
+  None of these is accepted, and none is rejected here.
+
+**Spec: decoding.** Each source ADR fixes these per source, under a new
+`ingestion_procedure_version` (recorded in the release manifest, T9).
+- **Encoding** is declared from publisher documentation or the file's own
+  declaration. No guessing.
+  - Decoding is strict, with no replacement characters.
+  - A row that fails to decode is excluded as `undecodable`.
+- **BOM:** one leading U+FEFF at the start of the *file* is removed before parsing.
+  It is file encoding, not field content. U+FEFF inside a field stays as published.
+- **CSV:** the RFC 4180 dialect, with the delimiter and quote character declared.
+  - Quoted embedded newlines are part of the value, and `raw_text` keeps them.
+  - A row with the wrong field count is excluded as `malformed_row`.
+- **XLSX:** a `raw_text` cell must be a text cell. A numeric, date or formula cell
+  is excluded as `non_text_cell`, because formatting it would invent text.
+  - Context columns: an integer-valued numeric cell becomes its decimal string.
+    Any other numeric value counts as no value.
+- **Empty values:** `raw_text` that is empty or entirely whitespace (`str.isspace()`)
+  is excluded as `empty_raw_text`.
+  - A value matching a declared missing token (D4.4) is excluded as
+    `missing_value_token`.
+  - No trimming otherwise (§2).
+- **Counts:** each reason is counted per source at ingestion, alongside the §17
+  reasons, and never summed across reasons.
+
+**D6.1 Partial address lines.**
+- *Recommended:* a field qualifies when publisher documentation presents it as the
+  facility's address or an address line.
+  - The manifest records `raw_text_scope: full_address | address_line`.
+  - `address_line` is reported as its own stratum.
+  - Layer D for such records will often be `not_specified`, which is honest.
+- *Alternative:* only fields documented as the full address qualify. C1a then
+  contributes nothing.
+- Never decided from the values themselves.
+
+**D6.2 Duplicate native IDs within one snapshot.**
+- A `record_id` collision.
+- *Recommended:* exclude every row that shares the ID, as `duplicate_native_id`,
+  counted.
+- *Alternative:* demote the whole source to `snapshot` scope.
+
+**Status:** BLOCKED on D6.1, D6.2 and D4.4. File-level checks also wait for B6 and
+the licences, not for T6.
+
+### T7: Blocker 10, screening and test exposure (ADR-0006 §12, §14; ADR-0007 §5)
+
+**Facts.**
+- ADR-0007 §5 says no person reads records before the split, because the maintainer
+  writes the guidelines and cue table, and reading would expose future test records.
+- ADR-0006 §12 says the screen runs "before anything reaches `data/processed/`", so
+  before the split. A person may screen (`screened_by`, §14).
+- ADR-0006 §14 allows guideline examples "from admitted records", which includes
+  test.
+- ADR-0006 §3 already says the cue table comes from **dev-pool** observation.
+- Test records must be read by their annotators (§15, double annotation).
+- So the goal can't be "nobody sees test". It is: nothing *derived from* test
+  reaches the guidelines, the cue table or model choices.
+
+**Controls that actually protect test**, as opposed to logging:
+- freezing the guidelines and cue table before any test record is annotated
+  (§14 already freezes the guidelines before gold annotation)
+- dev-only examples and observations
+- assigning splits before anyone reads records
+- reporting under the frozen versions
+
+The exposure log only makes breaches visible.
+
+**D7.1 When humans screen.**
+- *Recommended (a):*
+  1. A rules-only screen (`rule:{name}`) before the split.
+  2. The split is computed and frozen (D5.1).
+  3. Human screening happens after the split. For dev and train it can be done by
+     anyone. For test and `test_source_holdout` it's done only by people who don't
+     write or change the guidelines or cue table.
+  4. A record failing the human screen is excluded after the split, without moving
+     other records (T5 spec).
+- *Alternative (b):* allow human screening before the split, log it, and report the
+  exposure.
+- *Alternative (c):* screeners may never write the guidelines or cue table.
+- (a) changes the §12 order ("before `data/processed/`") for the human part, so it
+  is a semantic change.
+
+**D7.2 Guideline examples.**
+- *Recommended:* dev pool only.
+- Amends §14 "from admitted records". This matches §3 for the cue table.
+
+**D7.3 Accidental exposure.** A test or holdout record seen by someone who writes
+guidelines or the cue table, outside test annotation.
+- *Recommended:*
+  - log it
+  - keep the record in place (no moves after the freeze)
+  - flag its duplicate class as `exposed`
+  - report test metrics with and without exposed classes
+  - any guideline or cue-table change made after an exposure, by the exposed person,
+    must cite only dev or train evidence
+- *Alternative:* drop exposed classes from test scoring altogether.
+
+**Interactions:**
+- Duplicate classes: exposure is tracked per class, because members share text.
+- Publisher holdout: `test_source_holdout` is treated like `test`.
+- Withdrawal: T8, not started.
+
+**Status:** BLOCKED on D7.1–D7.3, which must be decided with D5.1.
+
+### Cross-task consistency (checked 2026-10-28)
+
+- Decided together: D5.1 + D7.1 (freeze vs. screening order), D4.4 (T4 and T6),
+  and Blocker 1 + the T5 spec (fixed per-record assignment).
+- T3 needs nothing from T4–T7.
+- No T3–T7 item touches the Blocker 2 or Blocker 8 rulings, except D3.3, which reuses
+  R1d and step 9 unchanged.
+- Nothing here is marked VERIFIED. No ADR, code, dataset or split was changed or
+  created.
