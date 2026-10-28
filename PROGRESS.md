@@ -41,8 +41,17 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
     removed during ingestion, before anything is written to `data/processed/`".
     D7.1 is therefore **not recorded**. Options are listed as D7.1′.
   - **T3, T4, T5, T6 VERIFIED** against their criteria.
-  - **T7 BLOCKED** on D7.1′.
-  - **T8 READY**: its prerequisites, T6 and Blocker 1, are met.
+  - T7 was blocked on D7.1′. Commit `0f3dc19`.
+- **D7.1′ (a), staging, approved (2026-10-28).**
+  - Order: rules-only screen, then the split frozen in an ignored staging area
+    (`data/interim/`), then a role-restricted human screen, then only passing
+    records written to `data/processed/`.
+  - Checked against ADR-0001 §2, ADR-0006 §12 and §17, ADR-0007 §3 and §5, D5.1,
+    D7.3, Blocker 1 and Blockers 2/8: no conflicts.
+  - **T7 VERIFIED.**
+  - New coupling: human-screen exclusions aren't reproducible on rebuild, so T8's
+    denylist must cover them.
+- **T8 decision requests D8.1–D8.4 prepared.** T8 is BLOCKED on them.
   - No file-level evidence exists for any source field (B6), so per-source
     eligibility stays pending. This isn't a T6 criterion.
 
@@ -69,6 +78,11 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 | | `uv run ruff format --check .` | 23 files already formatted, exit 0 |
 | | `uv run ruff check .` | All checks passed, exit 0 |
 | | status audit (grep of the graph table and per-task status lines) | T0–T6 VERIFIED, T7 BLOCKED, T8 READY, T9–T12 BLOCKED; no stale or contradictory lines |
+| 2026-10-28, D7.1′ + T8 requests | `git diff --check` | no output, exit 0 |
+| | `uv run ruff format --check .` | 23 files already formatted, exit 0 |
+| | `uv run ruff check .` | All checks passed, exit 0 |
+| | status audit | T0–T7 VERIFIED, T8 BLOCKED (D8.1–D8.4), T9–T12 BLOCKED |
+| | `uv run pytest` | not rerun (docs-only change) |
 
 ## Failed attempts
 
@@ -87,16 +101,13 @@ ADR-0007 rev 4). Tasks, edges and the ruling ledger:
 
 Each needs maintainer input.
 
-- Blocker 10 (T7, BLOCKED: D7.1′, the conflict with ADR-0001 §2; staging
-  recommended)
-- Blocker 3 (T8, READY: denylist option, cascade to the duplicate class, errata
-  location; coordinate with D7.1′)
-- Blocker 7 (T9, BLOCKED on T7 and T8)
+- Blocker 3 (T8, BLOCKED: D8.1 denylist, D8.2 cascade to the duplicate class, D8.3
+  errata location, D8.4 exposure-log retention)
+- Blocker 7 (T9, BLOCKED on T8)
 - Blocker 11 (T10). Its ordering part is BLOCKED on T9. The acceptance condition
   can be ruled at any time.
 
 ## Next action
 
-**Maintainer ruling on D7.1′** (graph, "T3–T7 rulings"). T8 is READY to be written
-up as a decision request; whether withdrawals happen inside the staging area
-depends on D7.1′. No ADR edits until T1–T10 are decided.
+**Maintainer rulings on D8.1–D8.4** (graph, "T8 ... decision requests"). Then T9
+(release-manifest fields) becomes READY. No ADR edits until T1–T10 are decided.

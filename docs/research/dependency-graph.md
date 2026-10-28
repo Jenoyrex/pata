@@ -20,7 +20,7 @@ maintainer's ruling is the work.
 T0 ─────────────────────────────────────────────┐
 T1 (Blocker 2 rest) → T2 (Blocker 8) → T3 (Blocker 9)
 T4 (Blocker 5) ── same §17 text, edit together ── T5 (Blocker 4)
-T6 (Blocker 6) → T8 (Blocker 3) ← Blocker 1 (decided)
+T6 (Blocker 6) → T8 (Blocker 3) ← Blocker 1 (decided), T7 (Blocker 10)
 T7 (Blocker 10)
 T1..T8 → T9 (Blocker 7) → T10 (Blocker 11 ordering)
 T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → T12
@@ -33,8 +33,11 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
   decoding.
 - T4, T5, T6, T7 have no prerequisites. The order below is a recommendation, not a
   dependency.
-- T5 ↔ T7: D5.1 (freeze point, approved) constrains D7.1′. Human screening must
-  stay after the split, while also satisfying ADR-0001 §2.
+- T5 ↔ T7: D5.1 (freeze point) and D7.1′ (staging) are both approved and
+  consistent. Human screening comes after the freeze and before
+  `data/processed/`.
+- T7 → T8: human-screen exclusions aren't deterministic, so the D8.1 denylist must
+  cover them.
 - T4 ↔ T6: D4.4 (publisher missing-value tokens) applies both to split-key columns
   and to `raw_text`.
 - T11 waits for every decision. The maintainer asked for one coordinated
@@ -51,8 +54,8 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
 | T4 | Blocker 5: split-key inputs | VERIFIED (2026-10-28) | — | ADR-0006 §17 steps 1–2; ADR-0007 §5 | — (D4.1–D4.5 ruled) | two engineers derive the same step-1/2 result |
 | T5 | Blocker 4: freeze point, salt, bucket mapping | VERIFIED (2026-10-28) | — | ADR-0006 §17, F5 | — (D5.1, D5.2 ruled) | mapping fully specified; freeze point testable |
 | T6 | Blocker 6: `raw_text` eligibility and decoding | VERIFIED (2026-10-28) | — | ADR-0006 §2, §11, L6 | — (D6.1, D6.2, D4.4 ruled) | eligibility decidable from documentation alone |
-| T7 | Blocker 10: screening before the split | BLOCKED (D7.1 conflicts with ADR-0001 §2) | — | ADR-0006 §12, §14; ADR-0007 §5; ADR-0001 §2 | ruling on D7.1′ | no unrecorded pre-split exposure |
-| T8 | Blocker 3: withdrawal, denylist, errata | READY (T6 VERIFIED, Blocker 1 decided) | T6, Blocker 1 | ADR-0006 §12, §13, §18 | denylist (a), (b) or (c); cascade to duplicate class; errata location | a rebuild can't silently re-admit a withdrawn record, or the limitation is documented |
+| T7 | Blocker 10: screening before the split | VERIFIED (2026-10-28) | — | ADR-0006 §12, §14; ADR-0007 §5; ADR-0001 §2 | — (D7.1′ (a) ruled) | no unrecorded pre-split exposure |
+| T8 | Blocker 3: withdrawal, denylist, errata | BLOCKED (maintainer: D8.1–D8.4) | T6, Blocker 1, T7 | ADR-0006 §12, §13, §18 | D8.1–D8.4 | a rebuild can't silently re-admit a withdrawn or human-screen-excluded record, or the limitation is documented |
 | T9 | Blocker 7: release-manifest fields | BLOCKED (T1–T8) | T1–T8 | ADR-0006 §18 | `benchmark_version` major/minor rules | every version input is listed |
 | T10 | Blocker 11: acceptance condition and ordering | BLOCKED (T9) for ordering. The acceptance condition can be ruled any time. | T9 | ADR-0006 status line, Consequences; ADR-0007 Consequences | what counts as acceptance | both ADRs give one consistent order |
 | T11 | Coordinated revision: ADR-0006 rev 6, ADR-0007 rev 4 | BLOCKED (T1–T10) | T1–T10 | as above | approval of the drafted diff | full diff reviewed; cross-references checked |
@@ -277,7 +280,7 @@ Labels:
 - **Spec** is derived from approved rules or existing ADR text. It's recorded under
   existing authority, and the maintainer may override it.
 - **D** is a decision request. Rulings are in "T3–T7 rulings" at the end of this
-  section. Every D was accepted except D7.1.
+  section. Every D was accepted. D7.1 was superseded by D7.1′ (a), staging.
 - Nothing here is in the ADRs yet (T11).
 
 ### T3: Blocker 9, Layer D reliability (ADR-0006 §1, §13, §14, §15)
@@ -646,8 +649,8 @@ guidelines or the cue table, outside test annotation.
 - Publisher holdout: `test_source_holdout` is treated like `test`.
 - Withdrawal: T8, not started.
 
-**Status:** BLOCKED on D7.1′ (the conflict with ADR-0001 §2; see "T3–T7 rulings").
-D7.2 and D7.3 are accepted.
+**Status:** VERIFIED 2026-10-28. D7.1′ (a), staging, was ruled; D7.2 and D7.3 are
+accepted (see "T3–T7 rulings").
 
 ### Cross-task consistency (checked 2026-10-28)
 
@@ -674,7 +677,8 @@ D5.2, D6.1, D6.2, D7.2, D7.3.
 - Source values are never rewritten. `source_context` keeps the value as published,
   and presence is derived.
 
-**D7.1: not recorded. Conflicts with ADR-0001 §2 (Accepted).**
+**D7.1: not recorded; it conflicted with ADR-0001 §2 (Accepted).** Resolved by the
+D7.1′ (a) ruling below. This paragraph is kept as the record of the conflict.
 - ADR-0001 §2: "If a public source contains them [names of individuals, phone
   numbers, emails, ID numbers], they are removed during ingestion, before anything
   is written to `data/processed/`."
@@ -728,7 +732,8 @@ D5.2, D6.1, D6.2, D7.2, D7.3.
   but only on publisher documentation, which needs the pending "Procedural
   position" confirmation or other documentation.
   - It is still pending, with that gap and B6/B14 named.
-- **T8 readiness.** Its listed prerequisites (T6, Blocker 1) are met.
+- **T8 readiness.** Its listed prerequisites (T6, Blocker 1, and T7 since D7.1′)
+  are met. Decision requests D8.1–D8.4 have been prepared, below.
   - Post-split exclusion of a withdrawn record uses the T5 fixed-assignment spec.
   - Where withdrawals happen relative to `data/processed/` should be decided
     together with D7.1′.
@@ -757,4 +762,145 @@ D5.2, D6.1, D6.2, D7.2, D7.3.
   - Malformed, missing and empty inputs are handled explicitly.
   - Counts are per reason.
   - No source is accepted.
-- **T7 BLOCKED** on D7.1′. D7.2 and D7.3 are recorded.
+- **T7 VERIFIED** (after D7.1′, below).
+  - Screening stages and who may access what are defined.
+  - Exposure is logged from the first human screen.
+  - Guideline and cue-table contamination is controlled (D7.2, the §14 freeze, §3
+    dev-pool observation).
+  - Accidental exposure has a disposition (D7.3).
+  - It is consistent with T4 and T5.
+  - No split was generated.
+
+### D7.1′ ruling: staging (maintainer, 2026-10-28)
+
+**Approved: option (a).** The ingestion order is:
+1. **Rules-only privacy screen** (`screened_by: rule:{name}`), in its versioned
+   form.
+2. The split is **computed and frozen in an ignored staging area outside
+   `data/processed/`**, such as `data/interim/`.
+   - `data/*` is already in `.gitignore`, so staging is never committed.
+3. **Role-restricted human screen** on the staged records, after the freeze. The
+   D5.1 exposure rules apply, and the exposure log starts here.
+   - Dev and train can be screened by anyone.
+   - Test and `test_source_holdout` are screened only by people who don't write or
+     change the guidelines or cue table (D7.1).
+4. **Only records that pass** are written to `data/processed/`.
+5. A failed record is excluded. No other record's frozen assignment is recomputed
+   or moved (T5 spec).
+   - Withdrawal and duplicate-class handling follow the existing rules, and T8.
+6. Personal identifiers are therefore removed before any record enters
+   `data/processed/` (ADR-0001 §2).
+
+**Consistency check (no conflicts found):**
+- **ADR-0001 §2 (Accepted):** satisfied as written. Nothing that fails a screen
+  reaches `data/processed/`.
+  - Staging holds rules-screened records on local disk, like the pinned raw
+    snapshots already do (ADR-0004). It is never committed and never released.
+  - Derived: staging holds only `raw_text` and allowlisted `source_context`
+    (ADR-0006 §12: "Nothing outside the list is ingested").
+- **ADR-0006 §12:** the human screen still runs "before anything reaches
+  `data/processed/`".
+  - "Excluded records are not stored": derived, a failed record is deleted from
+    staging after the screen and only per-rule counts are kept.
+  - The §12 withdrawal mechanism stays for records the human screen also misses.
+- **ADR-0006 §17 and ADR-0007 §3:**
+  - the split is still computed at ingestion, before annotation
+  - step-1 and out-of-focus exclusions are still never written to
+    `data/processed/`
+  - the split file in `data/processed/` lists only records that passed
+- **ADR-0007 §5:** no person reads records before the split.
+- **D5.1:** the first human exposure, the human screen, comes after the freeze.
+  - A later bug-fix recompute can't move a screened (exposed) record into `test` or
+    `test_source_holdout`.
+- **D7.3:** screening of test by non-authors is logged exposure, not "accidental
+  exposure", which D7.3 defines as exposure of a guideline or cue-table author.
+- **Blocker 1:**
+  - Removing a failed member leaves the frozen assignments of the other class
+    members unchanged.
+  - Whether a failure cascades to the whole duplicate class is D8.2. Until it is
+    ruled, only the failing record is excluded.
+- **Blocker 2 and Blocker 8:** no interaction. Annotation layers start only on
+  records in `data/processed/`.
+- **Practical constraint** (a consequence, not a decision): test and holdout records
+  can be screened only by someone who doesn't write the guidelines or cue table.
+  Until such a person is available, those records can't be written to
+  `data/processed/`.
+- **New coupling to T8.** A human screening decision isn't deterministic.
+  - A rebuild from the same snapshot and `screen_version` would re-admit records
+    that failed the human screen, just as it would re-admit withdrawals.
+  - Recording human-screen exclusions is therefore part of D8.1.
+
+### T8: Blocker 3, withdrawal, denylist, errata (ADR-0006 §12, §13, §18) — decision requests
+
+**Facts.**
+- §12, withdrawal before release: the record and all its annotations are deleted.
+  "Only the count of withdrawals is logged, because `record_id` is derived from
+  source data."
+- §13: annotation documents are immutable ("nothing is overwritten"), and
+  withdrawal deletes them. The exception isn't stated.
+- §18:
+  - a release is immutable
+  - the manifest has an `errata` field ("errata entries that affect this
+    release")
+  - errata entries never contain text, `record_id` or hashes
+  - withdrawal makes a new release without the affected records
+- **The gap.** Rebuilding from the pinned snapshot with the same `screen_version`
+  re-admits:
+  - withdrawn records
+  - D7.1′ human-screen exclusions
+  - textual duplicates of a withdrawn record, whatever their source
+- L1 (stand-off or shipping `raw_text`) is undecided.
+
+**Derived** (no ruling needed; overridable):
+- §13 gets an explicit exception: withdrawal is the only deletion of annotation
+  documents.
+- A withdrawal after the freeze never moves another record (T5 spec, D7.1′ step 5).
+
+**D8.1 Durable record of exclusions (denylist).**
+- *(a) Recommended: an internal, unreleased denylist.*
+  - Each entry: `source_id`, `source_record_ref`, `raw_text_sha256`, a reason
+    category, the date.
+  - It is applied as a screen rule, so every change bumps `screen_version`.
+  - It covers withdrawals and human-screen exclusions.
+  - It is kept in private maintainer storage: never in git, never released.
+  - External stand-off rebuilds are protected another way: a release lists its
+    member records, so a withdrawn record is absent from the next release's list.
+    That depends on L1.
+  - This **changes §12's** "only the count ... is logged".
+- *(b) A published keyed-hash denylist.*
+  - With a public key, anyone holding the source can identify the record. That
+    defeats §18's no-hashes rule.
+  - With a secret key, outsiders can't apply it.
+- *(c) No denylist, with the limitation documented.* Rebuilds silently re-admit
+  excluded records, and human-screen decisions can't be reproduced.
+
+**D8.2 Cascade to the duplicate class.**
+- *Recommended:* a withdrawal or human-screen failure excludes the record's whole
+  duplicate class (identical `name_key(raw_text)`, Blocker 1).
+  - `name_key` keeps letters and digits, so a personal name or phone number in one
+    member's text is in every member's.
+  - It is counted separately.
+  - A failure caused only by `source_context` stays per record, because context
+    differs between members.
+- *Alternative:* per record only, with the class flagged for re-screening.
+
+**D8.3 Where errata live.**
+- *Recommended:* an append-only errata log outside releases (for example
+  `docs/errata.md` in git).
+  - Entry: date, affected release versions, reason category, number of records
+    removed. No text, `record_id` or hashes (§18).
+  - The `errata` field of a release manifest lists only the entries known at
+    publication, meaning the ones that release fixes. The log, not the manifest,
+    says which earlier releases an entry affects. Releases stay immutable.
+- *Alternative:* a mutable manifest field, which breaks immutability.
+- *Alternative:* release notes only, which give no single place to look.
+
+**D8.4 Exposure-log entries of excluded records.** The D5.1 exposure log holds
+record or class identifiers.
+- *Recommended:* the entries are kept in the same private store as the D8.1
+  denylist and are released only as counts.
+- *Alternative:* replace them with counts at exclusion, which loses the exposure
+  audit for those classes.
+
+**Status:** BLOCKED on D8.1–D8.4. When they are ruled, T9 waits only on T8, which
+would then be done.
