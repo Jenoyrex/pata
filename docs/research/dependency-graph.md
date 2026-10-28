@@ -58,7 +58,7 @@ T1..T10 → T11 (ADR-0006 rev 6 + ADR-0007 rev 4) → maintainer acceptance → 
 | T8 | Blocker 3: withdrawal, denylist, errata | VERIFIED (2026-10-28) | T6, Blocker 1, T7 | ADR-0006 §12, §13, §18 | — (D8.1–D8.4 ruled) | a rebuild can't silently re-admit a withdrawn or human-screen-excluded record, or the limitation is documented |
 | T9 | Blocker 7: release-manifest fields | VERIFIED (2026-10-28) | T1–T8 (met) | ADR-0006 §2, §18, §20 | — (D9.1, D9.2 ruled; D9.2 evidence verified) | every version input is listed |
 | T10 | Blocker 11: acceptance condition and ordering | VERIFIED (2026-10-28) | T9 (met) | ADR-0006 status line, Consequences; ADR-0007 status line, Consequences; ADR-0008 | — (D10.1, D10.2 ruled) | both ADRs give one consistent order, and acceptance is defined |
-| T11 | Coordinated revision: ADR-0006 rev 6, ADR-0007 rev 4 | READY (edit map prepared; drafting not started) | T1–T10 (met) | see "T11 edit map" | review of the drafted diff; acceptance per D10.1 | every ruling incorporated; full diff reviewed; changed decision items re-approved by name; cross-references checked |
+| T11 | Coordinated revision: ADR-0006 rev 6, ADR-0007 rev 4 | IN PROGRESS (drafted on branch `adr-0006-rev6`, 2026-10-28; awaiting maintainer review; both ADRs Proposed) | T1–T10 (met) | see "T11 edit map" | review of the drafted diff; acceptance per D10.1 | every ruling incorporated; full diff reviewed; changed decision items re-approved by name; cross-references checked |
 | T12 | Follow-up implementation (`docs/schema.md`, procedures, validator) | BLOCKED (acceptance) | ADR acceptance | per ADR-0006 Consequences | — | per ADR |
 
 Other open records outside this graph: ADR-0003 (NAPIX permission pending), ADR-0008

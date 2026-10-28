@@ -160,6 +160,21 @@ Each needs maintainer input.
 - Evidence gaps preserved: no source accepted; B6, B14–B17; the C1a field
   documentation; reason categories; L1; the `Scripts.txt` manifest; P1–P7.
 
+## T11 draft (2026-10-28, branch `adr-0006-rev6`)
+
+- ADR-0007 rev 4 and ADR-0006 rev 6 were drafted from the edit map. Both stay
+  Proposed.
+- Decision rows changed in the actual diff:
+  - ADR-0006: F1, F3, F5, F9, F10, F12, new F14 and F15, and L3
+  - ADR-0007: S6, S9, E1, E3
+- Checks: `git diff --check` exit 0; ruff check passed; ruff format: 23 files
+  already formatted; pytest 26 passed (84.8 s).
+- Derived edits beyond the map:
+  - `admission.screened_by` records both screen stages
+  - the T5 test vectors are copied into §17
+  - §20 clarifies that `schema_version` and `benchmark_version` are separate
+- Not yet done: a full line-by-line review of the diff against every ruling.
+
 ## Next action
 
 **T11: draft ADR-0007 rev 4 and ADR-0006 rev 6** from the graph's "T11 edit map".
