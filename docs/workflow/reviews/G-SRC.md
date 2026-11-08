@@ -64,10 +64,9 @@ candidate. I did not reword the criterion. Decision 3 below resolves this.
 
 Also open: G4 (publisher unit, "government body") and B4 (reuse on request).
 
-**One small ruling unblocks E-INV.** C9c (`office_infrastructure_details.csv`, 299 B) has no known
-URL. Either drop it as a candidate with a dated note, or have its catalog located at
-https://tn.data.gov.in/. Either way E-INV then needs a verifier pass, and E-FIELD and E-LIC cannot
-start before that.
+**C9c located, 2026-11-08.** The file URL for `office_infrastructure_details.csv` (299 B) is now in
+the candidate register (R126), so no ruling is needed to unblock E-INV. Whether C9c stays a candidate
+is still yours to decide. What the file holds is UNKNOWN, and it was not downloaded.
 
 ### Draft to data.gov.in: not sent
 

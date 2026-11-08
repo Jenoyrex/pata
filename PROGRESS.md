@@ -161,7 +161,6 @@ Each needs maintainer input.
   `source_record_ref` screening, N1, rebuild scope, revision numbers, ADR-0008 rev 3), then
   acceptance of ADR-0006, ADR-0007 and ADR-0008 by the maintainer.
 - E-LGD: the options in `docs/workflow/cards/E-LGD.md`.
-- E-INV: a ruling or URL for C9c (`docs/workflow/reviews/G-SRC.md` section 4), then a verifier pass.
 - G-SRC: B14, retrieval and what counts as field evidence (same packet).
 - H-SCREENER: assign the screener.
 - Evidence gaps preserved: no source accepted; B6, B14–B17; the C1a field
@@ -169,9 +168,9 @@ Each needs maintainer input.
 
 ## Next action
 
-**No agent node is ready.** Progress depends on the maintainer decisions listed above. The
-smallest one that unblocks agent work is the C9c ruling: E-INV can then be re-verified, which is
-also the first verifier run on the C10 correction, and E-FIELD and E-LIC can start.
+**E-INV is done (2026-11-08); E-FIELD and E-LIC are ready.** E-FIELD's first criterion needs
+publisher documentation that was not found for any candidate, so it depends on G-SRC decision 3.
+The other maintainer decisions are listed above.
 
 ## Session log
 
@@ -287,13 +286,18 @@ also the first verifier run on the C10 correction, and E-FIELD and E-LIC can sta
   files); `uv run pytest -q` 119 passed, 4 skipped; `git diff --check` exit 0; graph OK. On a temporary
   export of `adr-0006-rev6` plus the patch: ruff and format pass (24 files, temporary virtualenv
   excluded); pytest 25 passed, 1 skipped. Packet sections 5–7 brought up to date. Patch still unapplied.
+- **E-INV done, 2026-11-08.** C9c's catalog and file URL found from page metadata (R126); the file was
+  not downloaded and C9c was not ruled on. Third verifier run: PASS on both criteria, including the
+  C10 correction; ruff, format, `git diff --check` and graph pass; pytest 119 passed, 4 skipped.
+  Caveat: today's metadata gives a different file path for C10's first URL and two C9b files, and
+  whether the old paths resolve is UNKNOWN (card `docs/workflow/cards/E-INV.md`).
 
 ## Dependency graph status
 
 <!-- graph:progress:begin -->
 _Generated from `workflow/graph.toml` on 2026-11-08 — do not edit by hand._
 
-**Graph nodes done:** 2/29 (node count, not effort; design nodes ≠ implementation).
+**Graph nodes done:** 3/29 (node count, not effort; design nodes ≠ implementation).
 
 | Phase | Node | Status | Gate | Waiting on |
 |---|---|---|---|---|
@@ -302,9 +306,9 @@ _Generated from `workflow/graph.toml` on 2026-11-08 — do not edit by hand._
 | P0-governance | **G-ADR67** T11 + D10.1: review and joint acceptance of ADR-0006 rev 6 and ADR-0007 rev 4 | review | maintainer | — |
 | P3-pipeline | **T12** T12 implementation task (scope per legacy dependency graph) | dropped | — | G-ADR67 |
 | P1-evidence | **E-LGD** LGD level verification: state / district / sub-district / village | review | maintainer | — |
-| P1-evidence | **E-INV** Candidate source inventory (exact files/snapshots, publishers) | blocked | — | — |
-| P1-evidence | **E-FIELD** Field semantics evidence (incl. C1a Address_Original_First_Line) | todo | — | E-INV |
-| P1-evidence | **E-LIC** Licence + redistribution evidence (B14–B17) | todo | — | E-INV |
+| P1-evidence | **E-INV** Candidate source inventory (exact files/snapshots, publishers) | done | — | — |
+| P1-evidence | **E-FIELD** Field semantics evidence (incl. C1a Address_Original_First_Line) | todo | — | — |
+| P1-evidence | **E-LIC** Licence + redistribution evidence (B14–B17) | todo | — | — |
 | P1-evidence | **E-B6** Scripted aggregate inspection of candidate source files (B6) | done | — | — |
 | P1-evidence | **G-SRC** Maintainer accept/reject decision per source | todo | maintainer | G-ADR67, E-FIELD, E-LIC |
 | P2-spec | **D-SCHEMA** docs/schema.md: schemas, statuses, reason-category vocabulary, provenance fields | todo | maintainer | G-ADR67 |
@@ -328,6 +332,6 @@ _Generated from `workflow/graph.toml` on 2026-11-08 — do not edit by hand._
 | P7-release | **B-BASE** Baselines + evaluation scripts | todo | — | A-GOLD |
 | P7-release | **R-REL** Release v1: manifest, hashes, metrics, exclusions, limitations, versioning | todo | maintainer · irreversible | B-BASE |
 
-**Ready now:** H-SCREENER
+**Ready now:** E-FIELD, E-LIC, H-SCREENER
 **Awaiting maintainer:** W0, G-ADR67, E-LGD
 <!-- graph:progress:end -->

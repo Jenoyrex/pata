@@ -27,7 +27,7 @@
 - E-B6: scripted aggregate inspection, added to the graph.
 
 ## Proof
-Metadata hashes are in the inventory, R111–R125.
+Metadata hashes are in the inventory, R111–R126.
 
 ## Verifier verdict
 First run, 2026-11-04: **FAIL** on criterion 1 (C5, C8a–C8i, C9b, C9c had no exact file or URL);
@@ -39,6 +39,18 @@ entries matched; C8d and C8i judged legitimate. Criterion 2 PASS.
 
 **Blocked on the maintainer:** C9c needs a ruling or a URL. The criterion is not reinterpreted here.
 
+**Unblocked 2026-11-08:** C9c's catalog and file URL were found from page metadata (R126), on the
+maintainer's request to do this work. The file was not downloaded and C9c was not ruled on.
+
+Third run, 2026-11-08: **PASS** on both criteria, including C10 and C9c. Gate checks passed: pytest
+119 passed, 4 skipped. Caveats, none failing a criterion as worded:
+
+- Fresh metadata gives a `www.data.gov.in/files/ogd20/ogdpv2dms/...` path for every file in C8a, C9b
+  and C10. C10's first URL and C9b's two base A files use a path not in today's metadata. File names
+  and sizes match. Whether the old paths still resolve is UNKNOWN, because testing them would mean
+  requesting data files.
+- URL accuracy for the rows not re-queried rests on earlier passes.
+
 ## Outcome
-- Graph status set to: blocked (C9c)
-- Commit(s): none (maintainer safeguard)
+- Graph status set to: done
+- C9c's status as a candidate stays with the maintainer (G-SRC)
