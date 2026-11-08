@@ -11,6 +11,7 @@ dist/
 .ruff_cache/
 .coverage
 .ipynb_checkpoints/
+graphify-out/
 
 # Data: never commit data files. Only provenance manifests are tracked (ADR-0001).
 data/*
