@@ -1,3 +1,27 @@
+## Workflow (read first, every session)
+
+This repo is run with **LOOP + dependency-graph engineering**.
+
+- **What to work on** is decided by `workflow/graph.toml`, never by memory or by PROGRESS.md prose.
+  `uv run python scripts/graph.py next` · `show <ID>` · `critical` · `validate`
+- **How to work** on one node: `docs/workflow/LOOP.md` (Load → Outline → Operate → Prove → Record).
+- Commands: `/next`, `/loop [ID]`, `/verify ID`, `/checkpoint ID status`, `/gate-review ID`, `/add-node`.
+- Subagents: `verifier` (independent Prove), `adr-reviewer` (gate packets), `evidence-scout` (sourced web evidence).
+
+### Non-negotiables
+1. One node at a time; never start a node whose deps aren't `done`.
+2. No push, merge, rebase, ADR acceptance or graph approval by Claude. Prepare; the maintainer decides.
+3. Ask for an explicit "go <ID>" before any `irreversible` node (split freeze, release).
+4. Never fabricate source records, field meanings, licence terms, admin links, approvals, scores or test output.
+   Unknown is written as UNKNOWN / UNVERIFIED.
+5. Raw, private, staging, denylist and exposure data never enter Git. Test/holdout data is not read by Claude.
+6. CAPTCHA/403/login walls are reported to the maintainer, never bypassed.
+7. Design verified ≠ implemented ≠ released. Say which one you mean.
+8. Work isn't done until the `verifier` returns all-PASS and the graph + PROGRESS.md are updated.
+
+Guard hooks in `.claude/hooks/pata_guard.py` enforce rules 2, 5 and the graph rules. If a hook blocks you,
+do not look for another way to do the same thing — report it.
+
 # Pata: working rules for Claude
 
 Pata is an open-source benchmark (PataBench) and toolkit for Indian address

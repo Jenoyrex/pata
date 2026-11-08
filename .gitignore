@@ -18,3 +18,13 @@ data/*
 
 # Manually downloaded source reports awaiting placement under data/raw/ (ADR-0004)
 /report data/
+
+# Workflow kit: private, staging and local-only paths
+data/raw/
+private/
+staging/
+**/denylist*
+**/exposure*
+*.local.toml
+.claude/settings.local.json
+_kit/
