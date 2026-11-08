@@ -17,10 +17,11 @@
   2026-10-07: alternative address sources (C7–C12), metadata only. Ninth
   pass, 2026-10-07: C9a and C9b assessment evidence. Tenth pass, 2026-10-25:
   B17 for Tamil Nadu (the Tamil Nadu Data Policy 2022), official documents
-  only, with a follow-up on 2026-10-26 on its open points.
+  only, with a follow-up on 2026-10-26 on its open points. Eleventh pass,
+  2026-11-04: candidate register, field and licence evidence (see that section).
 - **Not exhaustive.** Only the sources and categories listed below were looked
   at. Categories identified but not researched are listed separately.
-- **Ten passes.** The sections up to "Candidate-state evidence" record the
+- **Eleven passes.** The sections up to "Candidate-state evidence" record the
   first pass. "Licence and header verification" records a second pass on C1–C6.
   "data.gov.in host and licence re-check" records a third pass on the C1–C3
   licence only. "Terms of use and retrieval conditions" records a fourth pass on
@@ -2267,8 +2268,177 @@ UTC; responses saved outside the repository and hashed.
   - G2 (completeness of `Address`) and G6 (currency), unchanged.
 - **Unchanged:** C1–C8, C9c, C10–C12, and B18.
 
+## Candidate register, field and licence evidence (eleventh pass, 2026-11-04)
+
+Evidence status only. **No source is accepted, rejected or selected.** This pass serves graph
+nodes E-INV, E-FIELD and E-LIC. It consolidates earlier passes and re-checks what could be
+re-checked. Where it differs from an earlier pass, this pass is current.
+
+### Method
+
+- Metadata and policy pages were retrieved with `curl` on 2026-11-04 (from 14:03 UTC) and
+  2026-11-05 (from 12:55 UTC; R120–R125), and read directly [PUBD]. Saved responses are in a session
+  scratch directory, not committed.
+- `www.data.gov.in/robots.txt` disallows all paths (R49). As in earlier passes, a small number of
+  metadata and policy requests were made by hand-run command. No data file was requested, so
+  **no data file was retrieved in this pass** and no address record was read.
+- Sources not re-checked keep the date of the pass that last read them, shown per row below.
+
+### Sources for this pass
+
+| # | URL | Kind | SHA-256 of saved response | Supports |
+|---|---|---|---|---|
+| R111 | The R29 query (C1 resources) | [PUBD] | `94527c57b3d8e0a83fbf563f06fff41e85acb47d43e2fd27da5ad14d94277138` | C1 resource titles, notes, change dates |
+| R112 | The R30 query (C2 resource) | [PUBD] | `7eb0280e5a7a548564f4dbf78ea245a1dbf9d6fbc3014cf6d4065d297278dc20` | C2 |
+| R113 | The R31 query (C3 resource) | [PUBD] | `7198512da6a51545126b70f2cf792a4c7f84bd86615151bf7213079b16966946` | C3 |
+| R114 | The R32, R33 and R34 field-list queries | [PUBD] | `88407549bde6411b860346afdd1d41cd463c11e340a311e9c16b9f3b2506bb46`; `d068e39f284587f765291fd0b25f5bc2c710005f743ccd2419fa86d8724924e2`; `8ab43b09461f8739867ab327ef28396ab5d80f1e314c8618b0ede266f553ba73` | Field descriptors |
+| R115 | https://www.data.gov.in/policies | [PUBD] | `8a5f6df00de93fd854aeb4daa8a27e1bfcd3615a20a1636fb1d67c109cf50b31` | B14 Copyright Policy sentence still present |
+| R116 | https://www.data.gov.in/Godl | [PUBD] | `c3ce601c3e81fc171a15a16100830f9fa881d09ef6f9d693ecb2e9ed78c2349f` | Footer licence statement still present. The licence body in the route script was not re-read (last read R110, 2026-10-26) |
+| R117 | https://tn.data.gov.in/policies | [PUBD] | `31b55eab940cc8168b8ca5993be1ff53472d3d59443269b1b9402ae00ba02070` | The B14 sentence was not found in the server-rendered text, as in R83 |
+| R118 | The R36 query (C4 dataset metadata) | [PUBD] | `e112a96fdcbf0e14788075e5512ccac507e000a2c4d39ef7a03e535ce1eed9dd` | C4 licence label and CSV URL |
+| R120 | The resources query with `filters[catalog_reference]` for catalogs 6898251, 6899716, 603893053, 6898281, 6898258, 6910236, 6898274, 6903066 (C8a–C8c, C8e–C8i), retrieved 2026-11-05 | [PUBD] | `132419905a9725930791796cabaf1b0d719b0f2baddc2d07b0cfa1261d4adf1b`; `ce5d4e00fd2bf91faa5596327a20e92fcca24ec3d0a0fd54e169d12310bfc663`; `ec9e34a638a741078bb4e247b48b2549ec5f70e11ef42d4bf60cfb2e2a6a4395`; `29d04f8fbd86d1eeb2d8aaa04257a09265623b3024cf15d4a2c6a152dea4d419`; `3520d87f7726758cfbd81d1b9a5a62d1f0cc83a8d126b20eb025c2c26f89c023`; `f566c436298374fa79c9209b049337bcacf1b20b23ae6d79580c6ef595ba1c34`; `aa42f4bbe2ae8fbe338ba7febe2ae3629f1b1c4b639f553b74b867f401beab43`; `5ff804320ad791b77d9628bf447ce3dc5f2179dd5e6154dade3107317604d206` | C8 file URLs and sizes |
+| R121 | The resources query for catalog 6885864 (C9b), retrieved 2026-11-05 | [PUBD] | `cd8da7e6d2a1f304f449c6ccc15b97a1b78cccd728d6a284fc4efaa7e3883601` | C9b file URLs and sizes |
+| R122 | The R77 query (C7), retrieved 2026-11-05 | [PUBD] | `8669fc28e45bc331f30f0825cae390d915b7eb504a5f2e5f8fb641cc19c01414` | C7 file URL |
+| R123 | https://www.elections.tn.gov.in/PS_LIST.aspx and https://www.elections.tn.gov.in/PSLIST_06042026.aspx, retrieved 2026-11-05 | [PUBD] | `27e58dcad965cb03faa9614d0d183af40b78124c4b5e1b8106834d909fc74810`; `750d9b9a42e67e7b9907e84159a084622084052c95c638d29a6422597f9c0ef1` | C5 list pages. Links counted only; **no PDF opened**, no electoral roll touched |
+| R124 | https://karnataka.data.gov.in/catalog/list-prisons-karnataka-state, retrieved 2026-11-05, plus the resources query for its id `6911014` and uuid `4e9e0fed-c4cf-4d63-9b87-a499a37019e6` | [PUBD] | page `c60fbd5b2eb4d4e82f8f65d2860006e2dfa97fea263925d98e67b021ef834872`; both queries `bb04510ae0630ca0e9558ef67c3d10aa62199cf878004d2cccd2ba73cad2b1f1` | C8d: the rendered page shows "No Result Found..."; both queries return 0 resources |
+| R125 | The resources query for catalog 356901 (C10), retrieved 2026-11-05 | [PUBD] | `7674f8628dac7e4fb2311bb3061de9553f77686e128d74b1bce335f552c9ef21` | C10 file locations and sizes |
+| R119 | Connection attempts, 2026-11-04 | [PUBD] | none | `info.nhp.gov.in` and `nhp.gov.in` timed out; `www.nhp.gov.in` did not resolve; `api.data.gov.in` **now answers** HTTP 404 at its root (it refused connections on 2026-10-06). Its data endpoints were not tried |
+
+### Candidate register (E-INV)
+
+"Data file retrieved" is about the file itself. It is **not retrieved for every row**: no
+candidate's data file is held. "Evidence date" is the last date its metadata or page was read.
+Sizes are from metadata. C8 and C9b metadata was re-read on 2026-11-05 (R120, R121), because the
+eighth-pass responses are no longer held. Resource titles can differ from catalog titles.
+
+| Row | Publisher (as stated) | Exact file or snapshot | URL | Data file retrieved | Evidence date |
+|---|---|---|---|---|---|
+| C1a | MoHFW / DoHFW / NIHFW | "National Hospital Directory with Geo Code and additional parameters (updated till last month)"; `hospital_directory.csv`, 10,341,256 B per metadata; no dated snapshot | https://www.data.gov.in/files/ogdpv2dms/s3fs-public/datafile/hospital_directory.csv | not retrieved | 2026-11-04 |
+| C1b | As C1a | "NIN Health Faclities with Geo Code and additional parameters (updated till last month)"; `nin-health-facilities.csv`, 26,644,508 B per metadata | https://info.nhp.gov.in/api/nin-health-facilities.csv (host unreachable, R119) | not retrieved | 2026-11-04 |
+| C2 | MoHFW / DoHFW | "All India Health Centres Directory as on 7th October, 2016"; `geocode_health_centre.csv`, 20,967,450 B per metadata | https://www.data.gov.in/files/ogdpv2dms/s3fs-public/dataurl14092017/geocode_health_centre.csv | not retrieved | 2026-11-04 |
+| C3 | MoHFW / DoHFW / CGHS | "List of Hospitals empaneled under CGHS all over India"; `2_empanelledHospitals_1.csv`, 80,196 B per metadata | https://www.data.gov.in/files/ogdpv2dms/s3fs-public/datafile/2_empanelledHospitals_1.csv | not retrieved | 2026-11-04 |
+| C4 | "Health and Medical and Family Welfare", Open Data Telangana | "Details of Health centres latitude and longitude in Telangana"; dataset `44935575-631b-4116-b278-41f4c507b95b`; CSV | https://data.telangana.gov.in/sites/default/files/uploaded_resources/Details%20of%20Health%20centres%20latitude%20and%20longitude%20in%20Telangana.csv | not retrieved | 2026-11-04 |
+| C5 | Public (Elections) Department, Tamil Nadu; district administrations (unresolved) | Tamil Nadu only: `PSLIST_06042026`, the newest of the nine list pages linked from `PS_LIST.aspx` (seven carry an as-on date): 468 per-constituency PDFs, 234 English and 234 Tamil, `PSLIST_06042026/dt{district}/{English,Tamil}/AC{nnn}.pdf`. Karnataka: no list identified (R22 is one district's notices) | https://www.elections.tn.gov.in/PSLIST_06042026.aspx (R123) | not retrieved | 2026-11-05 |
+| C6 | Kendriya Vidyalaya Sangathan | No file found: a search form | R43 | not retrieved | 2026-10-04 |
+| C7 | Ministry of Corporate Affairs | "Registrars of Companies (RoC)-wise Company Master Data"; `company_master_data_upto_Mar_2015_Goa.csv`, 996,505 B per metadata. **Out of v0 scope (B18)** | https://www.data.gov.in/files/ogdpv2dms/s3fs-public/dataurl15092015/company_master_data_upto_Mar_2015_Goa.csv | not retrieved | 2026-11-05 |
+| C8a | DPAR, EDCS, Karnataka | "List of Karnataka One centers"; `kone_Centre.csv`, 8,347 B | https://data.gov.in/files/ogd20/ogdpv2dms/s3fs-public/datafile/kone_Centre.csv | not retrieved | 2026-11-05 |
+| C8b | DPAR, EDCS, Karnataka | Two resources titled "Grama One centers", each 32,064 B: `Gramaone_Centers_0.csv`, `Gramaone_Centers.csv` | https://data.gov.in/files/ogd20/ogdpv2dms/s3fs-public/datafile/Gramaone_Centers_0.csv; https://data.gov.in/files/ogd20/ogdpv2dms/s3fs-public/datafile/Gramaone_Centers.csv | not retrieved | 2026-11-05 |
+| C8c | Home Dept, Karnataka State Fire and Emergency Services | `DETAILS_OF_FIRE_STATIONS_WITH_PHONE_NUMBERS_6.csv`, 11,640 B | https://www.data.gov.in/files/ogdpv2dms/s3fs-public/DETAILS_OF_FIRE_STATIONS_WITH_PHONE_NUMBERS_6.csv | not retrieved | 2026-11-05 |
+| C8d | Home Dept, Prisons and Correctional Services, Karnataka | **No file currently listed.** Five resources per the eighth pass (R80); on 2026-11-05 the catalog page shows "No Result Found..." and the metadata returns none (R124). Whether the files were withdrawn is UNKNOWN | https://karnataka.data.gov.in/catalog/list-prisons-karnataka-state | not retrieved | 2026-11-05 |
+| C8e | Agricultural Marketing Dept, Karnataka | "Districtwise List of APMCs as on 2020-2021"; `List_Of_APMC.csv`, 19,566 B | https://data.gov.in/files/ogd20/ogdpv2dms/s3fs-public/datafile/List_Of_APMC.csv | not retrieved | 2026-11-05 |
+| C8f | Animal Husbandry and Fisheries Dept, Karnataka | Three resources: `fin_fish_hatchery.csv` 1,353 B; `Fisheries_training_centers.csv` 597 B; `District_contact.csv` 4,238 B | https://data.gov.in/files/ogd20/ogdpv2dms/s3fs-public/fin_fish_hatchery.csv; https://data.gov.in/files/ogd20/ogdpv2dms/s3fs-public/Fisheries_training_centers.csv; https://data.gov.in/files/ogd20/ogdpv2dms/s3fs-public/District_contact.csv | not retrieved | 2026-11-05 |
+| C8g | Karnataka Vocational Training and Skill Development Corporation | "List of training center"; `List_of_training_center.csv`, 644 B | https://data.gov.in/files/ogd20/ogdpv2dms/s3fs-public/datafile/List_of_training_center.csv | not retrieved | 2026-11-05 |
+| C8h | Co-operative Dept, Karnataka | "List of Societies_KSC Act 1959"; `LOS_KODI_0.csv`, 1,147 B | https://www.data.gov.in/files/ogdpv2dms/s3fs-public/datafile/LOS_KODI_0.csv | not retrieved | 2026-11-05 |
+| C8i | Directorate of Tourism, Karnataka | "District Wise List of Museums"; `List_Of_Museums.csv`, 1,784 B. No address field: **not carried as a candidate** | https://data.gov.in/files/ogdpv2dms/s3fs-public/datafile/List_Of_Museums.csv | not retrieved | 2026-11-05 |
+| C9a | CMA, Municipal Administration and Water Supply Dept, Tamil Nadu | `ulb_addresses_wards_2017_0.csv`, 23,541 B per metadata | https://www.data.gov.in/files/ogdpv2dms/s3fs-public/datafile/ulb_addresses_wards_2017_0.csv | not retrieved | 2026-10-07 |
+| C9b | Tamil Nadu Open University, Higher Education Dept | Ten resources, listed under this table | https://tn.data.gov.in/catalog/list-study-centres-under-tamil-nadu-open-university-2020 and the file URLs under this table | not retrieved | 2026-11-05 |
+| C9c | TN Fire and Rescue Services | `office_infrastructure_details.csv`, 299 B (R80). Left out of the evaluation table on 2026-10-07, on an inference from its size only; what it holds is [U], and no maintainer ruling exists. **File URL UNKNOWN: this row does not meet the E-INV criterion.** Alias guesses found no catalog on 2026-11-05, which is weak evidence because the same API search also missed C8d's existing page | UNKNOWN | not retrieved | 2026-10-07 |
+| C10 | NIHFW | "Blood Bank Directory (updated till last month)": `Blood_bank_updated-sep_2015.xls`, 904,654 B, plus `blood-banks.csv` (size not recorded). "Blood Bank Directory as on September 2015": `Blood_bank_updated-sep_2015.xls`, 1,107,968 B | https://www.data.gov.in/files/ogdpv2dms/s3fs-public/datafile/Blood_bank_updated-sep_2015.xls; https://data.gov.in/files/ogd20/ogdpv2dms/s3fs-public/datafile/Blood_bank_updated-sep_2015.xls; https://info.nhp.gov.in/api/blood-banks.csv (host unreachable, R119) | not retrieved | 2026-11-05 |
+| C11 | Ministry of Education (mirror label) | No bulk file found: interactive directory | https://dashboard.aishe.gov.in/hedirectory/ | not retrieved | 2026-10-07 |
+| C12 | CBSE | No bulk file found: interactive directory | https://saras.cbse.gov.in/SARAS/AffiliatedList/ListOfSchdirReport | not retrieved | 2026-10-07 |
+
+**C9b files** (R121). Base A is `https://data.gov.in/files/ogdpv2dms/s3fs-public/datafile/`;
+base B is `https://data.gov.in/files/ogd20/ogdpv2dms/s3fs-public/datafile/`.
+
+| File | Base | Bytes |
+|---|---|---|
+| `students_enrolled_and_passedout_details_under_tamil_nadu_open_university_in_tamil_nadu_2020_1.csv` | A | 151,813 |
+| `list_of_work_centres_under_tamil_nadu_open_university_regional-wise_in_tamil_nadu_2020.csv` | B | 5,324 |
+| `list_of_regional_centres_under_tamil_nadu_open_university_in_tamil_nadu_2020.csv` | B | 1,518 |
+| `list_of_programme_study_centres_under_tamil_nadu_open_university_in_tamil_nadu_2020.csv` | B | 2,604 |
+| `list_of_partner_institutions_with_tamil_nadu_open_university_in_tamil_nadu_2020.csv` | B | 1,322 |
+| `list_of_learner_resource_centers_under_tamil_nadu_open_university_in_tamil_nadu_2020.csv` | B | 30,970 |
+| `list_of_learing_support_centres_lsc_under_tamil_nadu_open_university_regional-wise_in_tamil_nadu_2020.csv` | B | 8,350 |
+| `list_of_jail_study_centres_under_tamil_nadu_open_university_in_tamil_nadu_2020.csv` | B | 976 |
+| `list_of_b_education_study_centres_under_tamil_nadu_open_university_in_tamil_nadu_2020.csv` | A | 1,808 |
+| `list_of_b_education_special_education_centres_under_tamil_nadu_open_university_in_tamil_nadu_2020.csv` | B | 1,653 |
+
+**Sources named in the request but not address-corpus candidates.** LGD and the India Post PIN
+directory are gazetteer sources, and ADR-0007 §1 and S1 keep them out of the address corpus. Their
+manifests exist in `data/manifests/`. The four core LGD files are held and verified: `sha256sum`
+on 2026-11-04 matches the pinned values. India Post stays deferred (ADR-0004 §7).
+
+**Earlier rows stand** for the "not usable", "not assessable" and "not researched" lists above.
+UGC, eCourts, NIC district pages, NVS, NDAP and Jan Aushadhi were not researched in this pass
+either, so the inventory remains non-exhaustive (G11).
+
+### Field semantics (E-FIELD)
+
+What was checked: for C1–C3, the field descriptor (`id`, `name`, `type`), the list `desc` and the
+resource `note` (R111–R114). For C4, the dataset metadata (R118), and the datastore schema from
+the second pass (R37).
+
+**Finding: no publisher documentation defining any candidate raw-text field was found.** Each
+field is known by its name and platform type only. Each `desc` repeats the resource title. Each
+`note` covers only missing values, plus update timing for C1 and the NIN expansion for C1b. A
+column name is not evidence.
+
+| Row | Candidate raw-text field | Publisher definition | Documented about it | Verdict |
+|---|---|---|---|---|
+| C1a | `Address_Original_First_Line` | None found | Note: "NA/Blank: Not Available" | **UNDETERMINED** |
+| C1b | `Address` | None found | Same note | UNVERIFIED |
+| C2 | `Facility Address` | None found | Note: "NA: Not Available" | UNVERIFIED |
+| C3 | `DiagnosticCentreAddress` | None found. It sits in a hospital resource under a diagnostic-centre name | Note: "NA: Not Available." | UNVERIFIED |
+| C4 | None: components only | None found | — | No field to back; G2 |
+| C5, C6 | UNKNOWN: no schema | None found | — | UNVERIFIED |
+| C8a–C8h | UNKNOWN: no field list | None found | — | UNVERIFIED |
+| C9a | `address` | None found | — | UNVERIFIED |
+| C9b | `Address` (nine of ten lists) | None found | — | UNVERIFIED |
+| C10 | `_address` | None found | — | UNVERIFIED |
+| C11 | `address1` | None found | — | UNVERIFIED |
+| C12 | "Address Details" | None found | — | UNVERIFIED |
+
+**C1a outcome: undetermined.** `Address_Original_First_Line` neither qualifies nor is disqualified
+on this evidence:
+
+- The name suggests one line of an address, and "Original" suggests text before some processing.
+  Both are readings of a column name, so neither counts.
+- The same catalog's 2015 lists have `address First Line`, and its May-2016 list has
+  `_address_original_first_line` (R114). That shows the field recurs, not what it holds.
+- What could move this: a publisher definition, or scripted aggregate statistics from a manually
+  retrieved file (node E-B6) compared with the component columns. Statistics can show shape only,
+  so whether they are enough is a maintainer decision (G2).
+
+**The first E-FIELD criterion cannot be met on available evidence.** "Each candidate raw-text
+field backed by publisher documentation, not column names" fails for every row above, so E-FIELD
+stays open. Whether to ask the publishers, or to rule on what suffices, is for the maintainer. The
+criterion is not reworded here.
+
+### Licence and redistribution (E-LIC, B14–B17)
+
+"Licence text location" is where the text was read. Permission is not inferred from access. All
+of this is evidence of what the texts say, not a reading that any of them governs.
+
+| Row | Licence text location | Redistribution terms stated | Attribution terms stated | Status | Last read |
+|---|---|---|---|---|---|
+| C1a, C2, C3 | Site footer naming GODL-India (R116) and `/Godl` text (R47, R110); no resource-level licence field (R111–R113). Copyright Policy (R115) | GODL-India §3: publish in original or adapted form, for lawful commercial and non-commercial purposes, **if it governs**. Copyright Policy: reproduction "after taking proper permission by sending a mail" | GODL-India §§4–5: attribution with DOI, URL or URI, template given. Terms of Use: source "must be prominently acknowledged" (R50) | **UNKNOWN: B14 open** | 2026-11-04 |
+| C1b | No licence text for `info.nhp.gov.in`; archived 2023 terms for `www.nhp.gov.in` reserve all rights (R58) | UNKNOWN | UNKNOWN | **UNKNOWN: B15 open, host unreachable (R119)** | 2026-11-04 |
+| C10 | **Corrects the eighth pass:** both resources also have an `.xls` on data.gov.in's file store (R125), so as C1a for those files. The `blood-banks.csv` link is as C1b. Its `.xls` is named September 2015 under a title saying "updated till last month" (G6) | As C1a if GODL-India governs; UNKNOWN for the `info.nhp.gov.in` file | As C1a; UNKNOWN for the `info.nhp.gov.in` file | **UNKNOWN: B14 for the `.xls`; B15 for the `.csv`** | 2026-11-05 |
+| C4 | Dataset label only, no text or link (R118). Portal Copyright Policy (R65) and footer (R63) | Label: UNKNOWN text. Policy: reproduction after permission by mail. Footer: all rights reserved | UNKNOWN | **UNKNOWN: B3, B16 open**; clarification drafted, not sent | Label 2026-11-04; policy 2026-10-06 |
+| C5 | Footer of the CEO site (R38); district policies (R39, R40) | All rights reserved (CEO). Reuse after permission (districts) | Not stated | **No reuse licence found; B4** | 2026-10-04 |
+| C6 | Website copyright policy (R42) | Reproduction after permission by mail | Not read in full [U] | **No reuse licence found; B4** | 2026-10-04 |
+| C7 | As C1a | As C1a | As C1a | B14; **out of v0 scope (B18)** | 2026-10-07 |
+| C8 | Instance footer (R84); `www.data.gov.in` policy where the files sit (R115) | As C1a if GODL-India reaches state data, which is unresolved | As C1a if it governs | **UNKNOWN: B14, B17 open** | 2026-10-07 |
+| C9a, C9b | Instance footer (R83); instance policy re-checked (R117); Tamil Nadu Data Policy 2022 names no licence (R99, R100) | As C8 | As C8 | **UNKNOWN: B14, B17 open; documentation route exhausted** | 2026-11-04 |
+| C11 | None found. Mirror label only (R88) | UNKNOWN | UNKNOWN | **UNKNOWN** | 2026-10-07 |
+| C12 | None on the page; website policies not checked [U] | UNKNOWN | UNKNOWN | **UNKNOWN** | 2026-10-07 |
+
+Under ADR-0007 §5 (Proposed), "an unclear or missing licence means the source is rejected". On
+this evidence, **no candidate has a licence that is clear today**. Whether B14 is a true conflict
+or the dataset exception in the footer resolves it is a maintainer reading, and C1a and C2 turn on
+it. This pass takes no position.
+
+### Effect on the open items
+
+- **E-INV:** the register above lists every candidate row. Files remain unretrieved.
+- **E-FIELD:** C1a outcome stated as undetermined; the first criterion is unmet.
+- **E-LIC:** unchanged in substance: B14, B15, B3, B16, B17 and B4 all stay open.
+- **G5 and B8:** `api.data.gov.in` now answers at its root (R119). Whether its data endpoints work,
+  and on what terms, is unknown. This does not change the manual-retrieval position.
+
 ## Evidence status
 
+- **Eleventh pass (2026-11-04 and 2026-11-05) [PUBD]:** R111–R125; see the section above.
 - **Publisher or publisher-platform, retrieved and inspected directly (second
   pass) [PUBD]:** C1–C3 catalog and resource metadata, field lists, publisher
   strings and the data.gov.in footer (R26–R34); C4 metadata, licence label,

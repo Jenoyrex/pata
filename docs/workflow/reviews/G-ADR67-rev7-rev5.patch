@@ -1,0 +1,215 @@
+diff --git a/docs/decisions/0006-annotation-scope-and-schema.md b/docs/decisions/0006-annotation-scope-and-schema.md
+index 6d67c52..8035532 100644
+--- a/docs/decisions/0006-annotation-scope-and-schema.md
++++ b/docs/decisions/0006-annotation-scope-and-schema.md
+@@ -2,7 +2,7 @@
+ 
+ - **Status:** Proposed. Not accepted until the decisions in section 21.1 are
+   approved by the maintainer.
+-  - It is accepted **together with ADR-0007 revision 4**, by an explicit, dated
++  - It is accepted **together with ADR-0007 revision 5**, by an explicit, dated
+     maintainer acceptance recorded in both status lines.
+   - Acceptance comes after the maintainer has reviewed the complete revision diff,
+     has re-approved by name every decision item whose text changed, and the
+@@ -11,7 +11,20 @@
+     5. That approval is **not** approval of revised text.
+   - Items explicitly deferred in sections 21.2 and 21.3 do not block acceptance.
+ - **Date:** 2026-10-04
+-- **Revision:** 6 (2026-10-28), alongside ADR-0007 revision 4, from the
++- **Revision:** 7 (2026-11-05), alongside ADR-0007 revision 5, from the G-ADR67
++  review and the maintainer's rulings of 2026-11-05. No row of section 21.1
++  changes, but these rules behind F1, F12 and F15 do:
++  - §12 and §17: a denylist entry for a failure caused only by `source_context`
++    drops only the matched record, after split-key step 5. The record still counts
++    toward its duplicate class, class key and holdout, so a rebuild reproduces the
++    split. The reason categories must identify such a failure.
++  - §12: the staging limit applies to source columns. A native `source_record_ref`
++    is allowed, and values computed for each record may be held with them. The
++    ingestion rule for `context_columns` gets a matching exception for the
++    `raw_text` field and a native `source_record_ref`.
++
++  Status unchanged.
++- **Revision 6** (2026-10-28), alongside ADR-0007 revision 4, from the
+   maintainer's acceptance-readiness rulings of 2026-10-27 and 2026-10-28:
+   - Layer A records roles as written. Designator verification covers all four LGD
+     levels, gates only Layer C and Layer D, and is checked by a deterministic gate
+@@ -727,7 +740,10 @@ record before its split is frozen (ADR-0007 §5) and nothing that fails reaches
+ 1. **Rules-only screen** (`admission.screened_by: rule:{name}`), before the split.
+ 2. The split is **computed and frozen in a staging area** outside
+    `data/processed/` (for example `data/interim/`, ignored by git like all of
+-   `data/`). Staging holds only `raw_text` and allowlisted `source_context`.
++   `data/`). Of a source's columns, staging holds only the `raw_text` field,
++   allowlisted `source_context` and a native `source_record_ref`. Values computed
++   for each record at ingestion and at the split, such as `raw_text_sha256`,
++   `record_id`, `group_key` and the split assignment, may be held with them.
+ 3. **Human screen** on the staged records, after the freeze. It is the first human
+    exposure (section 17).
+    - Dev and train records may be screened by anyone.
+@@ -758,20 +774,26 @@ other record's frozen split assignment (section 17).
+   - It is applied as a versioned screen rule, and every change bumps
+     `screen_version`.
+   - An entry matches a record when all three identifiers are equal. The record's
+-    whole duplicate class is then excluded in that build.
++    whole duplicate class is then excluded in that build, unless the entry's
++    reason category records a failure caused only by a `source_context` value.
++  - Such a record still counts toward its duplicate class, class key and holdout
++    designation (section 17 steps 4 and 5). Only it is dropped, after step 5, so
++    no other record's key or split changes.
+   - Rebuilds from the same pinned snapshots are therefore deterministic.
+   - **Limitation:** a new snapshot that drops the original row or changes its
+     text, and a duplicate that appears in another source after the original row
+     has gone, match no entry. These are caught only by the human screen of the
+     new ingestion.
+-  - The reason categories are a format question for `docs/schema.md`.
++  - The reason categories are a format question for `docs/schema.md`. They must
++    identify a failure caused only by a `source_context` value.
+ - Names that honour public figures ("Mahatma Gandhi Road") are admissible.
+ - Businesses named after a private person are excluded.
+ - **When in doubt, the record is excluded** (section 21.1, F1).
+ 
+ **`source_context` allowlist:**
+-- A source's manifest lists its approved `context_columns`. Nothing outside the
+-  list is ingested.
++- A source's manifest lists its approved `context_columns`. Apart from the
++  `raw_text` field and a native `source_record_ref` (section 2), nothing outside
++  the list is ingested.
+ - Only administrative-geography and facility-category columns can be approved,
+   such as state, district, sub-district, village, PIN and facility type.
+ - Columns holding names of people, phone numbers, email addresses, identifiers of
+@@ -1011,7 +1033,9 @@ human exposure** of any admitted record (section 12).
+   `test_source_holdout`.
+ - **Assignments are fixed per `record_id`** when the split is first computed.
+   Removing a record later (a failed human screen, a withdrawal) never recomputes
+-  or moves another record's key or split.
++  or moves another record's key or split. In a rebuild, a record dropped by a
++  denylist entry for a `source_context`-only failure still counts in steps 4 and
++  5 (section 12).
+ - **Accidental exposure.** If a person who writes or changes the guidelines or the
+   cue table sees a `test` or `test_source_holdout` record outside test annotation:
+   - It is logged.
+diff --git a/docs/decisions/0007-focus-states-and-sources.md b/docs/decisions/0007-focus-states-and-sources.md
+index faa7bb7..e980408 100644
+--- a/docs/decisions/0007-focus-states-and-sources.md
++++ b/docs/decisions/0007-focus-states-and-sources.md
+@@ -1,15 +1,25 @@
+ # ADR-0007: Focus states and address-corpus sources for PataBench v0
+ 
+ - **Status:** Proposed. Not accepted until the decisions in section 10.1 are
+-  approved by the maintainer. **Accepted only together with ADR-0006 revision 6**,
++  approved by the maintainer. **Accepted only together with ADR-0006 revision 7**,
+   on which sections 3 to 8 depend.
+   - Acceptance is an explicit, dated maintainer acceptance recorded in both ADRs'
+     status lines.
+-  - It comes after the maintainer has reviewed the complete revision diff and has
+-    re-approved by name every decision item whose text changed.
++  - It comes after the maintainer has reviewed the complete revision diff, has
++    re-approved by name every decision item whose text changed, and the
++    cross-reference checks pass.
+   - An approval in principle of earlier text is not approval of revised text.
++  - Items left open or deferred in sections 10.2 and 10.3 do not block acceptance.
+ - **Date:** 2026-10-04
+-- **Revision:** 4 (2026-10-28), alongside ADR-0006 revision 6, from the
++- **Revision:** 5 (2026-11-05), alongside ADR-0006 revision 7, from the G-ADR67
++  review. No rule or decision row changes:
++  - The header, Context and sections 6 and 7 now match ADR-0006's held-out
++    publisher, recompute, L3 and Consequences text.
++  - The status line and section 10.2 say that open and deferred items do not
++    block acceptance, and the status line adds the cross-reference check.
++
++  Status unchanged.
++- **Revision 4** (2026-10-28), alongside ADR-0006 revision 6, from the
+   maintainer's acceptance-readiness rulings of 2026-10-27 and 2026-10-28:
+   - section 8 sets one evidence standard for the LGD semantics of all four
+     levels, national or per state, with rules for conflicting evidence
+@@ -39,8 +49,9 @@
+ - **Deciders:** Project maintainer
+ - **Relates to:** ADR-0001 §1, §2, §5, §6, §7 (sources, privacy, provenance,
+   language and geographic scope), ADR-0002 and ADR-0004 (gazetteer sources),
+-  ADR-0005 (`gazetteer_version`), ADR-0006 (annotation scope and schema; this is
+-  the "focus-state and source ADR" its Consequences and L3 refer to)
++  ADR-0005 (`gazetteer_version`), ADR-0006 (annotation scope and schema; this ADR
++  holds the evidence standard its L3 refers to, and the procedure for the source
++  ADRs and the focus-state ADR in its Consequences)
+ 
+ This ADR decides **how** focus states and address-corpus sources are chosen,
+ recorded and used. It does **not** name any focus state or any address source.
+@@ -68,8 +79,10 @@ changes no manifest.
+   - no synthetic records in v0 (F6)
+   - the split key computed at ingestion from allowlisted `source_context`, the
+     source manifest, `raw_text` and the pinned gazetteer, with
+-    `test_source_holdout` for "sources designated as held out" (§17, F5). Before
+-    the freeze, the split may be recomputed **only** to fix a bug.
++    `test_source_holdout` for any duplicate class with a record from a held-out
++    publisher (§17, F5). The split may be recomputed **only** to fix a bug, and a
++    recompute never moves an exposed record into `test` or
++    `test_source_holdout`.
+   - split ratios, unresolved-group share and holdout feasibility (P6), answered
+     from ingestion-time statistics
+   - LGD level semantics, enabling `block` and verifying cue-table entries (L3).
+@@ -78,9 +91,9 @@ changes no manifest.
+     district, sub-district and village levels.
+   - how split assignments carry over between releases is open (L5)
+ 
+-  ADR-0006 does not say who designates held-out sources, how a source is
+-  accepted, or which states are in focus. Its Consequences list "the
+-  focus-state and source ADRs (with L3)" as the first follow-up.
++  ADR-0006 does not say who designates held-out publishers, how a source is
++  accepted, or which states are in focus. Its Consequences order places source
++  assessments at step 3, source ADRs at step 5 and the focus-state ADR at step 7.
+ - **The pinned gazetteer** (`gazetteer_version`
+   `bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78`) has 36
+   state/UT units. Its known limits bear on state choice:
+@@ -335,7 +348,7 @@ defined in `docs/schema.md`. This ADR changes no manifest.
+ ### 6. Held-out publishers and grouped splits
+ 
+ ADR-0006 §17 sends every duplicate class that contains a record from a held-out
+-source to `test_source_holdout`. This ADR decides how that designation is made:
++publisher to `test_source_holdout`. This ADR decides how that designation is made:
+ 
+ - **The unit is the publisher.** Every address source manifest with the same
+   `publisher` gets the same designation. Holding out one manifest of a publisher
+@@ -372,7 +385,7 @@ answer.
+ - The focus-state list, the set of accepted address sources and the held-out
+   publishers for a release are fixed **before its split is first computed**
+   (ADR-0006 §17, F5).
+-- ADR-0006 §17 allows a recompute before the freeze only to fix a bug. Changing
++- ADR-0006 §17 allows a recompute only to fix a bug. Changing
+   any of these three is not a bug fix. It means a new ingestion, a new
+   `split_version` and a new release, built under ADR-0006 §17.
+ - How split assignments carry over from one release to the next is not decided
+@@ -488,6 +501,8 @@ Revision 3 covered only the sub-district level.
+ 
+ #### 10.2 Open
+ 
++These items are deferred by design and do not block acceptance of this ADR.
++
+ O3, O4 and O5 are decided from ingestion-time aggregate statistics (section 4,
+ step 3) before the split is first computed, and never from pilot annotations.
+ 
+@@ -517,7 +532,7 @@ benchmark decision. It is recorded in the source ADR (section 5; E5).
+ ## Consequences
+ 
+ - Accepting this ADR selects no state and no source. It is accepted together with
+-  ADR-0006 revision 6.
++  ADR-0006 revision 7.
+ - The next steps follow the **single implementation order in ADR-0006's
+   Consequences** (revision 6). Revision 3's separate list is withdrawn: it ran the
+   first split before `docs/schema.md` and the split key procedure existed.
+diff --git a/docs/decisions/0008-gazetteer-state-properties-procedure.md b/docs/decisions/0008-gazetteer-state-properties-procedure.md
+index 560f145..3178012 100644
+--- a/docs/decisions/0008-gazetteer-state-properties-procedure.md
++++ b/docs/decisions/0008-gazetteer-state-properties-procedure.md
+@@ -3,9 +3,11 @@
+ - **Status:** Proposed. Not accepted until the decisions in section 8.1 are
+   approved by the maintainer. It defines the "versioned procedure" that
+   ADR-0007 §4 step 3 requires, so it is used only once ADR-0007 is accepted.
+-  ADR-0007 is itself Proposed and cannot be accepted before ADR-0006.
++  ADR-0007 is itself Proposed and is accepted only together with ADR-0006.
+ - **Date:** 2026-10-26
+-- **Revision:** 2 (2026-10-26). Records the maintainer's resolutions of Q1
++- **Revision:** 3 (2026-11-05). Corrects the status line's ADR-0007 acceptance
++  order, from the G-ADR67 review. Status unchanged.
++- **Revision 2** (2026-10-26). Records the maintainer's resolutions of Q1
+   to Q3 (section 8.2). Status unchanged.
+ - **Deciders:** Project maintainer
+ - **Relates to:** ADR-0001 §5 and §7, ADR-0004, ADR-0005 (`gazetteer_version`,
