@@ -1,5 +1,5 @@
 diff --git a/docs/decisions/0006-annotation-scope-and-schema.md b/docs/decisions/0006-annotation-scope-and-schema.md
-index 6d67c52..8035532 100644
+index 6d67c52..cb4a090 100644
 --- a/docs/decisions/0006-annotation-scope-and-schema.md
 +++ b/docs/decisions/0006-annotation-scope-and-schema.md
 @@ -2,7 +2,7 @@
@@ -11,7 +11,7 @@ index 6d67c52..8035532 100644
      maintainer acceptance recorded in both status lines.
    - Acceptance comes after the maintainer has reviewed the complete revision diff,
      has re-approved by name every decision item whose text changed, and the
-@@ -11,7 +11,20 @@
+@@ -11,7 +11,23 @@
      5. That approval is **not** approval of revised text.
    - Items explicitly deferred in sections 21.2 and 21.3 do not block acceptance.
  - **Date:** 2026-10-04
@@ -27,13 +27,25 @@ index 6d67c52..8035532 100644
 +    is allowed, and values computed for each record may be held with them. The
 +    ingestion rule for `context_columns` gets a matching exception for the
 +    `raw_text` field and a native `source_record_ref`.
++  - Wording aligned, with no new rule: §4 and §20 (national or per state, as in L3), §17
++    (the freeze point covers any record, as in F5), §18 (denylist entries as in
++    §12) and §19 (`deferred_coverage` as in F9 and §8).
 +
 +  Status unchanged.
 +- **Revision 6** (2026-10-28), alongside ADR-0007 revision 4, from the
    maintainer's acceptance-readiness rulings of 2026-10-27 and 2026-10-28:
    - Layer A records roles as written. Designator verification covers all four LGD
      levels, gates only Layer C and Layer D, and is checked by a deterministic gate
-@@ -727,7 +740,10 @@ record before its split is frozen (ADR-0007 §5) and nothing that fails reaches
+@@ -324,7 +340,7 @@ merged is a pilot question (section 21.2, P3).
+
+ **`block` is not a v0 label.** Revision 1 had it. It is withdrawn because whether
+ LGD's sub-district level corresponds to development blocks, revenue circles,
+-tehsils or something else must be checked for each selected state before the label
++tehsils or something else must be checked, national or per state, before the label
+ can be defined (section 21.3, L3). Revision 1 also listed "sub-division" under
+ `subdistrict`. That was wrong: a sub-division may be a separate tier, so it too
+ counts as an unverified designator. Text that names a block or sub-division is
+@@ -727,7 +743,10 @@ record before its split is frozen (ADR-0007 §5) and nothing that fails reaches
  1. **Rules-only screen** (`admission.screened_by: rule:{name}`), before the split.
  2. The split is **computed and frozen in a staging area** outside
     `data/processed/` (for example `data/interim/`, ignored by git like all of
@@ -45,7 +57,7 @@ index 6d67c52..8035532 100644
  3. **Human screen** on the staged records, after the freeze. It is the first human
     exposure (section 17).
     - Dev and train records may be screened by anyone.
-@@ -758,20 +774,26 @@ other record's frozen split assignment (section 17).
+@@ -758,20 +777,26 @@ other record's frozen split assignment (section 17).
    - It is applied as a versioned screen rule, and every change bumps
      `screen_version`.
    - An entry matches a record when all three identifiers are equal. The record's
@@ -76,7 +88,16 @@ index 6d67c52..8035532 100644
  - Only administrative-geography and facility-category columns can be approved,
    such as state, district, sub-district, village, PIN and facility type.
  - Columns holding names of people, phone numbers, email addresses, identifiers of
-@@ -1011,7 +1033,9 @@ human exposure** of any admitted record (section 12).
+@@ -997,7 +1022,7 @@ labels. It decides which records get double annotation (section 15). It is
+ versioned (`split_version`).
+
+ **Freeze point.** The split is computed and frozen in staging **before the first
+-human exposure** of any admitted record (section 12).
++human exposure** of any record (section 12).
+ - Human exposure means a person viewing an individual record's `raw_text` or
+   `source_context`, for screening, pilot, guideline work or annotation.
+ - Scripted aggregate statistics, and the distinct-value lists used for value
+@@ -1011,7 +1036,9 @@ human exposure** of any admitted record (section 12).
    `test_source_holdout`.
  - **Assignments are fixed per `record_id`** when the split is first computed.
    Removing a record later (a failed human screen, a withdrawal) never recomputes
@@ -87,6 +108,44 @@ index 6d67c52..8035532 100644
  - **Accidental exposure.** If a person who writes or changes the guidelines or the
    cue table sees a `test` or `test_source_holdout` record outside test annotation:
    - It is logged.
+@@ -1250,8 +1277,10 @@ release:
+ 1. A new release is made without the affected records.
+ 2. An **errata entry** is appended to the errata log. It contains the date, the
+    affected release versions, a reason category and the number of records
+-   removed. It never contains the record's text, `record_id` or hashes. The
+-   record and its duplicate class are added to the denylist (section 12).
++   removed. It never contains the record's text, `record_id` or hashes. An
++   entry for the record is added to the denylist. As section 12 sets out, a match
++   excludes its whole duplicate class unless the failure was caused only by a
++   `source_context` value.
+ 3. Pata stops distributing the affected releases wherever it controls
+    distribution.
+ 4. Scores on different releases are marked as not directly comparable.
+@@ -1268,9 +1297,10 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
+   at all.
+ - Layer D: a `city` role is not a role at any LGD level, so it changes no Layer D
+   status. A level the record does not otherwise state stays `not_specified`.
+-  `deferred_coverage` is used only for a role with an unverified designator whose
+-  cue-table `pending_level` (section 3) is that level, and `no_such_level` only
+-  where the gazetteer has no units below the deepest linked ancestor (section 8).
++  `deferred_coverage` is used only for a role with a designator that is unverified,
++  or that a gate rejected, whose cue-table `pending_level` (section 3) is that
++  level, and `no_such_level` only where the gazetteer has no units below the
++  deepest linked ancestor (section 8).
+ - Results: always reported by `settlement_signal`. A headline linking number must
+   state which share of roles was linkable.
+ - Village names with suffixes such as `(Ct)`, `(Og)` or `(Part)` are matched and
+@@ -1297,8 +1327,8 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
+   codes overlap village codes), `dop:po:`, `pin:`.
+ - **Reasons mark what to re-link when coverage grows:**
+   `urban_deferred`, `source_deferred`, `level_mapping_unverified`.
+-- **`block`** can be added once LGD semantics are verified for the selected
+-  geography (L3).
++- **`block`** can be added once LGD semantics are verified, national or per
++  state (L3).
+ - **Nested spans** can be added with an optional `parent_span_id` if a case
+   appears that two roles on one span can't express.
+ - **Synthetic data** needs `source_type: synthetic` plus generator fields in a
 diff --git a/docs/decisions/0007-focus-states-and-sources.md b/docs/decisions/0007-focus-states-and-sources.md
 index faa7bb7..e980408 100644
 --- a/docs/decisions/0007-focus-states-and-sources.md

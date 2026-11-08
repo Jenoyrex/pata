@@ -161,24 +161,49 @@ for acceptance. Still open:
 | Rebuild scope | §12 and §17 | §17 says "in a rebuild"; whether a bug-fix recompute counts is not stated | Decide with N1 |
 | Revision numbers, ADR-0008 rev 3 | D10.1, graph | No ruling yet | Approve both |
 
+**Text fixes drafted, 2026-11-08 (maintainer go).** The patch now also carries I7, I8, I9 and I11, plus
+one line in the ADR-0006 rev 7 note. I8 changes §17 only and leaves the F5 row alone. It applies to
+`adr-0006-rev6` in a temporary index, no table row or status line changes, and the four old wordings
+are gone. The patch stays unapplied. Native `source_record_ref`, N1, rebuild scope and the revision
+numbers still need rulings.
+
+**Third `adr-reviewer` run, 2026-11-08.** I7, I8, I9 and I11 each resolve (PASS); no new cross-reference
+failure; every table row byte-identical to rev 6. That no fix adds a rule is the reviewer's judgement,
+as is §18 falling within the I6 ruling, which does not name §18. Three points left UNPROVEN:
+
+- §20 said "verified for the selected geography (L3)", the same family as I9. A national verification
+  would satisfy it, so the reviewer did not call it a contradiction. Aligned afterwards on maintainer
+  go ("verified, national or per state (L3)", plus §20 in the rev 7 note). That change has mechanical
+  checks only, no `adr-reviewer` run.
+- The rev 7 note names F1, F12 and F15, not F5, though the new §17 sentence sits under a rule F5 states.
+  F5 is already on the re-approval list.
+- The rev 7 note is dated 2026-11-05 and these fixes were drafted 2026-11-08.
+
 ## 5. Checks
 
 See `PROGRESS.md`, session entry of 2026-11-05. The reviewer recomputed the §17 salt, four vectors
 and four boundaries with the standard library, and all matched. It did not run ruff or pytest on the
 branch, and I did not switch branches to do so (maintainer safeguard).
 
+**Checks on the patch as it now stands, 2026-11-08.** `adr-0006-rev6` plus the patch, built in a
+temporary index and exported, so no branch changed: ruff and format pass (24 files, the temporary
+virtualenv excluded), pytest 25 passed, 1 skipped (pinned LGD snapshots absent). The patch's index
+hashes match the blobs it produces for ADR-0006 and ADR-0007. These are mechanical checks; they say
+nothing about whether the wording is right.
+
 ## 6. Facts vs. assumptions
 
 - **Verified from the repository, by the reviewer:** the diff, status lines, rows and line numbers.
 - **Assumptions:** items marked [assumption]. The reviewer did not trace every sentence to a ruling.
-- **Recommendation (mine, not a decision):** rule on section 4b, apply the patch, then accept. The
+- **Recommendation (mine, not a decision):** rule on the four items still open in section 4b (native
+  `source_record_ref`, N1, rebuild scope, revision numbers), apply the patch, then accept. The
   earlier idea that I6 and I10 were small text fixes was wrong: both need a ruling. I have made no
   edits to any ADR or to the branch.
 
 ## 7. Maintainer checklist
 
 - [ ] Every approved ruling is incorporated (D10.1). The reviewer did not trace every sentence
-- [ ] Cross-reference checks pass (D10.1). I1, I2, I3 and I5 are open against this today
+- [ ] Cross-reference checks pass (D10.1). Fixes for I1–I5, I7, I8, I9 and I11 exist only in the unapplied patch. N1 and the other section 4b items are open
 - [ ] I read the full diff, not only this packet
 - [ ] Every changed decision is acceptable as written: F1, F3, F5, F9, F10, F12, F14, F15, S6, S9
 - [ ] Deferred P, L, O and E items are genuinely non-blocking, and that is documented

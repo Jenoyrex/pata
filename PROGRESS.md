@@ -268,6 +268,25 @@ also the first verifier run on the C10 correction, and E-FIELD and E-LIC can sta
   gave criteria 1–4 PASS, Overall PASS; `uv run pytest -q` 119 passed, 4 skipped.
 - **Not done:** the `graph.py` defects listed above are still present; `progress` was reproduced
   crashing on cp1252 stdout on 2026-11-08. Fixing them changes W0 after its verifier pass.
+- **W0 verifier, later on 2026-11-08 (at `17540a2`): Overall FAIL.** Criteria 1–3 PASS. Criterion 4
+  FAIL: no node gating G-SRC carries the eligibility assessment of D10.2 step 3. The table is in the
+  W0 card (`714bb4d`). W0 stays in `review`; it needs a new acceptance row or a maintainer ruling.
+- **G-ADR67 patch (maintainer go, 2026-11-08):** text fixes I7, I8, I9 and I11 added to
+  `docs/workflow/reviews/G-ADR67-rev7-rev5.patch`, not applied to any branch. `git apply --cached` on
+  `adr-0006-rev6` in a temporary index exits 0. Third `adr-reviewer` run: all four fixes PASS, no table
+  row changed, status lines still Proposed; UNPROVEN on §20's "selected geography" wording and two
+  points in the rev 7 note (packet section 4b). §20 was then aligned on maintainer go, with
+  mechanical checks only and no further reviewer run. Native `source_record_ref`, N1, rebuild scope
+  and revision numbers still need rulings.
+- **Gate checks, 2026-11-08 at `714bb4d`:** ruff and format pass (54 files); `uv run pytest -q` 119
+  passed, 4 skipped; `git diff --check` exit 0; graph OK. On an export of `adr-0006-rev6` (`0513447`):
+  ruff and format pass (23 files); pytest 25 passed, 1 skipped.
+- **Recheck, 2026-11-08, uncommitted tree over `714bb4d`:** two blank context lines added to the
+  G-ADR67 patch failed `git diff --check`; their single trailing space was removed. The patch produces
+  the same tree before and after (`008a412`) and its index hashes match. Ruff and format pass (54
+  files); `uv run pytest -q` 119 passed, 4 skipped; `git diff --check` exit 0; graph OK. On a temporary
+  export of `adr-0006-rev6` plus the patch: ruff and format pass (24 files, temporary virtualenv
+  excluded); pytest 25 passed, 1 skipped. Packet sections 5–7 brought up to date. Patch still unapplied.
 
 ## Dependency graph status
 
