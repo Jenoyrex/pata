@@ -263,13 +263,16 @@ also the first verifier run on the C10 correction, and E-FIELD and E-LIC can sta
   title, with no acceptance row. None is fixed here.
 - **Branch / commit:** `workflow-kit`, committed on maintainer instruction, split by node group. Not
   pushed, not merged.
+- **Graph edit after those commits (maintainer instruction, 2026-11-08):** G-SRC now depends on G-ADR67,
+  closing the verifier's gate-order caveat. A second W0 verifier run, on the tree with this edit,
+  gave criteria 1–4 PASS, Overall PASS; `uv run pytest -q` 119 passed, 4 skipped.
 - **Not done:** the `graph.py` defects listed above are still present; `progress` was reproduced
   crashing on cp1252 stdout on 2026-11-08. Fixing them changes W0 after its verifier pass.
 
 ## Dependency graph status
 
 <!-- graph:progress:begin -->
-_Generated from `workflow/graph.toml` on 2026-11-05 — do not edit by hand._
+_Generated from `workflow/graph.toml` on 2026-11-08 — do not edit by hand._
 
 **Graph nodes done:** 2/29 (node count, not effort; design nodes ≠ implementation).
 
@@ -284,7 +287,7 @@ _Generated from `workflow/graph.toml` on 2026-11-05 — do not edit by hand._
 | P1-evidence | **E-FIELD** Field semantics evidence (incl. C1a Address_Original_First_Line) | todo | — | E-INV |
 | P1-evidence | **E-LIC** Licence + redistribution evidence (B14–B17) | todo | — | E-INV |
 | P1-evidence | **E-B6** Scripted aggregate inspection of candidate source files (B6) | done | — | — |
-| P1-evidence | **G-SRC** Maintainer accept/reject decision per source | todo | maintainer | E-FIELD, E-LIC |
+| P1-evidence | **G-SRC** Maintainer accept/reject decision per source | todo | maintainer | G-ADR67, E-FIELD, E-LIC |
 | P2-spec | **D-SCHEMA** docs/schema.md: schemas, statuses, reason-category vocabulary, provenance fields | todo | maintainer | G-ADR67 |
 | P2-spec | **D-SRCADR** Source ADRs + provenance manifests | todo | maintainer | G-SRC, D-SCHEMA |
 | P2-spec | **U-UNICODE** Vendor Unicode Scripts.txt pinned to Python unicodedata version | todo | — | G-ADR67 |

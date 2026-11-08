@@ -182,11 +182,12 @@ title = "Maintainer accept/reject decision per source"
 phase = "P1-evidence"
 kind = "decision"
 status = "todo"
-deps = ["E-FIELD", "E-LIC"]
+deps = ["G-ADR67", "E-FIELD", "E-LIC"]
 gate = "maintainer"
 owner = "maintainer"
 outputs = ["docs/research/focus-state-source-evaluation.md"]
 acceptance = ["Each candidate has dated ACCEPT / REJECT / DEFER with reason, signed by maintainer"]
+notes = "G-ADR67 dep added 2026-11-08 on maintainer instruction: D10.2 puts ADR acceptance first, and the licence and evidence rules applied here are in ADR-0007 section 5."
 
 # ---------------------------------------------------------------- Phase 2: specs
 [[node]]
