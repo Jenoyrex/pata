@@ -1332,3 +1332,15 @@ list is taken from the actual diff, not from this plan.
 - L1 stand-off
 - the `Scripts.txt` provenance manifest (T12)
 - P1–P7 data-dependent values
+
+### G-ADR67 rulings (maintainer, 2026-11-05; drafted, not in the ADRs on any branch)
+
+Option A for both requests in `docs/workflow/reviews/G-ADR67.md` section 4b. These rulings are not
+acceptance of any ADR, and they do not settle the revision numbers or ADR-0008 revision 3.
+- **I6.** A denylist entry for a failure caused only by `source_context` drops only the matched
+  record, after split-key step 5. The record still counts toward its duplicate class, class key and
+  holdout. The reason categories must identify such a failure. This overrides the derived matching
+  rule in "T8 rulings" for those entries only.
+- **I10.** The D7.1′ derived staging note limits source columns: the `raw_text` field, allowlisted
+  `source_context` and a native `source_record_ref`. Values computed for each record may be held with
+  them. §12's "Nothing outside the list is ingested" gets a matching exception.

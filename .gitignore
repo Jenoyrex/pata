@@ -11,6 +11,7 @@ dist/
 .ruff_cache/
 .coverage
 .ipynb_checkpoints/
+graphify-out/
 
 # Data: never commit data files. Only provenance manifests are tracked (ADR-0001).
 data/*
@@ -18,3 +19,13 @@ data/*
 
 # Manually downloaded source reports awaiting placement under data/raw/ (ADR-0004)
 /report data/
+
+# Workflow kit: private, staging and local-only paths
+data/raw/
+private/
+staging/
+**/denylist*
+**/exposure*
+*.local.toml
+.claude/settings.local.json
+_kit/

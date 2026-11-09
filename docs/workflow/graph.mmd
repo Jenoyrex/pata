@@ -1,0 +1,89 @@
+flowchart LR
+  subgraph P0_governance["P0-governance"]
+    LEGACY["LEGACY<br/>T0–T10 design/planning tasks (imported)"]:::done
+    W0{{"W0<br/>Install workflow kit (graph, LOOP, hooks, com..."}}:::review
+    G_ADR67{{"G-ADR67<br/>T11 + D10.1: review and joint acceptance of A..."}}:::review
+  end
+  subgraph P3_pipeline["P3-pipeline"]
+    T12["T12<br/>T12 implementation task (scope per legacy dep..."]:::dropped
+    I_INGEST["I-INGEST<br/>Ingestion: strict decoding, parsing, eligibil..."]:::todo
+    G_ADR8{{"G-ADR8<br/>Maintainer acceptance of ADR-0008 (before sel..."}}:::todo
+    I_SPLITKEY["I-SPLITKEY<br/>Split-key step 1, duplicate classes, required..."]:::todo
+    D_SPLITCFG{{"D-SPLITCFG<br/>Focus-state ADR + split config (salt, held-ou..."}}:::todo
+  end
+  subgraph P1_evidence["P1-evidence"]
+    E_LGD{{"E-LGD<br/>LGD level verification: state / district / su..."}}:::review
+    E_INV["E-INV<br/>Candidate source inventory (exact files/snaps..."]:::blocked
+    E_FIELD["E-FIELD<br/>Field semantics evidence (incl. C1a Address_O..."]:::todo
+    E_LIC["E-LIC<br/>Licence + redistribution evidence (B14–B17)"]:::todo
+    E_B6["E-B6<br/>Scripted aggregate inspection of candidate so..."]:::done
+    G_SRC{{"G-SRC<br/>Maintainer accept/reject decision per source"}}:::todo
+  end
+  subgraph P2_spec["P2-spec"]
+    D_SCHEMA{{"D-SCHEMA<br/>docs/schema.md: schemas, statuses, reason-cat..."}}:::todo
+    D_SRCADR{{"D-SRCADR<br/>Source ADRs + provenance manifests"}}:::todo
+    U_UNICODE["U-UNICODE<br/>Vendor Unicode Scripts.txt pinned to Python u..."]:::todo
+  end
+  subgraph P4_screen["P4-screen"]
+    I_RULESCREEN["I-RULESCREEN<br/>Rules-only privacy screen in ignored staging"]:::todo
+    X_FREEZE{{"X-FREEZE<br/>Freeze split in staging + start exposure log"}}:::todo
+    H_SCREENER{{"H-SCREENER<br/>Assign eligible role-restricted test/holdout ..."}}:::todo
+    H_SCREEN{{"H-SCREEN<br/>Role-restricted human screen + private denylist"}}:::todo
+  end
+  subgraph P5_resolve["P5-resolve"]
+    I_TABLES["I-TABLES<br/>Reference list, normalization table, cue tabl..."]:::todo
+    I_RESOLVE["I-RESOLVE<br/>Candidate generation + resolution with verifi..."]:::todo
+    D_GUIDE{{"D-GUIDE<br/>Finalize + freeze annotation guidelines"}}:::todo
+    I_VALIDATOR["I-VALIDATOR<br/>Validator: schema, invariants, provenance, sp..."]:::todo
+  end
+  subgraph P6_annotate["P6-annotate"]
+    P_PILOT["P-PILOT<br/>Dev-pool annotation pilot + reliability metrics"]:::todo
+    G_PILOT{{"G-PILOT<br/>Maintainer resolves pilot decisions"}}:::todo
+    A_GOLD{{"A-GOLD<br/>Gold annotation: independent annotation, adju..."}}:::todo
+  end
+  subgraph P7_release["P7-release"]
+    B_BASE["B-BASE<br/>Baselines + evaluation scripts"]:::todo
+    R_REL{{"R-REL<br/>Release v1: manifest, hashes, metrics, exclus..."}}:::todo
+  end
+  LEGACY --> G_ADR67
+  G_ADR67 --> T12
+  E_INV --> E_FIELD
+  E_INV --> E_LIC
+  G_ADR67 --> G_SRC
+  E_FIELD --> G_SRC
+  E_LIC --> G_SRC
+  G_ADR67 --> D_SCHEMA
+  G_SRC --> D_SRCADR
+  D_SCHEMA --> D_SRCADR
+  G_ADR67 --> U_UNICODE
+  D_SRCADR --> I_INGEST
+  G_ADR67 --> G_ADR8
+  I_INGEST --> I_SPLITKEY
+  G_ADR8 --> I_SPLITKEY
+  U_UNICODE --> I_SPLITKEY
+  I_SPLITKEY --> D_SPLITCFG
+  I_INGEST --> I_RULESCREEN
+  D_SCHEMA --> I_RULESCREEN
+  D_SPLITCFG --> X_FREEZE
+  I_RULESCREEN --> X_FREEZE
+  X_FREEZE --> H_SCREEN
+  H_SCREENER --> H_SCREEN
+  H_SCREEN --> I_TABLES
+  E_LGD --> I_TABLES
+  I_TABLES --> I_RESOLVE
+  I_RESOLVE --> D_GUIDE
+  E_LGD --> D_GUIDE
+  D_SCHEMA --> I_VALIDATOR
+  D_GUIDE --> I_VALIDATOR
+  D_GUIDE --> P_PILOT
+  I_VALIDATOR --> P_PILOT
+  P_PILOT --> G_PILOT
+  G_PILOT --> A_GOLD
+  A_GOLD --> B_BASE
+  B_BASE --> R_REL
+  classDef done fill:#e8f7ef,stroke:#177245,color:#0b3d24
+  classDef doing fill:#eaf1ff,stroke:#244b8f,color:#10264d
+  classDef review fill:#fff4d8,stroke:#8a5700,color:#4a2f00
+  classDef blocked fill:#fff0f0,stroke:#9f2f2f,color:#5a1414
+  classDef todo fill:#ffffff,stroke:#8a96a8,color:#172033
+  classDef dropped fill:#eeeeee,stroke:#aaaaaa,color:#777777

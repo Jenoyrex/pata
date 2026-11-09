@@ -1,0 +1,499 @@
+# ============================================================================
+# Pata — execution dependency graph (single source of truth for "what next")
+# ============================================================================
+# Validated by:   uv run python scripts/graph.py validate
+# Ready tasks:    uv run python scripts/graph.py next
+#
+# RULES (enforced by scripts/graph.py and .claude/hooks):
+#   * A node may start only when every dep is `done`.
+#   * gate = "maintainer" nodes can only become `done` when a matching
+#     [[approval]] entry exists. Approvals are added ONLY by the maintainer,
+#     in their own terminal:  uv run python scripts/graph.py approve <ID> --by <name> --ref <evidence>
+#     Claude is blocked from writing approvals (hook).
+#   * irreversible = true nodes require an explicit maintainer go-ahead in chat
+#     BEFORE Claude runs them, even if all deps are done.
+#   * `status` values: todo | in_progress | review | blocked | done | dropped
+#       review   = work finished, waiting for maintainer decision
+#       blocked  = external blocker; `blocker` field required
+#   * Statuses were seeded from the dossier of 28 Oct 2026 and reconciled with
+#     docs/research/dependency-graph.md in W0 (2026-10-29). Legacy T0–T10 are
+#     LEGACY, T11 is G-ADR67, T12 is dropped with its scope mapped (see notes).
+# ============================================================================
+
+schema_version = 1
+project = "pata"
+
+# ---------------------------------------------------------------- Phase 0
+[[node]]
+id = "LEGACY"
+title = "T0–T10 design/planning tasks (imported)"
+phase = "P0-governance"
+kind = "decision"
+status = "done"
+deps = []
+gate = "none"
+owner = "agent"
+outputs = ["docs/research/dependency-graph.md"]
+acceptance = ["T0–T10 recorded verified in the legacy dependency graph"]
+notes = "Imported as one node. Design verification ≠ implementation. Split into T0..T10 nodes if you want finer tracking. Legacy T11 maps to G-ADR67; legacy T12 is the dropped node T12, its scope mapped to implementation nodes."
+
+[[node]]
+id = "W0"
+title = "Install workflow kit (graph, LOOP, hooks, commands, agents)"
+phase = "P0-governance"
+kind = "infra"
+status = "review"
+deps = []
+gate = "maintainer"
+owner = "agent"
+outputs = ["workflow/graph.toml", "scripts/graph.py", ".claude/settings.json", "docs/workflow/LOOP.md"]
+acceptance = [
+  "graph.py validate passes",
+  "tests/workflow pass alongside existing 26 tests",
+  "hook smoke tests pass (tests/workflow/test_hooks.py)",
+  "graph reconciled against docs/research/dependency-graph.md (no task lost or invented)",
+]
+verify = ["uv run python scripts/graph.py validate", "uv run pytest tests/workflow -q"]
+
+[[node]]
+id = "G-ADR67"
+title = "T11 + D10.1: review and joint acceptance of ADR-0006 rev 6 and ADR-0007 rev 4"
+phase = "P0-governance"
+kind = "decision"
+status = "review"
+deps = ["LEGACY"]
+gate = "maintainer"
+owner = "maintainer"
+outputs = [
+  "docs/decisions/0006-annotation-scope-and-schema.md",
+  "docs/decisions/0007-focus-states-and-sources.md",
+]
+acceptance = [
+  "T11 incorporates every approved ruling (D10.1)",
+  "Cross-reference checks pass (D10.1)",
+  "Full diff main..adr-0006-rev6 reviewed",
+  "Changed decision items re-approved by name (D10.1): ADR-0006 F1,F3,F5,F9,F10,F12,F14,F15; ADR-0007 S6,S9",
+  "Deferred P/L/O/E items confirmed non-blocking and documented",
+  "Dated maintainer acceptance written in BOTH ADRs by the maintainer",
+  "Branch merged by the maintainer",
+]
+notes = "Maps legacy T11 (coordinated revision). The draft exists only on local branch adr-0006-rev6 (099fdb6, 0513447); on main and workflow-kit both ADRs are still rev 5 / rev 3. Use /gate-review G-ADR67. Claude prepares the review packet only."
+
+[[node]]
+id = "T12"
+title = "T12 implementation task (scope per legacy dependency graph)"
+phase = "P3-pipeline"
+kind = "impl"
+status = "dropped"
+deps = ["G-ADR67"]
+gate = "none"
+owner = "agent"
+outputs = []
+acceptance = ["Dropped in W0 (2026-10-29): no obligation remains here; each is carried by a node in notes"]
+notes = "Legacy T12 'Follow-up implementation (docs/schema.md, procedures, validator)', docs/research/dependency-graph.md T12 row. Scope mapped: docs/schema.md formats -> D-SCHEMA; Scripts.txt provenance -> U-UNICODE; ingestion and decoding -> I-INGEST; split key and T5 vectors -> I-SPLITKEY; screening and denylist -> I-RULESCREEN, H-SCREEN; tables -> I-TABLES; candidate and resolution procedures -> I-RESOLVE; validator -> I-VALIDATOR. Kept, not deleted (LOOP.md)."
+
+# ---------------------------------------------------------------- Phase 1: evidence (parallel)
+[[node]]
+id = "E-LGD"
+title = "LGD level verification: state / district / sub-district / village"
+phase = "P1-evidence"
+kind = "evidence"
+status = "review"
+deps = []
+gate = "maintainer"
+owner = "agent"
+outputs = ["docs/evidence/lgd/levels.md"]
+acceptance = [
+  "Each level has LGD-side evidence: URL, retrieval date, quoted field definition, file hash if downloaded",
+  "Any level without evidence is explicitly marked UNVERIFIED (never guessed)",
+  "CAPTCHA/403 blocks are logged, not bypassed; maintainer asked to fetch manually",
+]
+notes = "Runs in parallel with G-ADR67. Must finish or be frozen-as-unverified before D-GUIDE."
+
+[[node]]
+id = "E-INV"
+title = "Candidate source inventory (exact files/snapshots, publishers)"
+phase = "P1-evidence"
+kind = "evidence"
+status = "done"
+deps = []
+gate = "none"
+owner = "agent"
+outputs = ["docs/research/source-inventory.md"]
+acceptance = [
+  "Every candidate lists publisher, exact file/snapshot, URL, retrieval date or 'not retrieved'",
+  "No raw data committed to Git",
+]
+
+[[node]]
+id = "E-FIELD"
+title = "Field semantics evidence (incl. C1a Address_Original_First_Line)"
+phase = "P1-evidence"
+kind = "evidence"
+status = "todo"
+notes = "2026-11-04: evidence gathered in docs/research/source-inventory.md, eleventh pass. Started once E-INV is done."
+deps = ["E-INV"]
+gate = "none"
+owner = "agent"
+outputs = ["docs/research/source-inventory.md", "docs/research/focus-state-source-evaluation.md"]
+acceptance = [
+  "Each candidate raw-text field backed by publisher documentation, not column names",
+  "C1a outcome stated: qualifies / does not qualify / undetermined, with evidence",
+]
+
+[[node]]
+id = "E-LIC"
+title = "Licence + redistribution evidence (B14–B17)"
+phase = "P1-evidence"
+kind = "evidence"
+status = "done"
+deps = ["E-INV"]
+gate = "none"
+owner = "agent"
+outputs = ["docs/research/source-inventory.md", "docs/research/focus-state-source-evaluation.md"]
+acceptance = [
+  "Per source: licence text location, redistribution terms, attribution terms, retrieval date",
+  "Unknown stays UNKNOWN; no inferred permission",
+]
+
+[[node]]
+id = "E-B6"
+title = "Scripted aggregate inspection of candidate source files (B6)"
+phase = "P1-evidence"
+kind = "impl"
+status = "done"
+deps = []
+gate = "none"
+owner = "agent"
+outputs = ["scripts/source_stats.py", "tests/test_source_stats.py"]
+acceptance = [
+  "Refuses a file whose SHA-256 differs from the recorded value",
+  "Report has the header row and aggregate statistics only; a test asserts no cell value appears",
+  "Invalid UTF-8, NUL bytes and ragged rows are reported, never repaired",
+  "Two runs give byte-identical output",
+]
+verify = ["uv run pytest tests/test_source_stats.py -q"]
+notes = "Tool only, tested on synthetic fixtures (ADR-0007 section 5 evidence limit). Running it on a real candidate needs a file the maintainer retrieves manually; B6 stays open until then."
+
+[[node]]
+id = "G-SRC"
+title = "Maintainer accept/reject decision per source"
+phase = "P1-evidence"
+kind = "decision"
+status = "todo"
+deps = ["G-ADR67", "E-FIELD", "E-LIC"]
+gate = "maintainer"
+owner = "maintainer"
+outputs = ["docs/research/focus-state-source-evaluation.md"]
+acceptance = ["Each candidate has dated ACCEPT / REJECT / DEFER with reason, signed by maintainer"]
+notes = "G-ADR67 dep added 2026-11-08 on maintainer instruction: D10.2 puts ADR acceptance first, and the licence and evidence rules applied here are in ADR-0007 section 5."
+
+# ---------------------------------------------------------------- Phase 2: specs
+[[node]]
+id = "D-SCHEMA"
+title = "docs/schema.md: schemas, statuses, reason-category vocabulary, provenance fields"
+phase = "P2-spec"
+kind = "spec"
+status = "todo"
+deps = ["G-ADR67"]
+gate = "maintainer"
+owner = "agent"
+outputs = ["docs/schema.md"]
+acceptance = [
+  "Controlled reason-category list defined",
+  "Every field used by ingestion/screening/split/validator is specified with type and invariants",
+  "Consistent with accepted ADR-0006/0007 (cross-reference check)",
+  "Defines the formats legacy T12 deferred to it: independent-C `independent_set` (D3.2), stage flag `level_mapping_unverified` (R1c), reasons `anchor_invalidated`, `district_column_ambiguous` and the T6 ingestion reasons, denylist and errata entry formats (D8.1, D8.3), the reason-category list, release-manifest fields (T9), and every ADR-0007 E3 format",
+]
+
+[[node]]
+id = "D-SRCADR"
+title = "Source ADRs + provenance manifests"
+phase = "P2-spec"
+kind = "spec"
+status = "todo"
+deps = ["G-SRC", "D-SCHEMA"]
+gate = "maintainer"
+owner = "agent"
+outputs = ["docs/decisions/", "data/manifests/"]
+acceptance = [
+  "Per accepted source: field roles, aliases, missing tokens, decoding rules, snapshot SHA-256, licence ref, retrieval provenance",
+  "Each manifest in data/manifests/ records at least the ADR-0001 §5 fields: source name and URL, publisher, licence and licence-text link, retrieval date, SHA-256 of each retrieved file, whether redistribution is permitted, the transformations applied (script path + git commit)",
+  "Unresolved licence or permission is recorded as UNKNOWN/pending, never as granted",
+  "Manifests validate against docs/schema.md",
+]
+
+[[node]]
+id = "U-UNICODE"
+title = "Vendor Unicode Scripts.txt pinned to Python unicodedata version"
+phase = "P2-spec"
+kind = "impl"
+status = "todo"
+deps = ["G-ADR67"]
+gate = "none"
+owner = "agent"
+outputs = [
+  "data/raw/unicode.org/Scripts.txt (git-ignored; maintainer decision 2026-11-04)",
+  "provenance manifest under data/manifests/ (filename UNDECIDED)",
+]
+acceptance = [
+  "Version equals unicodedata.unidata_version of the pinned Python",
+  "SHA-256 + source URL + retrieval date recorded; test asserts both",
+  "Provenance manifest in data/manifests/ with every ADR-0001 §5 field: name and URL, publisher, licence (Unicode License v3) and licence-text link, retrieval date, SHA-256, whether redistribution is permitted, transformations applied (script path + git commit)",
+  "Storage location and any redistribution decided by the maintainer before the file is placed; a redistributed copy carries the Unicode copyright and permission notice",
+]
+notes = "The kit's vendor/unicode/ path is not adopted: committing a data file conflicts with ADR-0001 §2 ('Data files are never committed to git'). Maintainer instruction 2026-11-04: keep the raw file at data/raw/unicode.org/Scripts.txt, so it is not redistributed from the repository. Evidence: docs/research/dependency-graph.md T9 rulings (D9.2)."
+
+# ---------------------------------------------------------------- Phase 3: pipeline
+[[node]]
+id = "I-INGEST"
+title = "Ingestion: strict decoding, parsing, eligibility, reason-coded exclusions"
+phase = "P3-pipeline"
+kind = "impl"
+status = "todo"
+deps = ["D-SRCADR"]
+gate = "none"
+owner = "agent"
+outputs = ["src/pata/ingest/", "tests/ingest/"]
+acceptance = [
+  "No replacement characters ever produced; decode errors are reason-coded exclusions",
+  "Malformed rows, non-text cells, empty text, declared missing tokens each tested",
+  "Eligibility counts reproducible across two runs (byte-identical output)",
+]
+verify = ["uv run pytest tests/ingest -q"]
+
+[[node]]
+id = "G-ADR8"
+title = "Maintainer acceptance of ADR-0008 (before selection records)"
+phase = "P3-pipeline"
+kind = "decision"
+status = "todo"
+deps = ["G-ADR67"]
+gate = "maintainer"
+owner = "maintainer"
+outputs = ["docs/decisions/0008-gazetteer-state-properties-procedure.md"]
+acceptance = ["Dated maintainer acceptance in ADR-0008"]
+
+[[node]]
+id = "I-SPLITKEY"
+title = "Split-key step 1, duplicate classes, required statistics, selection records"
+phase = "P3-pipeline"
+kind = "impl"
+status = "todo"
+deps = ["I-INGEST", "G-ADR8", "U-UNICODE"]
+gate = "none"
+owner = "agent"
+outputs = ["src/pata/split/", "tests/split/"]
+acceptance = [
+  "Duplicate class = identical name_key(raw_text); class key = lexicographically smallest member key",
+  "Hash input = group key + '\\n' + 64-hex lowercase salt, UTF-8, no BOM, no trailing newline",
+  "Integer-only bucket arithmetic (test forbids float)",
+  "Holdout-publisher member ⇒ whole class to test_source_holdout",
+  "Reproduces the T5 synthetic test-vector and boundary tables in docs/research/dependency-graph.md (salt and 8/1/1 weights as stated there)",
+]
+verify = ["uv run pytest tests/split -q"]
+
+[[node]]
+id = "D-SPLITCFG"
+title = "Focus-state ADR + split config (salt, held-out publishers, ratio weights)"
+phase = "P3-pipeline"
+kind = "decision"
+status = "todo"
+deps = ["I-SPLITKEY"]
+gate = "maintainer"
+owner = "maintainer"
+outputs = ["config/split.toml", "docs/decisions/"]
+acceptance = ["Salt, holdouts, weights pinned and accepted by maintainer"]
+
+# ---------------------------------------------------------------- Phase 4: screening + freeze
+[[node]]
+id = "I-RULESCREEN"
+title = "Rules-only privacy screen in ignored staging"
+phase = "P4-screen"
+kind = "impl"
+status = "todo"
+deps = ["I-INGEST", "D-SCHEMA"]
+gate = "none"
+owner = "agent"
+outputs = ["src/pata/screen/", "tests/screen/"]
+acceptance = [
+  "Runs only on staging paths that are git-ignored",
+  "Exclusion report has counts + reason codes, no raw text/IDs/hashes",
+  "D8.1 denylist applied as a versioned screen rule (empty at first); every change bumps screen_version",
+]
+
+[[node]]
+id = "X-FREEZE"
+title = "Freeze split in staging + start exposure log"
+phase = "P4-screen"
+kind = "impl"
+status = "todo"
+deps = ["D-SPLITCFG", "I-RULESCREEN"]
+gate = "maintainer"
+irreversible = true
+owner = "agent"
+outputs = ["staging/split/frozen.manifest"]
+acceptance = [
+  "Frozen before ANY human sees individual raw text",
+  "Split file hashes recorded; recompute is a no-op",
+  "Exposure log initialised outside Git",
+]
+
+[[node]]
+id = "H-SCREENER"
+title = "Assign eligible role-restricted test/holdout screener"
+phase = "P4-screen"
+kind = "human"
+status = "todo"
+deps = []
+gate = "maintainer"
+owner = "maintainer"
+outputs = ["docs/governance/roles.md"]
+acceptance = ["Screener is not an author of guidelines or cue tables; recorded in roles.md"]
+
+[[node]]
+id = "H-SCREEN"
+title = "Role-restricted human screen + private denylist"
+phase = "P4-screen"
+kind = "human"
+status = "todo"
+deps = ["X-FREEZE", "H-SCREENER"]
+gate = "maintainer"
+owner = "screener"
+outputs = ["private/denylist (outside Git)", "reports/exclusions.md"]
+acceptance = [
+  "Denylist match on (source ID, source record ref, raw-text SHA-256) excludes the whole duplicate class",
+  "Public report contains counts and reasons only",
+  "Only records that pass are written to data/processed/ (ADR-0001 §2, D7.1′)",
+]
+
+# ---------------------------------------------------------------- Phase 5: resolution
+[[node]]
+id = "I-TABLES"
+title = "Reference list, normalization table, cue table (dev-pool only)"
+phase = "P5-resolve"
+kind = "impl"
+status = "todo"
+deps = ["H-SCREEN", "E-LGD"]
+gate = "none"
+owner = "agent"
+outputs = ["data/reference/ (generated, provenance-stamped)"]
+acceptance = ["Built only from approved data and dev pool; test/holdout never read (asserted by test)"]
+
+[[node]]
+id = "I-RESOLVE"
+title = "Candidate generation + resolution with verification gates"
+phase = "P5-resolve"
+kind = "impl"
+status = "todo"
+deps = ["I-TABLES"]
+gate = "none"
+owner = "agent"
+outputs = ["src/pata/resolve/", "tests/resolve/"]
+acceptance = [
+  "Ambiguity preserved as candidate sets; no forced unique match",
+  "Unverified LGD levels never produce a link (no bare-name fallback)",
+]
+
+[[node]]
+id = "D-GUIDE"
+title = "Finalize + freeze annotation guidelines"
+phase = "P5-resolve"
+kind = "spec"
+status = "todo"
+deps = ["I-RESOLVE", "E-LGD"]
+gate = "maintainer"
+owner = "agent"
+outputs = ["docs/guidelines/"]
+acceptance = ["Guidelines versioned and frozen; LGD unverified levels stated"]
+
+[[node]]
+id = "I-VALIDATOR"
+title = "Validator: schema, invariants, provenance, splits, gates, exclusions, manifest"
+phase = "P5-resolve"
+kind = "impl"
+status = "todo"
+deps = ["D-SCHEMA", "D-GUIDE"]
+gate = "none"
+owner = "agent"
+outputs = ["src/pata/validate/", "tests/validate/"]
+acceptance = ["Validator run on staged data passes; each invariant has a failing-fixture test"]
+notes = "D10.2 steps 11 -> 12: candidate/resolution procedures and the guidelines freeze come before the validator. X-FREEZE stays an ancestor via D-GUIDE -> I-RESOLVE -> I-TABLES -> H-SCREEN -> X-FREEZE; D-SCHEMA is kept explicit for readability."
+
+# ---------------------------------------------------------------- Phase 6: annotation
+[[node]]
+id = "P-PILOT"
+title = "Dev-pool annotation pilot + reliability metrics"
+phase = "P6-annotate"
+kind = "human"
+status = "todo"
+deps = ["D-GUIDE", "I-VALIDATOR"]
+gate = "none"
+owner = "annotator"
+outputs = ["reports/pilot.md"]
+acceptance = ["Layer-specific agreement reported; issues list produced"]
+
+[[node]]
+id = "G-PILOT"
+title = "Maintainer resolves pilot decisions"
+phase = "P6-annotate"
+kind = "decision"
+status = "todo"
+deps = ["P-PILOT"]
+gate = "maintainer"
+owner = "maintainer"
+outputs = ["docs/decisions/"]
+acceptance = ["Each pilot issue has a dated decision"]
+
+[[node]]
+id = "A-GOLD"
+title = "Gold annotation: independent annotation, adjudication, audit trail"
+phase = "P6-annotate"
+kind = "human"
+status = "todo"
+deps = ["G-PILOT"]
+gate = "maintainer"
+owner = "annotator"
+outputs = ["staging/gold/"]
+acceptance = [
+  "Adjudication merge = union of additions, intersection of prunings, then verification gates",
+  "Validator passes on gold",
+]
+
+# ---------------------------------------------------------------- Phase 7: eval + release
+[[node]]
+id = "B-BASE"
+title = "Baselines + evaluation scripts"
+phase = "P7-release"
+kind = "impl"
+status = "todo"
+deps = ["A-GOLD"]
+gate = "none"
+owner = "agent"
+outputs = ["src/pata/baselines/", "src/pata/eval/"]
+acceptance = ["Scores reproducible from pinned config; no score published before this node"]
+
+[[node]]
+id = "R-REL"
+title = "Release v1: manifest, hashes, metrics, exclusions, limitations, versioning"
+phase = "P7-release"
+kind = "release"
+status = "todo"
+deps = ["B-BASE"]
+gate = "maintainer"
+irreversible = true
+owner = "maintainer"
+outputs = ["releases/v1/"]
+acceptance = [
+  "Rebuild from documented snapshots reproduces all split/gold hashes",
+  "Licence review of every included source re-checked",
+  "Repo visibility + push done by the maintainer",
+]
+
+# ---------------------------------------------------------------- Approvals
+# Append-only. Written ONLY via `graph.py approve` in the maintainer's terminal.
+# [[approval]]
+# node = "G-ADR67"
+# by = "Jenoy"
+# date = "2026-10-29"
+# ref = "ADR-0006 §Status, ADR-0007 §Status, merge commit <sha>"

@@ -363,6 +363,20 @@ accepts, rejects or selects anything, and no reading of the evidence is adopted.
     column (ADR-0006 §12);
   - G2 and G6, unchanged.
 
+### Field and licence evidence (eleventh pass, 2026-11-04)
+
+Detail in the inventory, "Candidate register, field and licence evidence". Evidence only.
+
+- **Field semantics:** no publisher definition was found for any candidate raw-text field. The C1a
+  outcome for `Address_Original_First_Line` is **undetermined**.
+- **Licence:** no candidate has a clear licence today. B3, B4, B14, B15, B16 and B17 are all open.
+  The B14 sentence is still on `www.data.gov.in/policies`, and the footer still names GODL-India.
+- **C1b:** the National Health Portal hosts are still unreachable (B15).
+- **C10:** corrects the row above: its resources also have an `.xls` on data.gov.in's file store, so
+  B14 applies to those files and B15 only to the `.csv`. The file is named September 2015.
+- **C9c:** left out of the table above on an inference from size only. No maintainer ruling exists.
+- **Options for the maintainer:** `docs/workflow/reviews/G-SRC.md`.
+
 ### O2 result
 
 **No source can be accepted now, and none is ready for a source ADR.**
