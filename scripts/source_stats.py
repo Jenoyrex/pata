@@ -19,6 +19,12 @@ BOM = b"\xef\xbb\xbf"
 SIX_DIGITS = re.compile(r"(?<!\d)\d{6}(?!\d)")
 TEN_DIGITS = re.compile(r"(?<!\d)\d{10}(?!\d)")
 EMAIL_LIKE = re.compile(r"\S+@\S+\.\S+")
+NON_CSV_SIGNATURES = {
+    b"PK\x03\x04": "zip_or_xlsx",
+    b"\xd0\xcf\x11\xe0": "ole2_or_xls",
+    b"%PDF": "pdf",
+}
+HTML_START = re.compile(rb"\s*<(?:!doctype\s+html|html)\b", re.IGNORECASE)
 
 
 class InspectError(Exception):
@@ -46,7 +52,19 @@ def _column(values: list[str], missing_tokens: list[str]) -> dict:
     }
 
 
-def inspect(path: Path, expected_sha256: str, missing_tokens: list[str]) -> dict:
+def _non_csv_format(body: bytes) -> str | None:
+    for signature, name in NON_CSV_SIGNATURES.items():
+        if body.startswith(signature):
+            return name
+    return "html" if HTML_START.match(body) else None
+
+
+def inspect(
+    path: Path,
+    expected_sha256: str,
+    missing_tokens: list[str],
+    expected_columns: list[str] | None = None,
+) -> dict:
     # ponytail: reads the whole file into memory; candidates are at most tens of MB.
     data = path.read_bytes()
     sha256 = hashlib.sha256(data).hexdigest()
@@ -57,6 +75,8 @@ def inspect(path: Path, expected_sha256: str, missing_tokens: list[str]) -> dict
     has_bom = data.startswith(BOM)
     report: dict = {"sha256": sha256, "bytes": len(data), "bom": has_bom}
     body = data[len(BOM) :] if has_bom else data
+    if fmt := _non_csv_format(body):
+        return {**report, "status": "unsupported_format", "format": fmt}
     try:
         text = body.decode("utf-8")
     except UnicodeDecodeError as e:
@@ -73,6 +93,10 @@ def inspect(path: Path, expected_sha256: str, missing_tokens: list[str]) -> dict
     if not rows or not rows[0]:
         raise InspectError("file is empty: no header row")
     header, *records = rows
+    # A file with no header row would otherwise print its first record as the header.
+    absent = sum(name not in header for name in expected_columns or [])
+    if absent:
+        return {**report, "status": "header_mismatch", "expected_columns_missing": absent}
     if len(set(header)) != len(header):
         raise InspectError("duplicate column names in the header row")
     records_with_cells = [r for r in records if r]
@@ -104,9 +128,15 @@ def main() -> int:
         default=[],
         help="a value the publisher documents as missing, such as NA (repeatable)",
     )
+    p.add_argument(
+        "--expected-column",
+        action="append",
+        help="a column the platform field list names; if absent, the header is not printed "
+        "(repeatable)",
+    )
     args = p.parse_args()
     try:
-        report = inspect(args.path, args.sha256, args.missing_token)
+        report = inspect(args.path, args.sha256, args.missing_token, args.expected_column)
     except (InspectError, OSError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 2

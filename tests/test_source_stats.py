@@ -3,6 +3,8 @@
 import hashlib
 import importlib.util
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -121,3 +123,74 @@ def test_cli_exits_nonzero_on_checksum_mismatch(tmp_path, capsys, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["source_stats.py", str(path), "--sha256", "0" * 64])
     assert source_stats.main() == 2
     assert "SHA-256" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    ("data", "status"),
+    [
+        (f"A,B\n1,2\n{SECRET},2,3\n{SECRET}\n".encode(), "ok"),  # ragged rows
+        (f"A,B\n{SECRET},\x002\n".encode(), "parse_error"),  # NUL byte
+        (f'A,B\n"{SECRET} never closed'.encode(), "parse_error"),  # unterminated quote
+        (f'A,B\n"{SECRET}"x,2\n'.encode(), "parse_error"),  # text after a closing quote
+        (f"A,B\n{SECRET},".encode() + b"\xff\n", "decode_error"),  # invalid UTF-8
+    ],
+)
+def test_malformed_files_never_leak_a_cell(tmp_path, data, status):
+    path, sha = write(tmp_path, data)
+    report = source_stats.inspect(path, sha, [])
+    assert report["status"] == status
+    assert SECRET not in source_stats.render(report)
+
+
+def test_output_is_identical_across_processes(tmp_path):
+    path, sha = write(tmp_path, GOOD)
+    outputs = {
+        subprocess.run(
+            [sys.executable, str(SCRIPT), str(path), "--sha256", sha, "--missing-token", "NA"],
+            capture_output=True,
+            check=True,
+            env={**os.environ, "PYTHONHASHSEED": seed},
+        ).stdout
+        for seed in ("1", "2")
+    }
+    assert len(outputs) == 1
+
+
+@pytest.mark.parametrize(
+    ("data", "fmt"),
+    [
+        (b"PK\x03\x04" + SECRET.encode(), "zip_or_xlsx"),
+        (b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + SECRET.encode(), "ole2_or_xls"),
+        (b"%PDF-1.7\n" + SECRET.encode(), "pdf"),
+        (b"\n  <!DOCTYPE html><title>" + SECRET.encode(), "html"),
+        (b"<HTML lang=en>" + SECRET.encode(), "html"),
+    ],
+)
+def test_non_csv_files_are_named_and_not_parsed(tmp_path, data, fmt):
+    path, sha = write(tmp_path, data)
+    report = source_stats.inspect(path, sha, [])
+    assert report["status"] == "unsupported_format"
+    assert report["format"] == fmt
+    assert "header" not in report
+    assert SECRET not in source_stats.render(report)
+
+
+def test_missing_expected_column_withholds_a_possible_record_header(tmp_path):
+    path, sha = write(tmp_path, f"{SECRET} First Record,12 Fake Road\nx,y\n".encode())
+    report = source_stats.inspect(path, sha, [], ["Name", "Address"])
+    assert report["status"] == "header_mismatch"
+    assert report["expected_columns_missing"] == 2
+    assert SECRET not in source_stats.render(report)
+
+
+def test_expected_columns_present_gives_the_normal_report(tmp_path):
+    path, sha = write(tmp_path, GOOD)
+    assert source_stats.inspect(path, sha, [], ["Address"])["status"] == "ok"
+
+
+def test_cli_passes_expected_columns_and_fails_on_mismatch(tmp_path, capsys, monkeypatch):
+    path, sha = write(tmp_path, GOOD)
+    argv = ["source_stats.py", str(path), "--sha256", sha, "--expected-column", "Absent"]
+    monkeypatch.setattr(sys, "argv", argv)
+    assert source_stats.main() == 1
+    assert json.loads(capsys.readouterr().out)["status"] == "header_mismatch"
