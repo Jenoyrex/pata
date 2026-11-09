@@ -168,7 +168,7 @@ Each needs maintainer input.
 
 ## Next action
 
-**E-INV is done (2026-11-08); E-FIELD and E-LIC are ready.** E-FIELD's first criterion needs
+**E-INV and E-LIC are done (2026-11-09 for E-LIC); E-FIELD is ready.** E-FIELD's first criterion needs
 publisher documentation that was not found for any candidate, so it depends on G-SRC decision 3.
 The other maintainer decisions are listed above.
 
@@ -292,12 +292,30 @@ The other maintainer decisions are listed above.
   Caveat: today's metadata gives a different file path for C10's first URL and two C9b files, and
   whether the old paths resolve is UNKNOWN (card `docs/workflow/cards/E-INV.md`).
 
+### 2026-11-09 — E-LIC — done
+
+- **Did:** Finished the licence table in `docs/research/source-inventory.md`: added C9c, corrected C4's
+  attribution and the state-instance terms, split "last read" dates by source, and read the C5, C6 and
+  C12 policy pages (R127–R130). KVS's policy page has moved to `kvs.gov.in`. Evidence only; B14, B15,
+  B3, B16, B17 and B4 stay open, and no source was accepted or rejected.
+- **Proof:** verifier run 1 FAIL, run 2 FAIL (criterion 1 only), run 3 Overall PASS, both criteria
+  (table in `docs/workflow/cards/E-LIC.md`). ruff and format pass; `uv run pytest -q` 119 passed,
+  4 skipped; graph OK; `git diff --check` clean.
+- **Branch / commit:** `workflow-kit`, uncommitted. Not pushed, not merged.
+- **Data:** no candidate data file requested. Only policy, home and directory pages were fetched.
+- **Needs maintainer:** the G-SRC readings. Note that the verifier's spot-check sent one request to
+  `tn.data.gov.in/policies`, a path that host's `robots.txt` disallows, with a generic browser
+  user-agent. For R127–R130, `robots.txt` was checked only for `saras.cbse.gov.in` (HTML 404).
+- **New nodes added:** none.
+- **Open risks:** `focus-state-source-evaluation.md:252` still describes C10 as "As C1b"; the inventory
+  corrects it, and it was left unedited to keep the verified tree unchanged.
+
 ## Dependency graph status
 
 <!-- graph:progress:begin -->
-_Generated from `workflow/graph.toml` on 2026-11-08 — do not edit by hand._
+_Generated from `workflow/graph.toml` on 2026-11-09 — do not edit by hand._
 
-**Graph nodes done:** 3/29 (node count, not effort; design nodes ≠ implementation).
+**Graph nodes done:** 4/29 (node count, not effort; design nodes ≠ implementation).
 
 | Phase | Node | Status | Gate | Waiting on |
 |---|---|---|---|---|
@@ -308,9 +326,9 @@ _Generated from `workflow/graph.toml` on 2026-11-08 — do not edit by hand._
 | P1-evidence | **E-LGD** LGD level verification: state / district / sub-district / village | review | maintainer | — |
 | P1-evidence | **E-INV** Candidate source inventory (exact files/snapshots, publishers) | done | — | — |
 | P1-evidence | **E-FIELD** Field semantics evidence (incl. C1a Address_Original_First_Line) | todo | — | — |
-| P1-evidence | **E-LIC** Licence + redistribution evidence (B14–B17) | todo | — | — |
+| P1-evidence | **E-LIC** Licence + redistribution evidence (B14–B17) | done | — | — |
 | P1-evidence | **E-B6** Scripted aggregate inspection of candidate source files (B6) | done | — | — |
-| P1-evidence | **G-SRC** Maintainer accept/reject decision per source | todo | maintainer | G-ADR67, E-FIELD, E-LIC |
+| P1-evidence | **G-SRC** Maintainer accept/reject decision per source | todo | maintainer | G-ADR67, E-FIELD |
 | P2-spec | **D-SCHEMA** docs/schema.md: schemas, statuses, reason-category vocabulary, provenance fields | todo | maintainer | G-ADR67 |
 | P2-spec | **D-SRCADR** Source ADRs + provenance manifests | todo | maintainer | G-SRC, D-SCHEMA |
 | P2-spec | **U-UNICODE** Vendor Unicode Scripts.txt pinned to Python unicodedata version | todo | — | G-ADR67 |
@@ -332,6 +350,6 @@ _Generated from `workflow/graph.toml` on 2026-11-08 — do not edit by hand._
 | P7-release | **B-BASE** Baselines + evaluation scripts | todo | — | A-GOLD |
 | P7-release | **R-REL** Release v1: manifest, hashes, metrics, exclusions, limitations, versioning | todo | maintainer · irreversible | B-BASE |
 
-**Ready now:** E-FIELD, E-LIC, H-SCREENER
+**Ready now:** E-FIELD, H-SCREENER
 **Awaiting maintainer:** W0, G-ADR67, E-LGD
 <!-- graph:progress:end -->
