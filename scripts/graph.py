@@ -244,9 +244,10 @@ class Graph:
                 if n["status"] != "done":
                     continue
                 for out in n.get("outputs", []):
-                    if "outside Git" in out or "(" in out:
+                    path = out.split(" (", 1)[0]  # "path (note)" still declares a path
+                    if "outside Git" in out or " " in path:
                         continue
-                    if not glob.glob(str(self.root / out)):
+                    if not glob.glob(str(self.root / path)):
                         r.warnings.append(f"{nid}: declared output not found: {out}")
         return r
 
@@ -427,7 +428,7 @@ def cmd_progress(g: Graph, write: str | None) -> None:
             + block
             + "\n"
         )
-    path.write_text(text, encoding="utf-8")
+    path.write_text(text, encoding="utf-8", newline="\n")
     print(f"updated {path}")
 
 
@@ -471,6 +472,8 @@ def cmd_approve(g: Graph, graph_path: Path, nid: str, by: str, ref: str, date: s
 
 
 def main(argv: list[str] | None = None) -> int:
+    # A Windows console or pipe may be cp1252, which cannot encode symbols such as "≠".
+    sys.stdout.reconfigure(errors="replace")
     p = argparse.ArgumentParser(
         prog="graph.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
