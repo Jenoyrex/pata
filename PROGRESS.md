@@ -5,19 +5,20 @@ results.
 
 ## Current objective
 
-Get the maintainer-gated nodes W0, G-ADR67 and E-LGD through review, and close E-INV. What to
+Get the maintainer-gated nodes W0, G-ADR67 and E-LGD through review, and finish E-FIELD. What to
 work on is decided by `workflow/graph.toml` (`uv run python scripts/graph.py next`). Legacy tasks and
 the ruling ledger: [`docs/research/dependency-graph.md`](docs/research/dependency-graph.md).
 
-## Repository state (2026-11-08)
+## Repository state (2026-11-09)
 
-- Branch `workflow-kit`, branched from local `main` at `0d1c570`. W0 and later work was committed here
-  on 2026-11-08 on maintainer instruction. Nothing here is pushed or merged.
-- `origin/main` was last fetched at `067aad3`; it was not re-fetched on 2026-11-08.
-- The ADR-0006 rev 6 and ADR-0007 rev 4 draft exists only on the local branch `adr-0006-rev6`
-  (`0513447`).
+- `origin/main` is at `0c72e75`. The maintainer pushed the branches and merged PR 1 (`adr-0006-rev6`)
+  and PR 2 (`workflow-kit`) on GitHub on 2026-11-09.
+- Local `main` is still at `0d1c570`, 12 commits behind `origin/main`. Local `workflow-kit` matches
+  `origin/workflow-kit` (`7947461`, before this update) and does not contain the ADR merge.
+- The ADR-0006 rev 6 and ADR-0007 rev 4 text is now on `origin/main`, **still Proposed**. Merging it
+  is not acceptance: G-ADR67 stays in `review` and D10.1 still needs an explicit, dated acceptance.
 - Accepted ADRs: 0001, 0002, 0004, 0005. Proposed: 0003 (permission pending), 0006,
-  0007, 0008.
+  0007, 0008 (status lines read on `origin/main`, 2026-11-09).
 - No address source accepted. No datasets, models or benchmark results.
 
 ## Completed
@@ -309,6 +310,18 @@ The other maintainer decisions are listed above.
 - **New nodes added:** none.
 - **Open risks:** `focus-state-source-evaluation.md:252` still describes C10 as "As C1b"; the inventory
   corrects it, and it was left unedited to keep the verified tree unchanged.
+- **Commit, after this entry:** E-LIC was committed as `7947461`.
+
+### 2026-11-09 — no node — push and merge recorded
+
+- **Did:** Recorded the maintainer's push and the merges of PR 1 and PR 2 in this file. No node status
+  changed. Claude's own push attempt was blocked by the guard hook; the maintainer pushed.
+- **Proof:** `git fetch origin`; `origin/main` at `0c72e75`; `gh pr list` shows both PRs merged;
+  ADR status lines read from `origin/main`.
+- **Not checked:** whether `docs/workflow/reviews/G-ADR67-rev7-rev5.patch`, prepared against
+  `adr-0006-rev6`, still applies to `origin/main`.
+- **Branch / commit:** `workflow-kit`, this update uncommitted. Not pushed.
+- **Needs maintainer:** update local `main`; the open reviews listed above.
 
 ## Dependency graph status
 
