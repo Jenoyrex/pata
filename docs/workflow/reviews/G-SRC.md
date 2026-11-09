@@ -53,11 +53,11 @@ candidate. I did not reword the criterion. Decision 3 below resolves this.
    ```
    and, with that checksum:
    ```bash
-   uv run python scripts/source_stats.py data/raw/data.gov.in/geocode_health_centre.csv --sha256 PASTE_CHECKSUM --missing-token NA
+   uv run python scripts/source_stats.py data/raw/data.gov.in/geocode_health_centre.csv --sha256 PASTE_CHECKSUM --missing-token NA --expected-column "Facility Address"
    ```
-   This prints the header row and aggregate statistics only (ADR-0007 §5). Check the header against
-   the platform field list before sharing the output: a file with no header row would print its
-   first record as the header.
+   This prints the header row and aggregate statistics only (ADR-0007 §5). If the named column from
+   the platform field list is absent, it reports `header_mismatch` and prints nothing from the file,
+   because a file with no header row would otherwise print its first record as the header.
 3. **What counts as field evidence.** Options: treat platform field lists plus scripted statistics
    as enough, and amend E-FIELD's criterion yourself; or ask the publishers first. The "Procedural
    position" question in `focus-state-source-evaluation.md` is the same one.

@@ -130,7 +130,8 @@ id = "E-FIELD"
 title = "Field semantics evidence (incl. C1a Address_Original_First_Line)"
 phase = "P1-evidence"
 kind = "evidence"
-status = "todo"
+status = "blocked"
+blocker = "Criterion 1 cannot be met: no publisher documentation defining any candidate field was found (verifier 2026-11-09). Needs G-SRC decision 3: ask the publishers, or the maintainer rules on what suffices."
 notes = "2026-11-04: evidence gathered in docs/research/source-inventory.md, eleventh pass. Started once E-INV is done."
 deps = ["E-INV"]
 gate = "none"
@@ -185,8 +186,11 @@ deps = ["G-ADR67", "E-FIELD", "E-LIC"]
 gate = "maintainer"
 owner = "maintainer"
 outputs = ["docs/research/focus-state-source-evaluation.md"]
-acceptance = ["Each candidate has dated ACCEPT / REJECT / DEFER with reason, signed by maintainer"]
-notes = "G-ADR67 dep added 2026-11-08 on maintainer instruction: D10.2 puts ADR acceptance first, and the licence and evidence rules applied here are in ADR-0007 section 5."
+acceptance = [
+  "Each candidate has dated ACCEPT / REJECT / DEFER with reason, signed by maintainer",
+  "Before any ACCEPT, that candidate's raw_text eligibility assessment is recorded (D10.2 step 3; ADR-0006 section 2, section 11, L6; T6 per-candidate table in docs/research/dependency-graph.md)",
+]
+notes = "G-ADR67 dep added 2026-11-08 on maintainer instruction: D10.2 puts ADR acceptance first, and the licence and evidence rules applied here are in ADR-0007 section 5. Eligibility row added 2026-11-09 under the maintainer's sprint instruction to fix W0's failed criterion 4."
 
 # ---------------------------------------------------------------- Phase 2: specs
 [[node]]
@@ -221,6 +225,7 @@ acceptance = [
   "Each manifest in data/manifests/ records at least the ADR-0001 §5 fields: source name and URL, publisher, licence and licence-text link, retrieval date, SHA-256 of each retrieved file, whether redistribution is permitted, the transformations applied (script path + git commit)",
   "Unresolved licence or permission is recorded as UNKNOWN/pending, never as granted",
   "Manifests validate against docs/schema.md",
+  "Each manifest carries everything that changes splits (T9): coverage_state, context_columns, column roles, alias table, missing_value_tokens, raw_text_scope (D6.1), record_id_scope",
 ]
 
 [[node]]
@@ -335,6 +340,7 @@ owner = "agent"
 outputs = ["staging/split/frozen.manifest"]
 acceptance = [
   "Frozen before ANY human sees individual raw text",
+  "Split-key steps 2-5 run after the rules screen and before the freeze (D10.2), with step 2 applying the D4.5 district rules; each step has a test",
   "Split file hashes recorded; recompute is a no-op",
   "Exposure log initialised outside Git",
 ]

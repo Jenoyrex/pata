@@ -5,19 +5,20 @@ results.
 
 ## Current objective
 
-Get the maintainer-gated nodes W0, G-ADR67 and E-LGD through review, and close E-INV. What to
+Get the maintainer-gated nodes W0, G-ADR67 and E-LGD through review, and finish E-FIELD. What to
 work on is decided by `workflow/graph.toml` (`uv run python scripts/graph.py next`). Legacy tasks and
 the ruling ledger: [`docs/research/dependency-graph.md`](docs/research/dependency-graph.md).
 
-## Repository state (2026-11-08)
+## Repository state (2026-11-09)
 
-- Branch `workflow-kit`, branched from local `main` at `0d1c570`. W0 and later work was committed here
-  on 2026-11-08 on maintainer instruction. Nothing here is pushed or merged.
-- `origin/main` was last fetched at `067aad3`; it was not re-fetched on 2026-11-08.
-- The ADR-0006 rev 6 and ADR-0007 rev 4 draft exists only on the local branch `adr-0006-rev6`
-  (`0513447`).
+- `origin/main` is at `0c72e75`. The maintainer pushed the branches and merged PR 1 (`adr-0006-rev6`)
+  and PR 2 (`workflow-kit`) on GitHub on 2026-11-09.
+- Local `main` is still at `0d1c570`, 12 commits behind `origin/main`. Local `workflow-kit` matches
+  `origin/workflow-kit` (`7947461`, before this update) and does not contain the ADR merge.
+- The ADR-0006 rev 6 and ADR-0007 rev 4 text is now on `origin/main`, **still Proposed**. Merging it
+  is not acceptance: G-ADR67 stays in `review` and D10.1 still needs an explicit, dated acceptance.
 - Accepted ADRs: 0001, 0002, 0004, 0005. Proposed: 0003 (permission pending), 0006,
-  0007, 0008.
+  0007, 0008 (status lines read on `origin/main`, 2026-11-09).
 - No address source accepted. No datasets, models or benchmark results.
 
 ## Completed
@@ -203,7 +204,7 @@ Each needs maintainer input.
 
 ## Next action
 
-**E-INV and E-LIC are done (2026-11-09 for E-LIC); E-FIELD is ready.** E-FIELD's first criterion needs
+**E-INV and E-LIC are done; E-FIELD is blocked, and no agent task is ready.** E-FIELD's first criterion needs
 publisher documentation that was not found for any candidate, so it depends on G-SRC decision 3.
 The other maintainer decisions are listed above.
 
@@ -344,6 +345,37 @@ The other maintainer decisions are listed above.
 - **New nodes added:** none.
 - **Open risks:** `focus-state-source-evaluation.md:252` still describes C10 as "As C1b"; the inventory
   corrects it, and it was left unedited to keep the verified tree unchanged.
+- **Commit, after this entry:** E-LIC was committed as `7947461`.
+
+### 2026-11-09 — no node — push and merge recorded
+
+- **Did:** Recorded the maintainer's push and the merges of PR 1 and PR 2 in this file. No node status
+  changed. Claude's own push attempt was blocked by the guard hook; the maintainer pushed.
+- **Proof:** `git fetch origin`; `origin/main` at `0c72e75`; `gh pr list` shows both PRs merged;
+  ADR status lines read from `origin/main`.
+- **Not checked:** whether `docs/workflow/reviews/G-ADR67-rev7-rev5.patch`, prepared against
+  `adr-0006-rev6`, still applies to `origin/main`.
+- **Branch / commit:** `workflow-kit`, this update uncommitted. Not pushed.
+- **Needs maintainer:** update local `main`; the open reviews listed above.
+
+### 2026-11-09 — W0, E-B6, E-FIELD — sprint on eligible nodes
+
+- **Did:** W0: added the eligibility, D4.5 and manifest-scope acceptance rows the verifier asked for;
+  fixed the `graph.py` cp1252 crash, the `--check-outputs` skip on `(`, and CRLF from `progress --write`.
+  E-B6: added the missing leak and per-process tests, non-CSV detection and `--expected-column`.
+  E-FIELD: added rows C7 and C9c and read R131–R133; no field gained a publisher definition.
+  No Phase 2–7 node was started: each waits, directly or indirectly, on a maintainer gate.
+- **Proof:** W0 verifier Overall PASS (after one FAIL on criterion 4). E-B6 verifier Overall PASS.
+  E-FIELD verifier Overall FAIL on criterion 1, PASS on criterion 2. Final gates: `uv lock --check`
+  exit 0; `uv sync --locked` exit 0; ruff passed; format 54 files; `uv run pytest -q` 142 passed,
+  4 skipped; `graph.py validate --check-outputs` OK; `git diff --check` exit 0.
+- **Status:** W0 stays `review`. E-B6 stays `done`. E-FIELD is `blocked`. Graph: 4 of 29 done, unchanged.
+- **Real-file validation of E-B6:** not done; no candidate file is held. Synthetic fixtures only.
+- **Branch / commit:** `workflow-kit`, committed by node group on the maintainer's instruction, after
+  W0 and E-B6 verifier reruns (both Overall PASS, tables in their cards).
+- **Needs maintainer:** G-ADR67; W0 approval; E-LGD option; G-SRC decision 3; H-SCREENER.
+- **New nodes added:** none.
+- **Open risks:** D-SPLITCFG can close without the focus-state ADR named in its title (no acceptance row).
 
 ## Dependency graph status
 
@@ -360,7 +392,7 @@ _Generated from `workflow/graph.toml` on 2026-11-09 — do not edit by hand._
 | P3-pipeline | **T12** T12 implementation task (scope per legacy dependency graph) | dropped | — | G-ADR67 |
 | P1-evidence | **E-LGD** LGD level verification: state / district / sub-district / village | review | maintainer | — |
 | P1-evidence | **E-INV** Candidate source inventory (exact files/snapshots, publishers) | done | — | — |
-| P1-evidence | **E-FIELD** Field semantics evidence (incl. C1a Address_Original_First_Line) | todo | — | — |
+| P1-evidence | **E-FIELD** Field semantics evidence (incl. C1a Address_Original_First_Line) | blocked | — | — |
 | P1-evidence | **E-LIC** Licence + redistribution evidence (B14–B17) | done | — | — |
 | P1-evidence | **E-B6** Scripted aggregate inspection of candidate source files (B6) | done | — | — |
 | P1-evidence | **G-SRC** Maintainer accept/reject decision per source | todo | maintainer | G-ADR67, E-FIELD |
@@ -385,6 +417,6 @@ _Generated from `workflow/graph.toml` on 2026-11-09 — do not edit by hand._
 | P7-release | **B-BASE** Baselines + evaluation scripts | todo | — | A-GOLD |
 | P7-release | **R-REL** Release v1: manifest, hashes, metrics, exclusions, limitations, versioning | todo | maintainer · irreversible | B-BASE |
 
-**Ready now:** E-FIELD, H-SCREENER
+**Ready now:** H-SCREENER
 **Awaiting maintainer:** W0, G-ADR67, E-LGD
 <!-- graph:progress:end -->

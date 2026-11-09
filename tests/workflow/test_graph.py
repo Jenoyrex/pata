@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import importlib.util
+import os
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -214,3 +216,42 @@ def test_progress_block_is_replaced_in_place(tmp_path):
     text = f.read_text(encoding="utf-8")
     assert "keep me" in text and "tail" in text and "old" not in text
     assert text.count(graph.BEGIN) == 1
+
+
+def test_progress_write_uses_lf_line_endings(tmp_path):
+    f = tmp_path / "PROGRESS.md"
+    f.write_text(f"{graph.BEGIN}\nold\n{graph.END}\n", encoding="utf-8")
+    graph.cmd_progress(make([node("A")]), str(f))
+    assert b"\r\n" not in f.read_bytes()
+
+
+def test_cli_survives_stdout_that_cannot_encode_its_symbols():
+    env = {**os.environ, "PYTHONIOENCODING": "cp1252"}
+    run = subprocess.run(
+        [sys.executable, str(ROOT / "scripts" / "graph.py"), "progress"],
+        capture_output=True,
+        env=env,
+        cwd=ROOT,
+    )
+    assert run.returncode == 0, run.stderr.decode("utf-8", "replace")
+
+
+def test_check_outputs_sees_a_path_with_a_note():
+    g = make([node("A", status="done", outputs=["no/such/file.txt (git-ignored; a note)"])])
+    assert any("no/such/file.txt" in w for w in g.validate(check_outputs=True).warnings)
+
+
+def test_check_outputs_ignores_prose_and_outside_git_outputs():
+    outputs = ["a manifest under no/such/ (name UNDECIDED)", "private/denylist (outside Git)"]
+    g = make([node("A", status="done", outputs=outputs)])
+    assert g.validate(check_outputs=True).warnings == []
+
+
+@pytest.mark.parametrize(
+    ("nid", "ruled_item"),
+    [("G-SRC", "eligibility"), ("D-SRCADR", "raw_text_scope"), ("D-SRCADR", "record_id_scope")]
+    + [("X-FREEZE", "D4.5"), ("X-FREEZE", "steps 2-5")],
+)
+def test_ruled_obligations_have_an_acceptance_row(nid, ruled_item):
+    g = graph.Graph.load(ROOT / "workflow" / "graph.toml")
+    assert any(ruled_item in a for a in g.nodes[nid]["acceptance"])
