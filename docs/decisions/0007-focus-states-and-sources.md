@@ -1,10 +1,27 @@
 # ADR-0007: Focus states and address-corpus sources for PataBench v0
 
 - **Status:** Proposed. Not accepted until the decisions in section 10.1 are
-  approved by the maintainer. **Cannot be accepted before ADR-0006**, which is
-  itself still Proposed and on which sections 3 to 7 depend.
+  approved by the maintainer. **Accepted only together with ADR-0006 revision 6**,
+  on which sections 3 to 8 depend.
+  - Acceptance is an explicit, dated maintainer acceptance recorded in both ADRs'
+    status lines.
+  - It comes after the maintainer has reviewed the complete revision diff and has
+    re-approved by name every decision item whose text changed.
+  - An approval in principle of earlier text is not approval of revised text.
 - **Date:** 2026-10-04
-- **Revision:** 3. Revision 2 followed a read-only adversarial review on
+- **Revision:** 4 (2026-10-28), alongside ADR-0006 revision 6, from the
+  maintainer's acceptance-readiness rulings of 2026-10-27 and 2026-10-28:
+  - section 8 sets one evidence standard for the LGD semantics of all four
+    levels, national or per state, with rules for conflicting evidence
+    (revision 3: sub-district only);
+  - duplicate classes, not merged groups (sections 3 and 6);
+  - section 5 adds manifest information for split-key column roles, value
+    aliases, missing-value tokens and `raw_text` scope;
+  - the step-1 state is never an input to designator verification (section 3);
+  - the next steps follow the single order in ADR-0006's Consequences.
+
+  Status unchanged.
+- **Revision 3 and earlier:** Revision 2 followed a read-only adversarial review on
   2026-10-04 (split timing, focus-state membership, out-of-focus records,
   overlapping source families, holdout unit, pre-split exposure of records,
   verification evidence).
@@ -55,10 +72,10 @@ changes no manifest.
     the freeze, the split may be recomputed **only** to fix a bug.
   - split ratios, unresolved-group share and holdout feasibility (P6), answered
     from ingestion-time statistics
-  - LGD sub-district semantics per selected state, enabling `block` and verifying
-    cue-table entries deferred "together with the focus-state ADR" (L3). Since
-    ADR-0006 revision 5, L3 points to section 8 (evidence standard) and E1
-    (per-state outcomes and `block`) of this ADR.
+  - LGD level semantics, enabling `block` and verifying cue-table entries (L3).
+    Since ADR-0006 revision 5, L3 points to section 8 (evidence standard) and E1
+    (outcomes and `block`) of this ADR. Since revision 6 it covers the state,
+    district, sub-district and village levels.
   - how split assignments carry over between releases is open (L5)
 
   ADR-0006 does not say who designates held-out sources, how a source is
@@ -75,6 +92,9 @@ changes no manifest.
   - what LGD records as the sub-district level differs by state and has not been
     verified for any state (ADR-0006 context and §4). No LGD file in the pinned
     snapshots has a column naming the sub-district tier (ADR-0004 headers).
+  - no designator's mapping to any LGD level (state, district, sub-district or
+    village) has been verified for any state or nationally. No verification record
+    exists (section 8).
 - **Repository convention** (`docs/README.md`): ADRs are never rewritten once
   accepted. Later decisions are new ADRs, as ADR-0004 amends ADR-0002.
 
@@ -104,9 +124,9 @@ changes no manifest.
   (ADR-0001 §7).
 - The list is decided in a **new ADR** that cites the selection records (section
   4). This ADR is not amended to add it.
-- Recording `focus_state_version` in the release manifest (ADR-0006 §18) is a
-  follow-up. `docs/schema.md` defines the field, and each release ADR records
-  its value (section 10.3, E3).
+- The release manifest records `focus_state_version` (ADR-0006 §18, revision 6).
+  `docs/schema.md` defines the field, and each release ADR records its value
+  (section 10.3, E3).
 - The list is fixed before the split is first computed. Any later change is a new
   `split_version` and a new release (section 7).
 
@@ -114,9 +134,9 @@ changes no manifest.
 
 - A record's **focus-state membership** is its own **step-1 state** from the
   versioned split key procedure (ADR-0006 §17, `split_key_procedure_version`),
-  computed for that record before any merge:
-  - the allowlisted state column takes precedence, matched by exact `name_key` as
-    ADR-0006 §17 step 1 says
+  computed for that record before duplicate classes are formed:
+  - the declared state column takes precedence. It is matched by exact `name_key`,
+    after missing-value tokens and value aliases, as ADR-0006 §17 step 1 says.
   - otherwise the manifest's `coverage_state` (section 5), which is already an
     `lgd:state:` ID and needs no name matching
   - a column value that matches no state never falls back to `coverage_state`
@@ -129,14 +149,17 @@ changes no manifest.
 
     Such a record is resolved only as ADR-0006 §17 step 1 allows.
 - A district found from `raw_text` in step 2 **never** assigns a focus state. A
-  merged group's key never changes a record's membership.
+  duplicate class's key never changes a record's membership.
+- The step-1 state is split metadata. It is **never** an input to designator
+  verification, candidate generation or linking. These use only what ADR-0006
+  §7 lists.
 - Membership never uses gold labels, annotator judgement or model output. It is
   reproducible from the procedure version, the manifest and the pinned gazetteer.
   Recording it as a split-file field is a follow-up for `docs/schema.md` (E3).
 - **Out-of-focus records.** Records whose step-1 state is known and is not a focus
   state are **counted** per state and per source, and then **dropped** before
-  split-key steps 2 to 5. They never take part in the duplicate merge
-  (union-find), get no `record_id` or split, and are never written to
+  split-key steps 2 to 5. They never join a duplicate class (ADR-0006 §17
+  step 4), get no `record_id` or split, and are never written to
   `data/processed/`. So the choice of focus states cannot change the group key or
   split of any retained record.
 - **Unknown state.** Whether records whose step-1 state is unknown are retained is
@@ -181,8 +204,9 @@ assigned a split, in this order:
      whose step-1 state is unknown, and, kept separate, the counts excluded
      as `state_column_unmatched` and as `state_coverage_disagreement` (section
      3). No record is read by a person or stored.
-   - the status of sub-district semantics verification for that state (section 8),
-     which will usually be "unverified" at this point
+   - the status of LGD level-semantics verification for each of the four levels
+     in that state, national or state-specific (section 8). It will usually be
+     "unverified" at this point.
    - the diversity dimensions below, as far as source documentation shows them.
      Anything not documented is recorded as unknown, not guessed.
 
@@ -199,7 +223,7 @@ Pata):
 |---|---|---|
 | Source families available | Avoids gold that reflects one publisher template | Source assessments (section 5) |
 | Number of independent publishers | `test_source_holdout` holds out publishers, and needs some left for `train`, `dev` and `test` (section 6) | Source assessments |
-| Sub-district verification status | ADR-0006 L3: tiers differ by state, and this drives `subdistrict` and `place_unspecified` outcomes | Verification records (section 8). Usually unverified at selection time. |
+| LGD level verification status | ADR-0006 L3: which designators can produce gold links at which levels in the state (ADR-0006 §3, §7). Sub-district tiers in particular differ by state. | Verification records (section 8). Usually unverified at selection time. |
 | Gazetteer coverage properties | Districts without villages, sibling-name density and PIN fan-out change how much can be linked | Computed from the pinned gazetteer |
 | Language and script of published addresses | ADR-0001 §6 scope; code-mixed and romanized strata | Source documentation only. Measurements from the dev pool are reported later and never revise the selection within a release. |
 | Region | Address conventions are not assumed to be national | LGD state unit |
@@ -227,7 +251,11 @@ assessed in writing.
 *Evidence limit.* Before the split is first computed, an assessment may use only:
 - the publisher's documentation, licence text and terms
 - the header row of a downloaded file
-- aggregate column statistics produced by a script
+- aggregate column statistics produced by a script. These include a scripted
+  list of the distinct values of a declared state or district column with their
+  counts (used for value aliases, below).
+  - Such lists aren't readings of individual records.
+  - Under ADR-0006 §17 they aren't human exposure.
 
 No person reads individual records or readable address text, and assessment
 documents never quote record text. The reason is that the maintainer also writes
@@ -252,6 +280,21 @@ ADR-0006 §12 is unchanged.
   IDs, and whether a state column exists for the allowlist.
 - **Identifier**: whether the publisher gives a stable per-record identifier, which
   decides `record_id_scope` (ADR-0006 §2).
+- **Split-key column roles** (ADR-0006 §17).
+  - A column is declared the source's `state_column` or `district_column` only on
+    publisher documentation naming the field's content, plus a scripted aggregate
+    exact-match rate against LGD names. The rate is reported; no threshold is set.
+  - A column name alone is never enough.
+  - At most one column per role. A source has exactly one `state_column` or none.
+    Other state-like columns are not used for split keys.
+- **Missing-value tokens.** Values that the publisher's documentation defines as
+  missing (for example "NA: Not Available") are listed per source and per column,
+  each cited.
+- **`raw_text` field and scope** (ADR-0006 §2).
+  - The field is eligible only if the publisher's documentation presents it as the
+    facility's address (`raw_text_scope: full_address`) or as an address line
+    (`address_line`).
+  - This is never judged from the values.
 
 A rejected source is recorded with its reason, so it is not reassessed without
 cause.
@@ -267,6 +310,21 @@ gazetteer. An address source manifest carries the ADR-0001 §5 fields (including
 | `record_id_scope` | yes | `native` or `snapshot` | ADR-0006 §2 |
 | `context_columns` | yes, may be empty | allowlisted column names | ADR-0006 §12 |
 | `coverage_state` | if the whole source covers exactly one state | `lgd:state:{code}` at the pinned `gazetteer_version` | Split-key step 1 and focus-state membership (section 3) |
+| Split-key column roles | if the source has such columns | `state_column` and `district_column`, each a name from `context_columns`; at most one per role | ADR-0006 §17 steps 1 and 2 |
+| Value aliases | optional | per role: exact `name_key` of a source value → one `lgd:` ID, each entry approved by the maintainer and citing its evidence | ADR-0006 §17 steps 1 and 2 |
+| Missing-value tokens | if the publisher documents any | per column: `name_key` values, each cited from publisher documentation | ADR-0006 §2, §17 |
+| `raw_text` field and `raw_text_scope` | yes | the column name; `full_address` or `address_line` | ADR-0006 §2; reported as a stratum |
+
+Value aliases:
+- **Evidence.** An alias is allowed only on the scripted distinct-value list of
+  that column and the LGD unit's name.
+- **No fuzzy matching.** An entry for a value that already matches an LGD name
+  exactly is invalid.
+- **Timing.** Adding or changing an alias after the split is first computed is a
+  change to the source set (section 7).
+
+Source values are never rewritten. Aliases and tokens change only how a value is
+matched, not the stored value.
 
 Manifests describe sources only. Holdout designation and the focus-state list are
 benchmark configuration and never go in a manifest (sections 2 and 6). Adding
@@ -276,7 +334,7 @@ defined in `docs/schema.md`. This ADR changes no manifest.
 
 ### 6. Held-out publishers and grouped splits
 
-ADR-0006 §17 sends every merged group that contains a record from a held-out
+ADR-0006 §17 sends every duplicate class that contains a record from a held-out
 source to `test_source_holdout`. This ADR decides how that designation is made:
 
 - **The unit is the publisher.** Every address source manifest with the same
@@ -298,9 +356,12 @@ source to `test_source_holdout`. This ADR decides how that designation is made:
 - Holding out every publisher of a state would remove that state from `train`,
   `dev` and `test`. That is reported as a property of the release. It is **not** an
   unseen-state split: v0 has no such split (ADR-0006 §17).
-- Because duplicate groups merge across sources (ADR-0006 §17 step 4), a held-out
-  publisher can also pull records of other publishers into `test_source_holdout`.
-  The number of such records is reported per release.
+- A duplicate class holds every record whose `name_key(raw_text)` is identical,
+  across sources (ADR-0006 §17 step 4). A record of a held-out publisher therefore
+  pulls the other records of its class into `test_source_holdout`, whoever
+  published them.
+  - Only identical texts move. Districts are never merged.
+  - The number of such records is reported per release.
 
 Which publishers are held out is open (O5, its only owner). Whether
 `test_source_holdout` is feasible at all is ADR-0006 P6, and O5 uses that
@@ -317,27 +378,74 @@ answer.
 - How split assignments carry over from one release to the next is not decided
   here. It is ADR-0006 L5.
 
-### 8. Sub-district semantics verification (ADR-0006 L3)
+### 8. LGD level semantics verification (ADR-0006 L3)
 
-This ADR fixes the evidence standard. The outcome for each state is open (section
-10.3, E1).
+This ADR fixes the evidence standard. The outcomes are open (section 10.3, E1).
+Revision 3 covered only the sub-district level.
 
-- Verification establishes what local tier (for example tehsil, circle, block or
-  another) LGD records as the sub-district level in one state.
+**What is verified.**
+- A **level mapping** is a designator's mapping to one LGD level: `state`,
+  `district`, `subdistrict` or `village` (ADR-0006 §3).
+- Verification establishes what LGD records at that level. For example:
+  - which local tier (tehsil, circle, block or another) is the sub-district level
+    in a state
+  - what LGD's village level includes
+- **Village records** must establish, where evidence permits, how LGD treats names
+  carrying suffixes such as `(Ct)`, `(Og)` and `(Part)`.
+  - Their meaning and matching behaviour are never assumed.
+  - They are not treated as ordinary villages without evidence.
+
+**Evidence.**
 - **LGD-side evidence is required**: LGD documentation, or information LGD itself
-  publishes about the type of its sub-district units. Each piece is cited by URL
+  publishes about the type of its units at that level. Each piece is cited by URL
   and retrieval date.
 - An official publication of the state government describing its administrative
   tiers may **corroborate** LGD-side evidence. On its own it cannot verify what
-  LGD records.
-- Not evidence: counts or name patterns in the gazetteer (such as names containing
-  "Circle"), annotator knowledge, or third-party summaries.
-- **If no LGD-side evidence exists, the mapping stays unverified.** The designator
-  stays unverified in the cue table and may name a `pending_level` (ADR-0006 §3,
-  §8).
-- A verified mapping is recorded in the cue table as a verified designator with a
-  reference to its evidence (ADR-0006 §3). The per-state outcome is recorded in a
-  new ADR or in the relevant source ADR, never by amending this ADR.
+  LGD records, and it cannot demote a national verification.
+- Not evidence:
+  - counts or name patterns in the gazetteer (such as names containing "Circle")
+  - Pata's own definitions
+  - annotator knowledge
+  - third-party summaries
+  - a name that looks intuitive
+
+**Scope.**
+- A mapping is verified **nationally** only where the LGD-side evidence explicitly
+  establishes that level's semantics nationally. Otherwise it is verified **per
+  state**.
+- The cue table records the scope: national, or a list of `lgd:state:` IDs, with
+  any states excepted from a national mapping (ADR-0006 §3).
+
+**Conflicting evidence.**
+- State-specific LGD-side evidence that agrees with, or narrows, the national
+  evidence controls for that state.
+- State-specific LGD-side evidence that contradicts the national evidence leaves
+  the mapping **unverified for that state** until the conflict is resolved.
+- LGD-side national sources that contradict each other leave the mapping
+  **unverified nationally** until it is resolved.
+- Neither side of a conflict is ever silently preferred.
+
+**Without verification.**
+- **If no LGD-side evidence establishes a mapping, it stays unverified.** The
+  designator stays unverified in the cue table for that scope.
+- The cue table's `pending_level` follows ADR-0006 §3:
+  - For a designator whose written role is an LGD level label, it is that level.
+  - For a designator labelled `place_unspecified` (such as "Block" or
+    "Sub-division"), it is named only on a cited source of any kind allowed above,
+    state-government material included, with URL and retrieval date. Such a source
+    supports "pending" only, never "verified".
+
+**Timing.**
+- Verification is completed, or the mapping is explicitly frozen as unverified,
+  before the annotation guidelines are frozen (ADR-0006 §14).
+- A later change needs a new `cue_table_version` and re-derivation as a migration
+  (ADR-0006 §10).
+
+**Recording.**
+- A verified mapping is recorded in the cue table with its scope and a reference
+  to its evidence (ADR-0006 §3).
+- The outcomes are recorded in a new ADR or in the relevant source ADR, never by
+  amending this ADR.
 - Whether to enable a `block` label stays with ADR-0006 L3.
 
 ### 9. Reporting
@@ -372,10 +480,10 @@ This ADR fixes the evidence standard. The outcome for each state is open (sectio
 | S3 | Membership is each record's own step-1 state from the versioned split key procedure. Known out-of-focus records are counted and dropped before split-key steps 2 to 5. Limiting v0 annotation to focus-state records is a new decision, not derived from ADR-0001. | 3 |
 | S4 | Selection follows the four-step procedure, with the two required conditions, the computed selection record and the diversity dimensions, and never uses annotations, gold, pilot results, model outputs or individual records. No thresholds are set here. | 4 |
 | S5 | Two publisher-based source families, `government_published` and `operator_published`. Anything else needs a new ADR. | 5 |
-| S6 | Written source assessment limited to documentation, headers and scripted aggregate statistics before the split; acceptance by a source ADR; the added manifest fields. | 5 |
+| S6 | Written source assessment limited to documentation, headers and scripted aggregate statistics before the split (including distinct-value lists of declared state and district columns); acceptance by a source ADR; the added manifest information, including split-key column roles on documented evidence, maintainer-approved exact value aliases, cited missing-value tokens, and the `raw_text` field with its documented scope. (Revision 4 adds the column roles, aliases, tokens and `raw_text` scope.) | 5 |
 | S7 | Holdout is designated per publisher, in the versioned split configuration, before the split is first computed, and never from results. | 6 |
 | S8 | The focus-state list, the accepted source set and the held-out publishers are fixed before the split is first computed. Any later change is a new `split_version` and a new release. | 7 |
-| S9 | Sub-district verification needs LGD-side evidence. State-government evidence only corroborates. Without LGD-side evidence the mapping stays unverified. | 8 |
+| S9 | Verifying a designator's mapping to any of the four LGD levels needs LGD-side evidence with URL and retrieval date. Scope is national only where the evidence establishes it nationally, otherwise per state. State-government evidence only corroborates and cannot demote a national verification. Contradicting state-specific LGD evidence leaves the mapping unverified for that state; contradicting national LGD evidence leaves it unverified nationally. Without LGD-side evidence the mapping stays unverified. (Revision 3: sub-district only.) | 8 |
 | S10 | Results are reported by focus state and source family, with per-state and per-source counts. | 9 |
 
 #### 10.2 Open
@@ -400,25 +508,22 @@ benchmark decision. It is recorded in the source ADR (section 5; E5).
 
 | # | Question | Where |
 |---|---|---|
-| E1 | Per-state outcome of sub-district semantics verification; enabling `block` | A new ADR or the relevant source ADR, together with ADR-0006 L3 |
+| E1 | Outcomes of LGD level-semantics verification for the four levels, national or per state (section 8); enabling `block` | A new ADR or the relevant source ADR, together with ADR-0006 L3 |
 | E2 | Redistribution of address text, and licence of the annotations | Release ADR (ADR-0006 L1) |
-| E3 | Formats: address-source manifest fields (section 5), split configuration (section 6) including the held-out publisher list with `split_salt`, focus-state list file, `focus_state_version` and the held-out publisher list in the release manifest, focus-state field in the split file | `docs/schema.md` is the normative owner of every format in this row: exact field names, structures, types and serialization. This ADR and ADR-0006 keep the policy, procedures, invariants and required information (here sections 2, 5, 6, 7 and 9), and reference the schema. Each release ADR records that release's values, such as its held-out publisher list, and references the schema; it never redefines a format. (Revision 2 said "`docs/schema.md` and the release ADR".) |
+| E3 | Formats: address-source manifest fields (section 5, including split-key column roles, value aliases, missing-value tokens and `raw_text_scope`), split configuration (section 6) including the held-out publisher list with `split_salt`, focus-state list file, `focus_state_version` and the held-out publisher list in the release manifest, focus-state field in the split file | `docs/schema.md` is the normative owner of every format in this row: exact field names, structures, types and serialization. This ADR and ADR-0006 keep the policy, procedures, invariants and required information (here sections 2, 5, 6, 7 and 9), and reference the schema. Each release ADR records that release's values, such as its held-out publisher list, and references the schema; it never redefines a format. (Revision 2 said "`docs/schema.md` and the release ADR".) |
 | E4 | How split assignments carry over between releases when sources or states change | ADR-0006 L5 |
 | E5 | Whether each source permits automated retrieval | That source's source ADR |
 
 ## Consequences
 
-- Accepting this ADR selects no state and no source. ADR-0006 must be accepted
-  first. The next steps are, in order:
-  1. the source inventory and assessments (documentation, headers and scripted
-     aggregate statistics only)
-  2. a source ADR accepting the address sources (O2), with their manifests
-  3. ingestion-time aggregate statistics and the selection records, computed by
-     script from the accepted sources and the pinned gazetteer
-  4. a new ADR recording the focus-state list (O1) and deciding O3, O4 and O5
-  5. ingestion, screening and the first split computation under ADR-0006 §17
-  6. sub-district verification for each focus state (E1)
-  7. the steps listed in ADR-0006's Consequences, from `docs/schema.md` onward
+- Accepting this ADR selects no state and no source. It is accepted together with
+  ADR-0006 revision 6.
+- The next steps follow the **single implementation order in ADR-0006's
+  Consequences** (revision 6). Revision 3's separate list is withdrawn: it ran the
+  first split before `docs/schema.md` and the split key procedure existed.
+  - This ADR's steps sit in that order: verification (E1) runs in parallel from
+    the start; source assessments; source ADRs (O2); ingestion-time statistics and
+    selection records; the focus-state ADR (O1, O3, O4, O5).
 - Requiring a written assessment and a source ADR makes adding sources slower.
   In exchange, every source in the benchmark has a recorded licence, terms and
   personal-data assessment.

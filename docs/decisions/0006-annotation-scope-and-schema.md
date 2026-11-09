@@ -1,10 +1,36 @@
 # ADR-0006: PataBench v0 annotation scope and schema
 
 - **Status:** Proposed. Not accepted until the decisions in section 21.1 are
-  approved by the maintainer. F1 to F13 were approved in principle on
-  2026-10-26. The ADR stays Proposed until revision 5 is reviewed.
+  approved by the maintainer.
+  - It is accepted **together with ADR-0007 revision 4**, by an explicit, dated
+    maintainer acceptance recorded in both status lines.
+  - Acceptance comes after the maintainer has reviewed the complete revision diff,
+    has re-approved by name every decision item whose text changed, and the
+    cross-reference checks pass.
+  - F1 to F13 were approved in principle on 2026-10-26, for the text of revision
+    5. That approval is **not** approval of revised text.
+  - Items explicitly deferred in sections 21.2 and 21.3 do not block acceptance.
 - **Date:** 2026-10-04
-- **Revision:** 5. Revision 2 followed a read-only design review on 2026-10-04
+- **Revision:** 6 (2026-10-28), alongside ADR-0007 revision 4, from the
+  maintainer's acceptance-readiness rulings of 2026-10-27 and 2026-10-28:
+  - Layer A records roles as written. Designator verification covers all four LGD
+    levels, gates only Layer C and Layer D, and is checked by a deterministic gate
+    that human additions can't bypass (§1, §3, §4, §7).
+  - §7 adds anchor invalidation (`anchor_invalidated`) and a fixed precedence.
+  - §8 and §9 settle `basis` precedence, PIN validity, `pincode_role` and the
+    `not_checkable` causes.
+  - Duplicate classes replace merged groups (§17 step 4).
+  - §17 specifies split-key column roles, aliases, missing-value tokens, district
+    rules, the bucket mapping, the salt and the freeze point.
+  - Ingestion is staged: a rules-only screen, then the split frozen in staging,
+    then a role-restricted human screen, before `data/processed/` (§12).
+  - A private denylist, duplicate-class cascade and an append-only errata log
+    (§12, §13, §18).
+  - Layer D reliability and adjudication `merge` are defined (§14, §15).
+  - The release manifest gains fields, plus `benchmark_version` rules (§18).
+  - The Consequences list is the single implementation order shared with
+    ADR-0007.
+- **Revision 5 and earlier:** Revision 2 followed a read-only design review on 2026-10-04
   that found circular split assignment, PIN circularity, an insufficient Layer D
   vocabulary and gaps in candidate reproducibility. Revision 3 (2026-10-04)
   narrows Layer D `deferred_coverage` to `pending_level`, fixes the
@@ -72,13 +98,18 @@ Constraints already in force:
     sub-district.
   - One PIN covers a median of 19 villages, and 1,889 PINs span more than one
     district.
-  - Census-town suffixes such as `(Ct)` appear in village names.
+  - Suffixes such as `(Ct)`, `(Og)` and `(Part)` appear in village names. What
+    LGD means by them, and whether they are ordinary villages, is not assumed
+    (ADR-0007 §8).
 - **The meaning of LGD's sub-district level varies by state.**
   - In the pinned snapshot, 115 sub-district names contain "Circle".
   - West Bengal has 346 sub-districts, Bihar 537 and Jharkhand 264.
   - These counts alone do not establish which local tier (tehsil, circle, block,
     or another) LGD records as the sub-district in a given state. That has to be
-    verified per state, not assumed (section 4).
+    verified, not assumed.
+- **No level mapping is verified yet.** A designator's mapping to the state,
+  district, sub-district or village level needs LGD-side evidence, national or per
+  state (ADR-0007 §8). None has been recorded.
 
 ## Decision
 
@@ -92,6 +123,9 @@ Constraints already in force:
 | **D. Address resolution** | Which unit does the record point to, at each LGD level? | **Derived** by a versioned procedure from gold A and C and the pinned gazetteer (section 8). Not annotated. |
 
 - Each layer has its own fields and provenance. No label encodes two layers.
+- **Layer A records each role as written.** Whether a designator's mapping to an
+  LGD level is verified never changes a Layer A label. It decides only Layer C
+  linking and Layer D gold (sections 3, 7 and 8).
 - **Staged gold.** A is adjudicated first. B and C work on the gold spans, and D
   is derived from gold A and C. So a boundary disagreement cannot appear as a
   linking disagreement.
@@ -127,6 +161,9 @@ under a source manifest, never typed in by annotators.
   - Carrying annotations to a new snapshot would need a separately versioned
     matching procedure. None is defined in v0, and snapshot-scoped IDs are never
     described as persistent.
+- **Duplicate native IDs.** If two or more rows of one snapshot share a
+  `native_id`, every one of them is excluded as `duplicate_native_id` and
+  counted. None gets a `record_id`.
 
 | Field | Required | Allowed values / format | Purpose and scientific use |
 |---|---|---|---|
@@ -138,10 +175,10 @@ under a source manifest, never typed in by annotators.
 | `source_type` | yes | `real` (the only allowed value in v0; section 21.1, F6) | ADR-0001 §3 source classification. Kept so that any synthetic data added later stays separable. |
 | `raw_text` | yes | Unicode string exactly as published. No trimming, Unicode normalization, case change or redaction. | The only text input to annotators and systems. All offsets refer to it. |
 | `raw_text_sha256` | yes | SHA-256 of the UTF-8 bytes of `raw_text` | Integrity check. Binds annotations to one text. Supports stand-off distribution (section 21.3, L1). |
-| `scripts` | yes, derived | sorted ISO 15924 codes from the Unicode Script property of letters | ADR-0001 §6 script field. Computed, so it is reproducible. |
+| `scripts` | yes, derived | sorted ISO 15924 codes from the Unicode Script property of letters, read from the Unicode Character Database `Scripts.txt` of the same Unicode version as the build's `unicodedata.unidata_version`. A build fails if the two versions differ. | ADR-0001 §6 script field. Computed, so it is reproducible. The file's SHA-256 is recorded in the release manifest (section 18). |
 | `source_context` | optional | object whose keys come only from the manifest's `context_columns` allowlist (section 12) | Used only to compute split keys and for audits. Never gold. Never shown to annotators or systems. |
 | `admission.screen_version` | yes | version of the written privacy screen | Screening can be reproduced. |
-| `admission.screened_by` | yes | pseudonymous annotator ID or `rule:{name}` | Accountability for the privacy decision. |
+| `admission.screened_by` | yes | the `rule:{name}` screen applied before the split and the pseudonymous ID of the human screener after it (section 12) | Accountability for each stage of the privacy decision. |
 
 **`raw_text` is strict in v0.** It is one string the source publishes as an
 address. A concatenation of separately published components, and text
@@ -149,6 +186,39 @@ extracted from a PDF or another document, are **not** `raw_text` in v0. A
 future documented decision may permit them (section 21.3, L6). Until then, a
 source that does not publish its addresses as such strings supplies no
 records.
+
+**Which field is `raw_text`.**
+- A field is eligible only if the publisher's documentation presents it as the
+  facility's address or as an address line. This is never judged from the values.
+- The manifest records the field and its `raw_text_scope` (ADR-0007 §5):
+  - `full_address`
+  - `address_line`: a documented single line of the address
+- `address_line` records are reported as their own stratum. Their Layer D levels
+  will often be `not_specified`.
+
+**Decoding**, fixed per source in its source ADR under a versioned
+`ingestion_procedure_version`:
+- **Encoding** is declared from the publisher's documentation or the file's own
+  declaration, never guessed.
+  - Decoding is strict, with no replacement characters.
+  - A row that fails to decode is excluded as `undecodable`.
+- **BOM.** One leading U+FEFF at the start of a *file* is file encoding and is
+  removed before parsing. A U+FEFF inside a field is kept as published.
+- **CSV:** RFC 4180, with the delimiter and quote character declared.
+  - A quoted embedded newline is part of the value and stays in `raw_text`.
+  - A row with the wrong number of fields is excluded as `malformed_row`.
+- **XLSX:** the `raw_text` cell must be a text cell. A numeric, date or formula
+  cell is excluded as `non_text_cell`, because formatting it would invent text.
+  - In a context column, an integer-valued numeric cell becomes its decimal
+    string. Any other numeric value counts as no value.
+- **Missing values.** Missing-value tokens that the publisher documents for the
+  `raw_text` field (ADR-0007 §5) are recognized first.
+  - A matching value is excluded as `missing_value_token`.
+  - Then `raw_text` that is empty or entirely whitespace (`str.isspace()`) is
+    excluded as `empty_raw_text`.
+  - Nothing is trimmed.
+- **Counts.** Each reason is counted per source at ingestion, alongside the
+  section 17 reasons. Counts for different reasons are never added together.
 
 Removed from revision 1: `synthetic_generator` (synthetic data is excluded from v0)
 and `admission.result` (it was always `admitted`).
@@ -174,18 +244,39 @@ may use only:
   - Village and sub-district names are not in the list. Recognizing them requires
     a designator from the cue table, or the span is labelled `place_unspecified`.
 - **Cue table.** A versioned table (`cue_table_version`) of designators and
-  relational cue words. Each designator carries:
-  - the LGD level it indicates, **only where that mapping is verified** for the
-    state concerned
-  - a reference to where the verification is recorded
+  relational cue words. Each designator entry carries:
+  - the **written role**: the section 4 label the designator gives a span, as
+    written. The guidelines and cue table own this mapping from written words to
+    labels, based on observed address usage.
+  - the **claimed level**: the LGD level that role names, if any
+  - the **verified scope** of the claimed level's mapping:
+    - national, or a list of `lgd:state:` IDs
+    - with any states excepted from a national mapping
+    - or none
+  - a reference to the evidence (ADR-0007 §8)
+  - `pending_level`, if any (below)
 
-  Unverified designators, such as "Block" or "Sub-division" before verification,
-  indicate no level (section 4). An unverified designator's entry may name a
-  **`pending_level`**: the single LGD level whose mapping to that designator is
-  pending verification. `pending_level` must not drive annotation, candidate
-  generation, ranking or linking. It is used only by the derived Layer D status
-  `deferred_coverage` (section 8). This ADR does not define the table's
-  contents. They come from dev-pool observation and LGD documentation.
+  **Verification gates only linking.**
+  - A designator unverified for a state never yields a gold link at its claimed
+    level for units in that state (the gate, section 7).
+  - It never falls back to the no-designator route.
+  - It never changes the Layer A label.
+
+  **`pending_level`** is the single LGD level whose mapping to the designator is
+  pending verification.
+  - **Written role is an LGD level label:** `pending_level` is that level.
+  - **Written role is `place_unspecified`** (the F10 designators "Block" and
+    "Sub-division"): it is named only on a cited source of a kind ADR-0007 §8
+    allows, state-government material included, with URL and retrieval date.
+    - Such a source supports "pending" only, never "verified".
+    - Without one, no `pending_level` is named.
+  - `pending_level` must not drive annotation, candidate generation, ranking or
+    linking. It is used only by the derived Layer D status `deferred_coverage`
+    (section 8).
+
+  This ADR does not define the table's contents. They come from dev-pool
+  observation, LGD documentation and, for `pending_level` only, the cited sources
+  above.
 
 Everything an annotator may use is also available to systems (section 16). So the
 gold never relies on information systems cannot have.
@@ -193,7 +284,8 @@ gold never relies on information systems cannot have.
 ### 4. Span labels (v0)
 
 Labels name the **role a span plays as written**, decided by the rules in
-section 3.
+section 3. Whether the designator's LGD mapping is verified never changes the
+label. It only gates Layer C and Layer D (sections 3, 7 and 8).
 
 | Label | Covers | Default Layer C status |
 |---|---|---|
@@ -204,15 +296,15 @@ section 3.
 | `street` | Road, street, lane, cross, main, marg | `not_in_gazetteer` / `entity_type_not_modelled` |
 | `landmark` | Another place used as a reference ("near X"), without the cue word | `not_in_gazetteer` / `entity_type_not_modelled` |
 | `locality` | Colony, nagar, sector, ward, mohalla, area, layout | `not_in_gazetteer` / `entity_type_not_modelled` |
-| `village` | A place marked as a village by a verified designator from the cue table | linkable (`lgd:village:`) |
+| `village` | A place marked as a village by a designator whose written role in the cue table is `village` | linkable (`lgd:village:`) where the mapping is verified; otherwise `not_in_gazetteer` / `level_mapping_unverified` (section 7) |
 | `post_office` | A place marked as a post office ("P.O.", "Post") | `not_in_gazetteer` / `source_deferred` |
-| `subdistrict` | A place marked by a designator whose mapping to LGD's sub-district level is **verified for that state** in the cue table | linkable (`lgd:subdistrict:`) |
+| `subdistrict` | A place marked by a designator whose written role in the cue table is `subdistrict` | linkable (`lgd:subdistrict:`) where the mapping is verified; otherwise `not_in_gazetteer` / `level_mapping_unverified` (section 7) |
 | `city` | A place marked as a city, town or urban local body | `not_in_gazetteer` / `urban_deferred` |
-| `district` | A place marked as a district, or a bare name matching the reference name list (rules: section 21.2, P5) | linkable (`lgd:district:`) |
-| `state` | A state or union territory: designator or reference-list match | linkable (`lgd:state:`) |
+| `district` | A place marked as a district, or a bare name matching the reference name list (rules: section 21.2, P5) | linkable (`lgd:district:`). A designated role is gated (section 7). |
+| `state` | A state or union territory: designator or reference-list match | linkable (`lgd:state:`). A designated role is gated (section 7). |
 | `pincode` | A Postal Index Number as written | `not_in_gazetteer` / `entity_type_not_modelled` |
 | `country` | A country name | `not_applicable` |
-| `place_unspecified` | A named place whose level the text does not reveal under these rules, including places with an unverified designator ("Block X", "Sub-division X") | linkable at the levels its designator allows. With an unverified designator: `not_in_gazetteer` / `level_mapping_unverified`. |
+| `place_unspecified` | A named place whose level the text does not reveal under these rules, including places whose designator's written role is `place_unspecified` ("Block X", "Sub-division X"; F10) | Without a designator: linkable at all four levels. With an F10 designator: `not_in_gazetteer` / `level_mapping_unverified`. |
 
 **Overlapping labels and how they are told apart.** Whether any of these should be
 merged is a pilot question (section 21.2, P3).
@@ -222,7 +314,7 @@ merged is a pilot question (section 21.2, P3).
 | `organization` / `premise_name` | `organization` names who occupies the address. `premise_name` names the structure. Test: would the name change if the occupant moved out? If yes, it is `organization`. Government buildings named after their function ("Collectorate") are the hard case the pilot must measure. |
 | `organization` / `landmark` | `organization` is the occupant of **this** address. `landmark` is another place, introduced by a relational cue. |
 | `unit` / `premise_number` | `unit` is inside a building. `premise_number` identifies the building or plot. |
-| `locality` / `village` / `city` / `place_unspecified` | Decided only by designators and cue words. Without one, the label is `place_unspecified`. The pilot measures whether `place_unspecified` takes over most of the label distribution. |
+| `locality` / `village` / `city` / `place_unspecified` | Decided only by designators and cue words, by their written role in the cue table, never by LGD verification status. Without one, the label is `place_unspecified`. The pilot measures whether `place_unspecified` takes over most of the label distribution. |
 | `street` / `locality` | Decided by the designator: "Road" and "Lane" mean `street`; "Nagar" and "Colony" mean `locality`. |
 
 **Candidates for removal**, kept in v0 pending pilot evidence:
@@ -237,6 +329,7 @@ can be defined (section 21.3, L3). Revision 1 also listed "sub-division" under
 `subdistrict`. That was wrong: a sub-division may be a separate tier, so it too
 counts as an unverified designator. Text that names a block or sub-division is
 labelled `place_unspecified` and left unlinked (`level_mapping_unverified`).
+These F10 exceptions stay unless a separately justified decision changes them.
 
 ### 5. Spans, offsets and spans with two roles (Layer A)
 
@@ -325,7 +418,7 @@ There is one entry per (`span_id`, role) for every role of every gold span: the
 |---|---|---|
 | `linked` | The final candidate set has exactly one unit, and the text supports it | `entity_id` equals the only member of `final_set` |
 | `ambiguous` | The final candidate set has two or more units, and the text can't decide between them | `final_set` has at least 2 members. No `entity_id`. |
-| `not_in_gazetteer` | The role denotes a geographic unit that the pinned gazetteer can't represent, or no candidate is supported | `reason` is given. `final_set` is empty, or absent for roles that are not linkable. No `entity_id`. |
+| `not_in_gazetteer` | The role denotes a geographic unit that the pinned gazetteer can't represent, no candidate is supported, the verification gate rejected it, or its anchor was invalidated | `reason` is given. `final_set` is empty, or absent for roles that are not linkable. No `entity_id`. Generated candidate lists may be present for audit; they never feed Layer D. |
 | `not_applicable` | The role never denotes a geographic unit (section 4) | Has no candidates, `entity_id` or `reason` |
 
 `reason` takes one of these values:
@@ -336,57 +429,123 @@ There is one entry per (`span_id`, role) for every role of every gold span: the
 - `no_match_in_snapshot`: name generation found nothing
 - `no_supported_match`: candidates existed, but each was pruned as not supported by
   the text
+- `anchor_invalidated`: the role's candidates were narrowed by a higher-level
+  anchor whose final outcome no longer supports it (step 9)
 
 **Deterministic candidate generation**, versioned as
 `candidate_procedure_version` and uses only `raw_text`, gold spans, the cue table
-and the pinned gazetteer. It runs for linkable roles in level order: state,
-district, sub-district, village, then `place_unspecified`.
+and the pinned gazetteer.
+- It never uses split metadata, the step-1 state or a PIN to decide verification
+  scope.
+- It runs for linkable roles in level order: state, district, sub-district,
+  village, then `place_unspecified`.
 
-A role whose designator is unverified in the cue table never enters generation.
-Its status is `not_in_gazetteer` / `level_mapping_unverified` (section 4).
+**Precedence for one linkable role** (the steps are checked in order; a terminal
+step fixes the status):
 
-1. **Name stage.**
+0. **Not linkable.** A label that is not linkable gets its section 4 default.
+1. **Designator unverified everywhere** (no verified scope at all, including the
+   F10 designators).
+   - The role never enters generation. Lists are `null` and no stage flag is set.
+   - Status `not_in_gazetteer` / `level_mapping_unverified`. *Terminal.*
+2. **Name stage.**
    - Strip the cue-table designators from the span text.
    - Collect every unit whose `name_key` equals the `name_key` of the remainder, at
-     the role's level. For `place_unspecified`, use the levels the designator
-     allows (all four if there is no designator).
+     the role's level: its designator's claimed level or, without a designator,
+     its label's level. A `place_unspecified` role without a designator uses all
+     four levels.
    - Output: `candidates.name`.
-2. **Hierarchy stage.**
-   - If a higher-level role in the record has exactly one candidate after its own
-     stages, keep only that unit's descendants.
-   - Skip this stage if the filter would leave nothing, and record
+   - If it is empty, the status is `not_in_gazetteer` / `no_match_in_snapshot`.
+     The gate is not checked. A reconciliation addition can still widen the
+     set (step 6), and step 7 checks it.
+3. **Hierarchy stage.**
+   - The **anchors** are the higher-level roles in the record that have exactly
+     one candidate after their own stages, including the gate (step 4).
+   - With several anchors, keep the intersection of their descendant sets.
+   - Skip this stage if the result would be empty, and record
      `hierarchy_conflict`.
    - Output: `candidates.hierarchy`.
-3. **PIN stage** (village-level candidates only).
-   - If a `pincode` span normalizes to a valid PIN, keep only the villages
+   - A role **depends on** anchor A if removing A from the anchor set changes
+     `candidates.hierarchy` (compared with `candidates.name` when no anchor
+     remains). A skipped stage depends on no anchor.
+4. **Generation gate**, for a role with a designator.
+   - It is checked on the last generated set: `candidates.hierarchy`, or
+     `candidates.name` if the hierarchy stage did not run or was skipped.
+   - Each unit is checked against the designator's verified scope, through its
+     state ancestor (`parent_id`).
+   - If **any** unit lies outside the scope:
+     - status `not_in_gazetteer` / `level_mapping_unverified`
+     - stage flag `level_mapping_unverified`
+     - `candidates.name` and `candidates.hierarchy` kept for audit
+     - `candidates.pincode` is `null`
+     - `final_set` is `[]`
+     - the role anchors nothing
+     - *Terminal.*
+   - Candidates in unverified states are never silently dropped, because dropping
+     them could leave a false unique match.
+5. **PIN stage**, only for roles that passed the gate, and only on village-level
+   candidates.
+   - If the record has a valid PIN (section 9), keep only the villages
      `village_pincode` lists under that PIN.
-   - Skip this stage if the filter would leave nothing, and record
-     `pincode_conflict`.
+   - For a `place_unspecified` role with candidates at several levels, only its
+     village members are filtered. Other levels are left as they are.
+   - Skip this stage if it would leave no village, and record `pincode_conflict`.
    - Output: `candidates.pincode`.
+6. **Human decision.**
+   1. Annotators first link **independently**, using only lookups they start
+      themselves (section 13).
+   2. In **reconciliation** they see the generated lists and record, in structured
+      form, every difference between their decision and the last generated stage:
+      - an **addition**: `{entity_id, reason: spelling_variant, evidence_span_id}`,
+        for a unit that name matching missed
+      - a **pruning**: `{entity_id, reason, evidence_span_id, guideline_section}`.
+        `reason` comes from a closed, versioned list in the guidelines (section
+        21.2, P7). It includes `outside_annotated_ancestor` (an ancestor the
+        annotator linked as a spelling variant excludes this unit) and
+        `text_does_not_support`.
+7. **Reconciliation gate.**
+   - An addition outside the designator's verified scope is recorded.
+   - The role then gets the same outcome as a step-4 failure: status
+     `level_mapping_unverified`, the flag set, `final_set` `[]`, and it anchors
+     nothing. *Terminal.*
+   - Human additions can't bypass verification.
+8. **`final_set`** is the last generated stage, plus additions, minus prunings.
+   - It is derived, never typed in.
+   - Exception: when either gate failed, `final_set` is `[]`. Additions and
+     prunings on such a role are recorded for audit only and have no effect.
+   - One unit gives `linked`; two or more give `ambiguous`.
+   - None gives `not_in_gazetteer` / `no_supported_match`, or keeps
+     `no_match_in_snapshot` if the name stage was empty and nothing was added
+     (step 2).
+9. **Anchor invalidation**, on the adjudicated Layer C (and on each annotator's
+   reconciliation C, section 14).
+   - It is one pass from the top level down. Every anchor is at a higher level
+     and has already been settled, so cascades resolve in one deterministic pass.
+   - Anchor A, whose single generated candidate is u, still supports its anchor
+     only if A's final status is `linked` with `entity_id` u.
+   - Otherwise, every role that depends on A becomes `not_in_gazetteer` /
+     `anchor_invalidated`, with `final_set` `[]`.
+     - This includes roles that were `linked`, `ambiguous` or
+       `no_supported_match`, and roles that passed the gate only because the
+       anchor narrowed them. There is no re-gating.
+     - Roles that failed either gate keep `level_mapping_unverified`.
+   - The number of invalidated roles is recorded and reported.
 
-**Human decision.**
-1. Annotators first link **independently**, using only lookups they start
-   themselves (section 13).
-2. In **reconciliation** they see the generated lists and record, in structured
-   form, every difference between their decision and the last generated stage:
-   - an **addition**: `{entity_id, reason: spelling_variant, evidence_span_id}`, for
-     a unit that name matching missed.
-   - a **pruning**: `{entity_id, reason, evidence_span_id, guideline_section}`.
-     `reason` comes from a closed, versioned list in the guidelines (section 21.2,
-     P7). It includes `outside_annotated_ancestor` (an ancestor the annotator
-     linked as a spelling variant excludes this unit) and
-     `text_does_not_support`.
-3. `final_set` is the last generated stage, plus additions, minus prunings. It is
-   derived, never typed in.
+**Known limitation.** An unverified designator removes its claimed level.
+- "Vill. Rampur" with an unverified `village` mapping therefore has no candidates.
+- A bare "Rampur" (`place_unspecified`, no designator) can still be linked at any
+  level under the rules above.
+- This inversion is documented, not worked around. An unverified designator is
+  never treated as absent.
 
 | Field | Required | Allowed values / format | Purpose and scientific use |
 |---|---|---|---|
 | `span_id`, `role` | yes | gold `span_id`. `role` is the label or one of the `also_labels`. | One link per stated role. |
 | `status` | yes | the four statuses above | Systems are scored on correct abstention, not only on choosing an ID. |
 | `entity_id` | if `linked` | `lgd:{level}:{code}`, present in the pinned `admin_unit.csv` at the role's level (or an allowed level) | The linking target. |
-| `candidates.name`, `candidates.hierarchy`, `candidates.pincode` | for linkable roles | complete sorted lists of `entity_id`s. `null` if the stage did not run. Stage flags `hierarchy_conflict` and `pincode_conflict`. | Every candidate set can be reproduced from the pinned gazetteer. Nothing is truncated. |
+| `candidates.name`, `candidates.hierarchy`, `candidates.pincode` | for linkable roles | complete sorted lists of `entity_id`s. `null` if the stage did not run. Stage flags `hierarchy_conflict`, `level_mapping_unverified` and `pincode_conflict`. | Every candidate set can be reproduced from the pinned gazetteer. Nothing is truncated. |
 | `additions`, `prunings` | if any | structured lists as above | Every human change to a generated set is recorded and can be audited. |
-| `final_set` | derived | sorted list | The decision set, reproducible from the stages plus additions and prunings. |
+| `final_set` | derived | sorted list; `[]` after a gate failure or anchor invalidation | The decision set, reproducible from the stages plus additions and prunings. |
 | `reason` | if `not_in_gazetteer` | the reason values above | Says why the role can't be linked, and marks which spans to re-link when coverage grows. |
 | `pincode_role` | derived | `not_applicable`, `not_used`, `narrowing`, `decisive`, `conflict` (section 9) | Separates links that the PIN decided from links that are independent of it. |
 
@@ -402,10 +561,19 @@ sub-district, village) by a **versioned resolution procedure**
 (`resolution_procedure_version`). Its inputs are gold A, gold C, the cue table
 and the pinned gazetteer. It is not annotated.
 
-A **role at `L`** is a role whose label is `L`'s label (`state`, `district`,
-`subdistrict`, `village`), or a `place_unspecified` role that is linked to a unit at
-`L`, whose `final_set` lies entirely at `L`, or whose verified designator allows
-only `L`. Roles with no LGD level (`city`, `post_office`, `locality`,
+A **role at `L`** is either of these:
+- a role whose label is `L`'s label (`state`, `district`, `subdistrict`,
+  `village`)
+- a `place_unspecified` role that is linked to a unit at `L`, or whose `final_set`
+  is **non-empty** and lies entirely at `L`
+
+A `place_unspecified` role with an empty `final_set` is a role at no level. So is
+one whose `final_set` spans several levels; that is a documented limitation.
+
+Generated candidate lists of a role that is `not_in_gazetteer` (gated, invalidated
+or unmatched) never feed any Layer D status or `basis`.
+
+Roles with no LGD level (`city`, `post_office`, `locality`,
 `street`, `landmark`, `pincode` and the `not_applicable` labels) are never roles at
 any `L`. Their Layer C status and reason (section 7) already record that the
 gazetteer cannot represent them, and they do not change any Layer D status.
@@ -414,21 +582,23 @@ gazetteer cannot represent them, and they do not change any Layer D status.
 
 | `status` | Meaning |
 |---|---|
-| `conflicting` | The units supported at `L` disagree. They come from linked roles at `L`, ancestors of linked units below `L`, or both. `candidates` lists them. A source error is recorded, not repaired. |
+| `conflicting` | The units supported at `L` disagree. They come only from linked roles at `L` (`stated`), ancestors of linked units below `L` (`inferred_from_descendant`), or both. PIN and descendant-candidate inference never count. `candidates` lists them. A source error is recorded, not repaired. |
 | `linked` | Exactly one unit at `L` is supported. `basis` says how (see below). |
 | `ambiguous` | Units at `L` come only from an `ambiguous` role at `L`, there are two or more after keeping descendants of linked ancestors, and no `basis` gives a single unit. `candidates` lists them. |
-| `not_in_gazetteer` | A role at `L` is `not_in_gazetteer` with reason `no_match_in_snapshot` or `no_supported_match`. |
-| `deferred_coverage` | The record has a role that is `not_in_gazetteer` / `level_mapping_unverified` whose designator's cue-table entry names `L` as its `pending_level` (section 3; this is the only use of `pending_level`). `reason` is `level_mapping_unverified`. It never fires because of a `city` or other role with no LGD level. A level for which the record has no such role is never `deferred_coverage`. |
+| `not_in_gazetteer` | A role at `L` is `not_in_gazetteer` with reason `no_match_in_snapshot`, `no_supported_match` or `anchor_invalidated`. `anchor_invalidated` is scored only as abstention and reported separately. |
+| `deferred_coverage` | The record has a role that is `not_in_gazetteer` / `level_mapping_unverified` (unverified everywhere, or rejected by a gate) whose designator's cue-table entry names `L` as its `pending_level` (section 3; this is the only use of `pending_level`). `reason` is `level_mapping_unverified`. It never fires because of a `city` or other role with no LGD level. A level for which the record has no such role is never `deferred_coverage`. |
 | `no_such_level` | The pinned gazetteer has no units at `L` below the deepest linked ancestor. This is computed, and is relative to the gazetteer version. |
 | `not_specified` | Nothing in the record constrains `L` beyond its ancestors. This includes records whose only other place roles have no LGD level, such as `city`. |
 
-**`basis`** is required when the status is `linked`:
+**`basis`** is required when the status is `linked`. When several apply, the first
+in this order wins: `stated`, `inferred_from_descendant`,
+`inferred_from_descendant_candidates`, `inferred_from_pincode`.
 - `stated`: a role at `L` is linked.
 - `inferred_from_descendant`: `L` is an ancestor of a linked unit below it.
 - `inferred_from_descendant_candidates`: every unit in an `ambiguous` set below `L`
   shares this one ancestor at `L`.
 - `inferred_from_pincode`: `L` is `state`, `district` or `subdistrict`, and the
-  record's valid PIN maps, in `village_pincode`, only to villages under one unit
+  record's valid PIN (section 9) maps, in `village_pincode`, only to villages under one unit
   at `L`, consistent with the linked ancestors. This basis is never used at
   village level, because picking a village from a PIN alone would be downward
   inference, and never to produce an `ambiguous` status.
@@ -455,32 +625,51 @@ task-definition document (section 21.3, L2).
   - `ambiguous` (scored against the set)
   - `conflicting`
   - abstention correctness for `not_in_gazetteer`, `deferred_coverage`,
-    `no_such_level` and `not_specified`
+    `no_such_level` and `not_specified`, with `anchor_invalidated` counted
+    separately
 
 ### 9. PIN as evidence versus PIN consistency
 
 A PIN plays two roles that must not be mixed: **evidence** that helps choose a
 village, and an **independent check** of the source against LGD.
 
-**`pincode_role`** is derived for each village-level link in Layer C:
-- `not_applicable`: the record has no valid PIN, or the role is not village-level.
+**Valid PIN.** A record has a valid PIN when its `pincode` spans give exactly one
+distinct value that normalizes (Layer B) to 6 ASCII digits with a non-zero first
+digit (`docs/gazetteer.md`, `invalid_pincode`).
+- Repeats of one value count once.
+- Several distinct values mean the record has no valid PIN.
+- A valid PIN that `village_pincode` doesn't list leads to `pincode_conflict`. It
+  is not invalid.
+- The PIN never anchors and never establishes verification scope (section 7).
+
+**`pincode_role`** is derived for each village-level link in Layer C. For a
+mixed-level `place_unspecified` role it is computed on the village subset, and the
+role counts as village-level only if it ends up linked to a village.
+- `not_applicable`: the record has no valid PIN, the role is not village-level, or
+  **the PIN stage did not run** (for example after a gate failure).
+  `not_applicable` never means that a PIN was checked.
 - `not_used`: the PIN stage did not change the candidate list.
-- `narrowing`: the PIN stage shrank the list, but two or more remain.
+- `narrowing`: the PIN stage shrank the list in any way other than `decisive`.
 - `decisive`: the last stage that ran before the PIN stage (hierarchy, or name if
   hierarchy did not run) had two or more candidates, and the PIN stage left
-  exactly the linked unit.
+  exactly the final linked unit.
 - `conflict`: the PIN stage would have left nothing, so it was skipped.
 
 **`pincode_consistency`** is derived for each in-scope record:
 - `consistent` or `inconsistent`: the village level is `linked` (its basis is
   always `stated`; section 8), `pincode_role` is not `decisive`, and the stated
   PIN is, or is not, listed for that village in `village_pincode`. A `conflict`
-  always gives `inconsistent`.
+  with a linked village is therefore `inconsistent`.
 - `not_independent`: the PIN decided the village (`pincode_role` is `decisive`).
   Agreement between the PIN and the village is then true by construction, so it
   is **excluded**.
-- `not_checkable`: there is no valid stated PIN, or the village level is not
-  `linked`.
+- `not_checkable`: otherwise. It is reported by its first applicable cause, in
+  this order:
+  1. no valid PIN
+  2. the village level is `deferred_coverage` (verification missing)
+  3. no village-level link for any other reason
+
+  The causes are derived from existing fields, and no field is added.
 
 **Evaluation semantics:**
 - The source-versus-LGD PIN disagreement rate is `inconsistent / (consistent +
@@ -501,6 +690,12 @@ village, and an **independent check** of the source against LGD.
   1. Candidates are generated again and D is derived again.
   2. Changed links are reviewed.
   3. A new gold release is produced (section 18). The old release is kept.
+- **A verification change after the guidelines freeze** (a new or revised level
+  mapping, ADR-0007 §8) is also a migration.
+  - It needs a new `cue_table_version`.
+  - Candidates are regenerated, new Layer C work is done for affected roles, and
+    D is derived again.
+  - Layer A is unchanged, because it records roles as written.
 
 ### 11. Raw text versus normalized text
 
@@ -526,10 +721,50 @@ screen, checked before anything reaches `data/processed/`:
 5. It is not personal data under ADR-0001 by any other route, for example a
    beneficiary list.
 
+**Staged screening.** The screen runs in two stages, so that no person reads a
+record before its split is frozen (ADR-0007 §5) and nothing that fails reaches
+`data/processed/` (ADR-0001 §2):
+1. **Rules-only screen** (`admission.screened_by: rule:{name}`), before the split.
+2. The split is **computed and frozen in a staging area** outside
+   `data/processed/` (for example `data/interim/`, ignored by git like all of
+   `data/`). Staging holds only `raw_text` and allowlisted `source_context`.
+3. **Human screen** on the staged records, after the freeze. It is the first human
+   exposure (section 17).
+   - Dev and train records may be screened by anyone.
+   - Test and `test_source_holdout` records are screened only by people who don't
+     write or change the guidelines or the cue table.
+4. **Only records that pass** are written to `data/processed/`.
+
+A record that fails the human screen is excluded without recomputing or moving any
+other record's frozen split assignment (section 17).
+
 **Failure handling:**
 - A record that fails is **excluded whole, never redacted**. Redaction would
   change the published text and teach models the placeholders.
-- Excluded records are not stored. Only aggregate counts per rule are kept.
+- **Duplicate classes.** A withdrawal or human-screen failure excludes the
+  record's whole duplicate class (section 17 step 4). `name_key` keeps letters and
+  digits, so an identifier in one member's text is in every member's.
+  - Such cascades are counted separately.
+  - A failure caused only by a `source_context` value stays a per-record
+    exclusion.
+- Excluded records are not stored. Failed staged records are deleted from staging.
+  Only aggregate counts per rule are kept, plus the denylist below.
+- **Denylist.** Withdrawals and human-screen exclusions are recorded in an
+  internal denylist.
+  - Entry: `source_id`, `source_record_ref`, `raw_text_sha256`, a reason
+    category, the date.
+  - It is kept in private maintainer storage. It is never committed and never
+    released.
+  - It is applied as a versioned screen rule, and every change bumps
+    `screen_version`.
+  - An entry matches a record when all three identifiers are equal. The record's
+    whole duplicate class is then excluded in that build.
+  - Rebuilds from the same pinned snapshots are therefore deterministic.
+  - **Limitation:** a new snapshot that drops the original row or changes its
+    text, and a duplicate that appears in another source after the original row
+    has gone, match no entry. These are caught only by the human screen of the
+    new ingestion.
+  - The reason categories are a format question for `docs/schema.md`.
 - Names that honour public figures ("Mahatma Gandhi Road") are admissible.
 - Businesses named after a private person are excluded.
 - **When in doubt, the record is excluded** (section 21.1, F1).
@@ -551,9 +786,15 @@ screen, checked before anything reaches `data/processed/`:
 - Any free-text `internal_note` stays internal and is **never released**.
 
 **Withdrawal before release.** An annotator who finds personal data the screen
-missed sets `privacy_flag`. The record and all its annotations are then deleted
-from the working data. Only the count of withdrawals is logged, because
-`record_id` is derived from source data.
+missed sets `privacy_flag`.
+- The record's duplicate class and all its annotations are then deleted from the
+  working data.
+- The record is added to the denylist above.
+- Published logs carry only counts, because `record_id` is derived from source
+  data. Revision 5 kept only the count. The denylist is private, so a rebuild
+  can't silently re-admit the record.
+- Exposure-log entries (section 17) for withdrawn or excluded records are kept in
+  the same private store as the denylist. Only aggregate counts are published.
 
 **Withdrawal after release** is covered in section 18.
 
@@ -597,7 +838,8 @@ F2 and F13).
   reconciliation annotations) without annotator identities.
 
 **Annotation documents:** one per record, per layer (A, B decisions, C), per
-annotator, per round.
+annotator, per round. They are never overwritten. The only deletion is a
+withdrawal (section 12), which removes a withdrawn record's documents.
 
 | Field | Required | Allowed values / format | Purpose and scientific use |
 |---|---|---|---|
@@ -627,12 +869,17 @@ evaluation.
 
 ### 14. Guidelines and agreement
 
-The guidelines are versioned and frozen before gold annotation starts. They need
-these sections:
+The guidelines are versioned and frozen before gold annotation starts.
+- Before that freeze, every level mapping in the cue table is verified, or is
+  explicitly frozen as unverified (ADR-0007 §8).
+- Guideline examples come only from the dev pool, or are clearly marked as
+  invented.
+
+They need these sections:
 
 1. scope tests
 2. the privacy screen and flagging
-3. a definition of each label, with examples from admitted records or clearly
+3. a definition of each label, with examples from dev-pool records or clearly
    marked as invented
 4. how to use the cue table and the reference name list
 5. boundary rules, with Indic-script examples
@@ -653,9 +900,16 @@ these sections:
 | A: `also_labels` | F1 on the role sets of matched spans |
 | A: `languages` | exact set agreement and Jaccard |
 | B: `decisions` | kappa on the choices for flagged matches |
-| C: independent `status` and `entity_id` | kappa on status; agreement on `entity_id` where both annotators linked |
-| C: reconciliation prunings and additions | agreement on the resulting `final_set` (Jaccard) |
-| D | not annotated. Derive D from each annotator's independent A and C and report per-level agreement, which shows how A and C disagreement carries through. |
+| C: independent `status` and `entity_id` | kappa on status; agreement on `entity_id` where both annotators linked. Statuses fixed mechanically (non-linkable defaults, designators unverified everywhere, generation-gate failures) are excluded and counted separately. Reconciliation-gate failures stay in. |
+| C: reconciliation prunings and additions | agreement on the resulting `final_set` (Jaccard), after anchor invalidation is applied to each annotator's C. Generation-gate failures are excluded and counted. Reconciliation-gate failures and `anchor_invalidated` roles stay in. |
+| D | not annotated. Derived once per annotator from **gold A plus that annotator's independent C**, the cue table and the pinned gazetteer, with mechanically fixed entries taken from generation. Anchor invalidation doesn't apply to independent C. Only records with two independent C documents count. Per level: kappa on status; `entity_id` agreement where both are `linked`; Jaccard on `candidates` where both are `ambiguous` or both `conflicting`; `basis` agreement where both are `linked`; `reason` agreement where both are `not_in_gazetteer` or both `deferred_coverage`. A status disagreement is counted only by the kappa. |
+
+**Independent C stores a set for `ambiguous`.**
+- When an annotator's independent status is `ambiguous`, they record
+  `independent_set`: the complete sorted list of units their own lookups found
+  (at least 2).
+- `linked` stores only `entity_id`; `not_in_gazetteer` stores only `reason`.
+- This is the minimum needed to derive D per annotator.
 
 Thresholds for freezing the guidelines come from the pilot (section 21.2, P1).
 After the freeze, any change creates a new `guidelines_version` together with an
@@ -680,6 +934,23 @@ annotated again under the frozen guidelines.
 - **Adjudication.** The adjudicator works blinded (section 13), chooses, merges or
   replaces, and never records a guess as `linked`. If neither link is supported by
   the text, the result is `ambiguous` or `not_in_gazetteer` / `no_supported_match`.
+- **`merge` for candidate sets** is the union on edits: the generated stage, plus
+  every addition either annotator made, minus only the prunings both made.
+  - The reconciliation gate (section 7 step 7) and anchor invalidation (step 9)
+    then apply.
+  - The adjudicator may afterwards `replace`, with structured additions and
+    prunings.
+  - Defined cases:
+    - two empty sets give `[]`
+    - {a} and {b} give {a, b}, so `ambiguous` unless a reasoned pruning follows
+    - an out-of-scope addition by either annotator fails the gate
+    - if one annotation is missing, `merge` isn't available; only `accept` or
+      `replace`
+  - Roles that failed the generation gate are never adjudicated: the outcome is
+    fixed before any human decision. A reconciliation-gate failure comes from one
+    annotator's addition, so it is adjudicated like any other disagreement.
+  - Intersection is never used: it can turn {a, b} and {a} into a false unique
+    link.
 - Independent annotations are kept unchanged.
 
 ### 16. What systems receive
@@ -723,16 +994,56 @@ document (section 21.3, L2). The contract above defines the **closed** setting.
 
 The split is computed **at ingestion, before any annotation**. It never uses gold
 labels. It decides which records get double annotation (section 15). It is
-versioned (`split_version`) and **frozen before any model experiment**.
+versioned (`split_version`).
+
+**Freeze point.** The split is computed and frozen in staging **before the first
+human exposure** of any admitted record (section 12).
+- Human exposure means a person viewing an individual record's `raw_text` or
+  `source_context`, for screening, pilot, guideline work or annotation.
+- Scripted aggregate statistics, and the distinct-value lists used for value
+  aliases (ADR-0007 §5), are not exposure.
+- **Exposure log.** From the first exposure on, an exposure log records the record
+  or duplicate class, the person's pseudonym, the purpose and the date.
+  - It is kept with the denylist in private storage (section 12).
+  - Only aggregate counts are published.
+- **Exposed records never enter test.** A later bug-fix recompute (a new
+  `split_version`) may never move an exposed record into `test` or
+  `test_source_holdout`.
+- **Assignments are fixed per `record_id`** when the split is first computed.
+  Removing a record later (a failed human screen, a withdrawal) never recomputes
+  or moves another record's key or split.
+- **Accidental exposure.** If a person who writes or changes the guidelines or the
+  cue table sees a `test` or `test_source_holdout` record outside test annotation:
+  - It is logged.
+  - The record stays in place, and its duplicate class is flagged `exposed`.
+  - Test metrics are reported with and without exposed classes.
+  - Any later guideline or cue-table change by that person must cite only dev or
+    train evidence.
+
+Revision 5 froze the split "before any model experiment", which allowed recomputes
+after people had read records.
 
 **Split key procedure**, versioned as `split_key_procedure_version`, uses only
 allowlisted `source_context`, the source manifest, `raw_text` and the pinned
 gazetteer. Neither the resulting key nor `source_context` is ever shown to
 annotators.
 
+**Column values (steps 1 and 2).**
+- Only the column the manifest declares as `state_column` or `district_column`
+  is used (ADR-0007 §5). A column's name alone never makes it one.
+- A value "has a value" only if, in this order:
+  1. its `name_key` is not one of that column's cited missing-value tokens. A
+     token such as "NA" that the publisher defines as "Not Available" is treated
+     as missing.
+  2. `name_key(v) != ""`
+- A present value is then matched by its exact `name_key`:
+  1. first against the column's maintainer-approved value aliases
+  2. then against LGD names
+- No fuzzy matching. Stored values are never rewritten.
+
 1. **State.**
-   - If the record has a value in an allowlisted state column, match it to an
-     LGD state by exact `name_key`.
+   - If the record has a value in the declared state column, match it to an
+     LGD state as above.
    - Otherwise, if the manifest declares `coverage_state` (ADR-0007 §5), use
      that `lgd:state:` ID directly. It is not name-matched.
    - Otherwise the state is unknown. Whether such records are retained is
@@ -771,26 +1082,80 @@ annotators.
      follows ADR-0007 §7.
    - Revision 4 used "or", name-matched both inputs and had no rule for an
      unmatched value or a disagreement.
-2. **District.** Use the first rule that gives exactly one LGD district:
-   1. An allowlisted district column, matched by exact `name_key` within the known
-      state (or across India, if the match is unique).
-   2. District names from the reference list that appear as whole-token sequences
-      in `name_key(raw_text)`, within the known state if there is one.
+2. **District.**
+   1. **District column.** If the record has a value in the declared district
+      column, match it as above:
+      - within the known state, if there is one. A district in another state is
+        never matched.
+      - across India, only if the state is unknown
+      - Exactly one district: use it.
+      - No match: the district is unknown, counted as `district_column_unmatched`.
+      - Several matches: the district is unknown, counted as
+        `district_column_ambiguous`.
+      - In both of those cases there is **no fall-through to text**. The record is
+        kept, with the step 3 key for an unknown district.
+   2. **Text.** Only if the record has no district-column value: district names
+      from the reference list that appear as whole-token sequences in
+      `name_key(raw_text)`, within the known state if there is one.
+      - Tokens are `name_key(raw_text).split(" ")`.
+      - Exactly one district: use it. None, or two or more: no district from text.
+   - A district column that matches is used even when the text names another
+     district. Such disagreements are counted per source and never change the key.
 3. **Group key.** `lgd:district:{code}` if a district was found. Otherwise
    `unresolved:lgd:state:{code}`, or `unresolved:unknown`. The source is **not** part
    of the key. In revision 1 it was, which let the same place, published by two
    sources, end up in different groups.
-4. **Duplicate merge.**
-   - Records whose `name_key(raw_text)` values are equal, across all sources, are
-     merged into one group (union-find).
-   - The merged group's key is the lexicographically smallest member key.
+4. **Duplicate classes.**
+   - Records whose `name_key(raw_text)` values are identical, across all sources,
+     form one **duplicate class**. Only identical values join a class. Districts
+     or step-3 groups are never merged, and nothing is grouped transitively.
+   - The class key is the lexicographically smallest step-3 key of its members.
+     Every member gets the class key as its `group_key`.
 5. **Assignment.**
-   - Sources designated as held out, and any merged group containing their
-     records, go to `test_source_holdout`. The designation is per publisher
-     and is listed in the versioned split configuration (ADR-0007 §6).
-   - Every other group goes to `train`, `dev` or `test` by SHA-256 of
-     `group_key + "\n" + split_salt`, mapped to ratios.
-   - The ratios are deferred (section 21.2, P6).
+   - **Held out.** A duplicate class with any record from a held-out publisher goes
+     wholly to `test_source_holdout`.
+     - The designation is per publisher, listed in the versioned split
+       configuration (ADR-0007 §6).
+   - **Bucket mapping.** Every other class goes to `train`, `dev` or `test`:
+     1. Message: `group_key + "\n" + split_salt`, encoded UTF-8, with no BOM and
+        no trailing newline. `split_salt` is its 64-character lowercase hex
+        string.
+     2. `h` = the first 8 bytes of SHA-256(message), read as an unsigned
+        big-endian integer, 0 ≤ h < 2⁶⁴.
+     3. Ratios are positive integer weights `w_train`, `w_dev`, `w_test`, with W =
+        their sum. A zero weight is a configuration error.
+     4. `b = (h × W) >> 64`, in exact integer arithmetic.
+     5. Half-open intervals, in the fixed order train, dev, test:
+        - `train` if b < w_train
+        - `dev` if b < w_train + w_dev
+        - otherwise `test`
+   - The weight values are deferred (section 21.2, P6).
+   - **Synthetic test vectors.** These are not benchmark data. An implementation
+     must reproduce them.
+     - Salt: the SHA-256 hex of the ASCII bytes `pata synthetic test-vector salt`
+       = `c2486d9637f8cc990bec2ea16a39999692387fdddd099c55df427bc6c8745b2a`.
+     - Weights: 8/1/1.
+
+     | `group_key` | h (hex) | split |
+     |---|---|---|
+     | `synthetic:a` | `63b6c9c4c2b75d54` | train |
+     | `synthetic:b` | `f5f0f6a861bb0d63` | test |
+     | `synthetic:c` | `53526df4c6a3e805` | train |
+     | `synthetic:d` | `8c1fd55acbb2aebd` | train |
+
+     Boundaries (weights 8/1/1):
+     - h = `cccccccccccccccc` → train
+     - h = `cccccccccccccccd` → dev
+     - h = `e666666666666666` → dev
+     - h = `e666666666666667` → test
+   - **Salt.**
+     - 32 bytes from the operating system's cryptographic random generator,
+       generated once, before the first split computation.
+     - Committed to the versioned split configuration before that run, and
+       published with the release.
+     - Immutable for its `split_version`, and never regenerated after any split
+       result has been seen.
+     - A new salt means a new `split_version`, recorded with its reason.
 
 **Split names:**
 - `test` holds out **whole groups**. It is **not** an i.i.d. sample. Revision 1's
@@ -808,11 +1173,13 @@ annotators.
   The audit is reported. It never moves records after the split is frozen.
 - Unresolved groups can be large. How many records end up unresolved is counted
   at ingestion, before the split is first computed (P6).
-- Adding sources or records in a later release can merge groups (step 4) and so
-  change the `group_key`, and the split, of records already assigned. How
-  assignments carry over between releases is open (section 21.3, L5).
-- Before the freeze, the split may be recomputed **only** to fix a bug in the
-  procedure, as a new `split_version`, and never using gold.
+- Adding sources or records in a later release can add members to a duplicate
+  class (step 4) and so change the `group_key`, and the split, of records already
+  assigned. How assignments carry over between releases is open (section 21.3,
+  L5).
+- A recompute is allowed **only** to fix a bug in the procedure.
+  - It is a new `split_version`, and it never uses gold.
+  - It never moves an exposed record into `test` or `test_source_holdout`.
 
 The table below fixes **what** the split file must record. Its exact field
 names, structure, types and serialization are defined in `docs/schema.md`
@@ -822,7 +1189,7 @@ names, structure, types and serialization are defined in `docs/schema.md`
 |---|---|---|---|
 | `record_id` | yes | as in section 2 | Joins the split to the record. |
 | `split` | yes | `train`, `dev`, `test`, `test_source_holdout` | Evaluation partition. |
-| `group_key` | yes | as in step 3, after merging | Leakage audit: no key appears in two splits. |
+| `group_key` | yes | the duplicate-class key (step 4) | Leakage audit: no key appears in two splits. |
 | `split_version` | yes | version string | Reproducibility, and protection against silent re-splitting. |
 
 ### 18. Release manifest and withdrawal after publication
@@ -838,31 +1205,53 @@ does not redefine the format.
 
 | Field | Purpose |
 |---|---|
-| `benchmark_version` | Identity of the release (semantic versioning). |
+| `benchmark_version` | Identity of the release (semantic versioning, rules below). |
 | `release_date` | When it was published. |
 | `schema_version`, `guidelines_version` | The rules the labels follow. |
 | `gazetteer_version` and the SHA-256 of `admin_unit.csv` and `village_pincode.csv` | The exact reference data. |
-| `sources`: `source_id` and snapshot SHA-256 for each source | The exact input snapshots. |
-| `screen_version` | The privacy rules applied. |
+| `sources`: `source_id`, snapshot SHA-256 and the SHA-256 of the source manifest's content for each source | The exact input snapshots. The manifest hash covers everything a manifest adds that changes records or splits: `coverage_state`, `context_columns`, column roles, value aliases, missing-value tokens, the `raw_text` field and scope, `record_id_scope`. |
+| `screen_version` | The privacy rules applied, including the state of the private denylist (section 12). Neither the denylist nor its hash is published. |
 | `reference_list_version`, `cue_table_version`, `normalization_table_version` | Tables that annotation and generation depend on. |
+| `ingestion_procedure_version`, `normalization_procedure_version` | Decoding (section 2) and the Layer B procedure (section 6). |
 | `candidate_procedure_version`, `resolution_procedure_version`, `split_key_procedure_version` | Procedures that generate or derive gold and splits. |
-| `split_version`, `split_salt` | The salt is published with the release, so splits can be regenerated. |
+| `focus_state_version` | The focus-state list (ADR-0007 §2). |
+| `split_version`, `split_salt`, ratio weights | The salt and weights are published with the release, so splits can be regenerated. |
+| Code provenance: Pata git commit, Python version, `unicodedata.unidata_version`, and the SHA-256 of the pinned `Scripts.txt` (section 2) | `name_key`, decoding and `scripts` depend on them. |
+| Release report: path and SHA-256, listed in `files` | Published aggregate counts: exclusions per reason (sections 2, 12 and 17), duplicate-class cascades, exposure, `anchor_invalidated` roles, and mechanically fixed statuses (section 14). |
 | Held-out publisher list | Which publishers form `test_source_holdout`, as fixed in the versioned split configuration (ADR-0007 §6). Its field name and format are defined in `docs/schema.md` (ADR-0007 E3), not here. The release ADR records the list for that release. |
 | `files`: path and SHA-256 for each file | Integrity of every file in the release. |
-| `errata` | References to errata entries that affect this release. |
+| `errata` | References to the errata entries this release incorporates. Entries found later are recorded in the errata log, not in this manifest. |
 | `licence`, `attribution` | Deferred to the release ADR (section 21.3, L1). |
 
 Not released: `annotator_id` mappings, `internal_note`, `created_at` and other
-timing data.
+timing data, the denylist and the exposure log.
+
+**`benchmark_version` rules:**
+- **MAJOR:** any change that makes scores not directly comparable. That means
+  changes to records (additions or withdrawals), to splits (`split_version`), to
+  `gazetteer_version`, or to gold semantics (labels, statuses, procedures that
+  change gold).
+- **MINOR:** additive release content that changes no record, split or gold.
+- **PATCH:** documentation or packaging fixes, only when every gold and split file
+  keeps its SHA-256.
+
+**Errata log.** Errata live in an append-only log outside releases (for example
+`docs/errata.md`).
+- An entry records the date, the affected release versions, a reason category
+  and the number of records removed.
+- It never contains raw text, `record_id`s or hashes.
+- Releases stay immutable. A release manifest lists only the entries it
+  incorporates.
 
 **Withdrawal after publication.** A copy that has been published cannot be
 recalled. When personal data, or any other reason for withdrawal, is found in a
 release:
 
 1. A new release is made without the affected records.
-2. An **errata entry** is published. It contains the date, the affected release
-   versions, a reason category and the number of records removed. It never
-   contains the record's text, `record_id` or hashes.
+2. An **errata entry** is appended to the errata log. It contains the date, the
+   affected release versions, a reason category and the number of records
+   removed. It never contains the record's text, `record_id` or hashes. The
+   record and its duplicate class are added to the denylist (section 12).
 3. Pata stops distributing the affected releases wherever it controls
    distribution.
 4. Scores on different releases are marked as not directly comparable.
@@ -884,8 +1273,12 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
   where the gazetteer has no units below the deepest linked ancestor (section 8).
 - Results: always reported by `settlement_signal`. A headline linking number must
   state which share of roles was linkable.
-- Census towns that LGD lists as villages (`(Ct)`) are linked as villages when the
-  text marks them with a village designator.
+- Village names with suffixes such as `(Ct)`, `(Og)` or `(Part)` are matched and
+  linked only as the village-level verification record establishes (ADR-0007 §8).
+  - Their meaning and their matching behaviour, including whether the name stage
+    strips the suffix, are not assumed.
+  - Revision 5 linked `(Ct)` units as villages whenever the text had a village
+    designator.
 
 ### 20. Extending the schema beyond v0
 
@@ -895,6 +1288,11 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
   - Major: splitting, merging or redefining a label, or changing offsets. Existing
     gold is migrated, not edited.
   - A label's meaning is never reused.
+  - `schema_version` versions the format. The release identity, `benchmark_version`
+    (section 18), is versioned separately.
+    - A schema change that changes any gold makes the next release MAJOR, even
+      when it is only a minor schema version.
+    - A new status is one example.
 - **New gazetteer content uses new ID namespaces:** `lgd:localbody:` (local-body
   codes overlap village codes), `dop:po:`, `pin:`.
 - **Reasons mark what to re-link when coverage grows:**
@@ -912,19 +1310,21 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
 
 | # | Was | Proposal | Why it must be frozen before any annotation |
 |---|---|---|---|
-| F1 | U7 | Exclude whole records, never redact. Names honouring public figures are allowed. Businesses named after private persons are excluded. When in doubt, exclude. | Decides what may enter `data/processed/` at all. |
+| F1 | U7 | Exclude whole records, never redact. Names honouring public figures are allowed. Businesses named after private persons are excluded. When in doubt, exclude. A withdrawal or human-screen failure excludes the record's whole duplicate class; a failure caused only by `source_context` stays per record (section 12). (Revision 6 adds the class cascade.) | Decides what may enter `data/processed/` at all. |
 | F2 | U8 | No personal or world knowledge in any layer. Only the inputs in the section 3 visibility table: the reference name list and cue table and, in pass C, gazetteer lookups the annotator starts themselves (not prefilled, ranked or preselected). Independent passes never include generated candidates (F13). | Defines what the gold measures and how the visibility rules match the system inputs. |
-| F3 | U9 | PIN semantics as in section 9: `pincode_role`, exclusion of `not_independent`, D strata, and `inferred_from_pincode` only above village level. | The PIN circularity would otherwise corrupt both linking gold and the consistency statistic. |
+| F3 | U9 | PIN semantics as in section 9: the valid-PIN rule, `pincode_role` (including "PIN stage did not run" under `not_applicable`), exclusion of `not_independent`, the ordered `not_checkable` causes, D strata, and `inferred_from_pincode` only above village level. A PIN never sets verification scope. (Revision 6 adds the valid-PIN rule, the `pincode_role` cases and the `not_checkable` causes.) | The PIN circularity would otherwise corrupt both linking gold and the consistency statistic. |
 | F4 | U10 | A city named like its district does not imply that district. | Upward-only inference; changes district-level gold. |
-| F5 | U13 (principle) | The split is computed at ingestion from the split key procedure in section 17, never from gold, and frozen before experiments. | Double annotation and pilot sampling depend on the split. |
+| F5 | U13 (principle) | The split is computed at ingestion from the split key procedure in section 17, never from gold, and frozen in staging before the first human exposure of any record. Exposure is logged, assignments are fixed per record, and exposed records never move into test. (Revision 5: "frozen before experiments".) | Double annotation and pilot sampling depend on the split. |
 | F6 | U14 | No synthetic records in v0. `source_type` is kept and is always `real`. | Scope, and ADR-0001 §3 reporting. |
 | F7 | U15 | Flat spans, with spans carrying two stated roles via `also_labels`. | Representation. Changing it later is a major version. |
 | F8 | U16 | `record_id` scopes as in section 2. | Identity. Revision 1's stability claim was false for row references. |
-| F9 | new | Layer D is derived, with its own seven-status vocabulary and `basis` values. `deferred_coverage` fires only through an unverified designator's cue-table `pending_level` (the single LGD level whose mapping is pending verification), never because of a `city` or other role with no LGD level. `pending_level` drives no annotation, candidate generation, ranking or linking. Layer B is generated, with human decisions only for flagged matches. | Gold that can be reproduced; no subjective D labels. |
-| F10 | U18 | No `block` label in v0. Block and sub-division designators count as unverified, and those spans are unlinked (`level_mapping_unverified`). | Avoids assuming LGD semantics that haven't been verified. |
+| F9 | new | Layer D is derived, with its own seven-status vocabulary and `basis` values, applied in a fixed `basis` precedence. `deferred_coverage` fires only through the cue-table `pending_level` of a designator that is unverified, or that a gate rejected (the single LGD level whose mapping is pending verification), never because of a `city` or other role with no LGD level. `pending_level` drives no annotation, candidate generation, ranking or linking. Gated or invalidated candidate lists never feed D. Layer B is generated, with human decisions only for flagged matches. (Revision 6 adds the `basis` precedence, gate-rejected designators and the rule on candidate lists.) | Gold that can be reproduced; no subjective D labels. |
+| F10 | U18 | No `block` label in v0. Block and sub-division designators count as unverified, and those spans are labelled `place_unspecified` and unlinked (`level_mapping_unverified`). Their `pending_level` is named only on a cited source (section 3). | Avoids assuming LGD semantics that haven't been verified. |
 | F11 | U17 (replaced) | `settlement_signal` is derived and used only for stratification. | Removes a subjective field that drove gold. |
-| F12 | new | `source_context` allowlist and screening. Only structured comment codes are released. | Privacy. |
+| F12 | new | `source_context` allowlist and screening. Screening is staged: a rules-only screen, then the split frozen in staging, then a role-restricted human screen, then `data/processed/`. Only structured comment codes are released. (Revision 6 adds the staging.) | Privacy (ADR-0001 §2) and no pre-split exposure (ADR-0007 §5). |
 | F13 | new | No pre-annotation (section 13): until independent labels are frozen, no generated candidate recommendations or lists, ranked candidates, suggested entities, model labels or prior annotations of the same layer are presented. Complete generated candidate lists become available only after the independent C labels are stored and frozen, and are then shown in C reconciliation and the adjudication that follows it, so that the derivation of `final_set` can be audited. Annotators are blinded to each other. The adjudicator is blinded to annotator identities. | Protects the gold against confirmation bias. |
+| F14 | new (revision 6) | Layer A records roles as written. A designator's LGD level mapping is verified only under ADR-0007 §8, national or per state. It gates only Layer C and Layer D: through the generation gate (any candidate outside the verified scope makes the role `level_mapping_unverified`, lists kept for audit, `final_set` empty) and the reconciliation gate (human additions can't bypass it). An unverified designator never falls back to the no-designator route. Anchor invalidation (`anchor_invalidated`) follows the section 7 precedence. | Gold links never rest on unverified LGD semantics, and the gate is reproducible from system inputs. |
+| F15 | new (revision 6) | A private, unreleased denylist of withdrawals and human-screen exclusions is applied as a versioned screen rule. The exposure log is kept in the same private store. Errata go in an append-only log outside releases. | A rebuild from the same snapshots can't silently re-admit an excluded record; releases stay immutable. |
 
 #### 21.2 Deferred until data exists (not to be decided without it)
 
@@ -948,9 +1348,9 @@ annotations.
 |---|---|---|---|
 | L1 | U3 | Licence of the annotations; shipping `raw_text` or stand-off | A release ADR, before the first publication |
 | L2 | new | Task and metric definitions; whether an "open" track exists | A task-definition document |
-| L3 | U18 (rest) | LGD sub-district semantics per selected state; whether to enable `block`; verifying cue-table entries | Evidence standard: ADR-0007 §8 (S9). Per-state outcomes and enabling `block`: a new ADR or the relevant source ADR (ADR-0007 E1). Revision 4 said "together with the focus-state ADR". |
+| L3 | U18 (rest) | LGD semantics of the state, district, sub-district and village levels, national or per state; whether to enable `block`; verifying cue-table entries | Evidence standard: ADR-0007 §8 (S9). Outcomes and enabling `block`: a new ADR or the relevant source ADR (ADR-0007 E1). Must be completed, or frozen as unverified, before the guidelines freeze (section 14). Revision 4 said "together with the focus-state ADR"; revision 5 covered the sub-district level only. |
 | L4 | U4 | Annotator recruitment, consent, compensation. Consent is required either way. | An annotation-protocol document |
-| L5 | new | How split assignments carry over between releases when new sources or records change duplicate merges (section 17, step 4). Unresolved; no policy is chosen here. Must be decided before any second release, or any change to the source set after a split is first computed. | An ADR amending section 17 (or a revision of this ADR while it is Proposed) |
+| L5 | new | How split assignments carry over between releases when new sources or records change duplicate classes (section 17, step 4). Unresolved; no policy is chosen here. Must be decided before any second release, or any change to the source set after a split is first computed. | An ADR amending section 17 (or a revision of this ADR while it is Proposed) |
 | L6 | G2/B5 (revision 5) | Whether text not published as one address string (a concatenation of published components, or text extracted from a PDF or other document) can ever be `raw_text`, and by which versioned procedure. Until decided, it cannot (section 2). | A new ADR, or a revision of this ADR while it is Proposed |
 
 #### 21.4 Removed from ADR-0006
@@ -980,15 +1380,34 @@ U17 (`settlement_context`) is not removed: it is replaced by F11.
   corpus. That is accepted in exchange for gold that doesn't rest on assumptions.
 - Generated candidates and derived D need versioned procedures before annotation
   starts. They are part of the follow-up work.
-- Follow-up work after acceptance, in this order:
-  1. the focus-state and source ADRs (with L3)
-  2. `docs/schema.md`
-  3. the reference list, cue table and normalization table procedures
-  4. the candidate and resolution procedures
-  5. the split key procedure, with P6 answered from ingestion-time statistics
-     before the split is first computed
-  6. the guidelines
-  7. the validator
-  8. the pilot (P1 to P5, P7)
+- **Implementation order.** This is the single order shared with ADR-0007. It
+  replaces both ADRs' revision 5 and revision 3 lists, which contradicted each
+  other.
+  1. Complete and review the coordinated ADR revisions and acceptance (this ADR
+     with ADR-0007).
+  2. Start LGD verification (ADR-0007 §8, E1) in parallel where possible. Finish
+     it, or explicitly freeze unresolved levels as unverified, before the
+     guidelines are finalized.
+  3. Complete the source inventory, eligibility, documentation and licence
+     assessments before accepting any source.
+  4. Define `docs/schema.md` before implementing procedures that depend on its
+     formats. Source manifests use its manifest format.
+  5. Complete source ADRs and provenance manifests before ingesting their data.
+  6. Implement ingestion (section 2), split-key step 1 and the required
+     ingestion-time statistics. ADR-0008 is accepted before selection records are
+     computed.
+  7. Finalize the focus-state ADR and the split configuration: the salt, the
+     held-out publishers, the ratio weights (P6).
+  8. Run the rules-only privacy screen, then compute and freeze the split in
+     staging (sections 12 and 17).
+  9. Conduct the role-restricted human screen, applying the denylist and
+     duplicate-class rules (section 12).
+  10. Build the reference list, normalization table and cue table under the dev-pool
+      restrictions (sections 3 and 6).
+  11. Implement the candidate and resolution procedures, then finalize and freeze
+      the guidelines (section 14).
+  12. Implement and run the validator.
+  13. Conduct the dev-pool pilot (P1 to P5, P7) and resolve its decisions. Only
+      then proceed to gold annotation.
 
   None of this produces results until real admitted records exist.

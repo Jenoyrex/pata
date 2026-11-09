@@ -160,6 +160,41 @@ Each needs maintainer input.
 - Evidence gaps preserved: no source accepted; B6, B14–B17; the C1a field
   documentation; reason categories; L1; the `Scripts.txt` manifest; P1–P7.
 
+## T11 draft (2026-10-28, branch `adr-0006-rev6`)
+
+- ADR-0007 rev 4 and ADR-0006 rev 6 were drafted from the edit map. Both stay
+  Proposed.
+- Decision rows changed in the actual diff:
+  - ADR-0006: F1, F3, F5, F9, F10, F12, new F14 and F15, and L3
+  - ADR-0007: S6, S9, E1, E3
+- Checks: `git diff --check` exit 0; ruff check passed; ruff format: 23 files
+  already formatted; pytest 26 passed (84.8 s).
+- Derived edits beyond the map:
+  - `admission.screened_by` records both screen stages
+  - the T5 test vectors are copied into §17
+  - §20 clarifies that `schema_version` and `benchmark_version` are separate
+- **Review completed** (2026-10-28, second checkpoint on the branch). Both diffs
+  were read in full against the edit map and the rulings. Fixes:
+  - ADR-0007 §3 still said "allowlisted state column" and "before any merge".
+    Now: the declared column, matched after tokens and aliases, before duplicate
+    classes are formed.
+  - ADR-0006 §7 step 2: the level of a role without a designator was undefined.
+    Now: its label's level.
+  - ADR-0006 §7 step 8: an empty result could override `no_match_in_snapshot`.
+    It is now kept.
+  - ADR-0006 §8: a paragraph that had run into the next one was split.
+  - ADR-0006 L5: outdated "duplicate merges" wording.
+  - ADR-0006 §19: the history note on revision 5 is now factual.
+- Cross-reference check:
+  - Every cited section exists: ADR-0006 §2, §3, §7, §10, §12, §14, §17, §18;
+    ADR-0007 §2, §5, §6, §8.
+  - The only remaining "merged group" text is in the revision notes.
+  - ADR-0006, ADR-0007 and ADR-0008 are all Proposed. ADR-0008 is unchanged.
+- **Re-approval list**, from the diff:
+  - ADR-0006: F1, F3, F5, F9, F10, F12, new F14, new F15. Deferred rows reworded:
+    L3, L5.
+  - ADR-0007: S6, S9. Deferred rows reworded: E1, E3.
+
 ## Next action
 
 **T11: draft ADR-0007 rev 4 and ADR-0006 rev 6** from the graph's "T11 edit map".
