@@ -2308,6 +2308,9 @@ re-checked. Where it differs from an earlier pass, this pass is current.
 | R128 | https://chikkaballapur.nic.in/en/website-policies/, retrieved 2026-11-09 | [PUBD] | `1737cf3754b42cee14baba8392c76f8b0f4aa8124fa46947bfe32a0acc8288f8` | C5: as R127, same Copyright Policy wording |
 | R129 | https://kvs.gov.in/वेबसाइट-नीतियां/ (percent-encoded), retrieved 2026-11-09 | [PUBD] | `ae8e05fb3fd2c576cc5fcbe14234ca283b97c110a4ab8e7cb4075f0bc238d60c` | C6: Hindi Copyright Policy, read in full; two blocks on the page, same in substance. R42's `kvsangathan.nic.in` path timed out connecting over HTTP; over HTTPS it redirected to the `kvs.gov.in` home page, which links this page |
 | R130 | https://saras.cbse.gov.in/SARAS/AffiliatedList/ListOfSchdirReport; https://www.cbse.gov.in/ and its link `/cbsenew/cbse.html`; retrieved 2026-11-09 | [PUBD] | SARAS `086c2d1e57bd880de1d21716d30c0acc637bb3b4f0810c9705990de0d0eed6fc`; home `28cab80272d1b5bfc3efb642e8e78deef51efadefa36abc2ffad13bf599b340c`; `cbse.html` `e026ea856293f1a4718dc9cbbb95c13df405bb32d386befc2c246786be49f124` | C12: served HTML searched for licence, copyright, permission and policy terms and links; none found (only a `legal_cir.html` link, not opened). Scripts not read. `saras.cbse.gov.in/robots.txt` returned an HTML 404 page |
+| R131 | https://www.nhsrcindia.org/sites/default/files/2021-04/Part-II%20Data%20Element%20Quick%20Ref%20Health%20MDDS_0.pdf, retrieved 2026-11-09 | [PUBD] | `1786e90f9d5a05009a1209ae2cd37caadc52550eeb1120eaab7c3b75a1740bfa` | Health MDDS Part II, 148 pages; "Facility Address" element on page 51. Scripted text extraction; not committed |
+| R132 | https://nin.mohfw.gov.in/files/user_manual_state_user.pdf, retrieved 2026-11-09 | [PUBD] | `fbd8764fe468d3868d304891717afea3432b60c82e31e49cd9b1f85cb715dd17` | NIN-2-HFI state-user manual, 5 pages; address named on page 1, not defined |
+| R133 | https://nin.mohfw.gov.in/about_nin2hfi.php, retrieved 2026-11-09 | [PUBD] | `3ef4b223a086bc3cf3f050d177f917bf26b2ef255b7d947141bc37e3130a6f2b` | About page; no mention of address. `nin.mohfw.gov.in/robots.txt` returned 404; `www.nhsrcindia.org/robots.txt` has no rule against `/sites/` |
 | R119 | Connection attempts, 2026-11-04 | [PUBD] | none | `info.nhp.gov.in` and `nhp.gov.in` timed out; `www.nhp.gov.in` did not resolve; `api.data.gov.in` **now answers** HTTP 404 at its root (it refused connections on 2026-10-06). Its data endpoints were not tried |
 
 ### Candidate register (E-INV)
@@ -2387,9 +2390,11 @@ column name is not evidence.
 | C3 | `DiagnosticCentreAddress` | None found. It sits in a hospital resource under a diagnostic-centre name | Note: "NA: Not Available." | UNVERIFIED |
 | C4 | None: components only | None found | — | No field to back; G2 |
 | C5, C6 | UNKNOWN: no schema | None found | — | UNVERIFIED |
+| C7 | `Registered_Office_Address` | None found | — | UNVERIFIED; out of v0 scope (B18) |
 | C8a–C8h | UNKNOWN: no field list | None found | — | UNVERIFIED |
 | C9a | `address` | None found | — | UNVERIFIED |
 | C9b | `Address` (nine of ten lists) | None found | — | UNVERIFIED |
+| C9c | UNKNOWN: no field list (R81); what the file holds is [U] | None found | — | UNVERIFIED |
 | C10 | `_address` | None found | — | UNVERIFIED |
 | C11 | `address1` | None found | — | UNVERIFIED |
 | C12 | "Address Details" | None found | — | UNVERIFIED |
@@ -2409,6 +2414,19 @@ on this evidence:
 field backed by publisher documentation, not column names" fails for every row above, so E-FIELD
 stays open. Whether to ask the publishers, or to rule on what suffices, is for the maintainer. The
 criterion is not reworded here.
+
+**Further search, 2026-11-09 (R131–R133).** Web searches for a data dictionary for C1 and for the
+field name `Address_Original_First_Line` found neither. Two publisher-side documents were read:
+
+- **Health MDDS Part II (draft, November 2013, MoHFW; R131).** Element 05.008.0004, "Facility Address",
+  is described only as "Address of Facility", and refers to "Address of a Premises (G02.03)", which
+  this pass did not read. The document does not mention data.gov.in or any candidate file. Nothing
+  read says C1–C3 follow it, so it defines no candidate column. Whether they conform is UNKNOWN.
+- **NIN-2-HFI state-user manual and About page (R132, R133).** The manual names address among facility
+  details and gives no definition. The About page does not mention address. C1b's name refers to NIN;
+  whether its `Address` column comes from this system is UNKNOWN.
+
+The finding above is unchanged.
 
 ### Licence and redistribution (E-LIC, B14–B17)
 

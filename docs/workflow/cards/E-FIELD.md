@@ -31,10 +31,24 @@ resource `note`. Each `desc` repeats the title; each `note` covers missing value
 update timing.
 
 ## Verifier verdict
-Pending.
+2026-11-09: **Overall FAIL**, on criterion 1 only. The verifier's table, verbatim:
+
+| # | Criterion (verbatim) | Verdict | Evidence (path:line / test id / command) |
+|---|---|---|---|
+| 1 | Each candidate raw-text field backed by publisher documentation, not column names | FAIL | E:\PATA\docs\research\source-inventory.md:2380 states that no publisher documentation defining any candidate field was found. In the table at :2387-2400, every row says "None found". :2413-2416 says the criterion "cannot be met on available evidence". I re-fetched R32 on 2026-11-09: `Address_Original_First_Line` has only `id`, `name` and `type: keyword`, and each `desc` shown repeats a title. R131 (MDDS p.51, "Address of Facility") and R132 (manual p.1) define no candidate column, as :2421-2427 says. |
+| 2 | C1a outcome stated: qualifies / does not qualify / undetermined, with evidence | PASS | Stated as undetermined at source-inventory.md:2387 and :2402-2411, and at E:\PATA\docs\research\focus-state-source-evaluation.md:370-371. The evidence is R111-R114 plus the live re-fetch: the R29 note reads "NA/Blank: Not Available; data will be updated on regular interval", and the R32 field descriptor matches. The row does not infer meaning from the column name (:2405-2406). |
+
+Checks: ruff ✓ · format ✓ · pytest 138 passed/0 failed (4 skipped: ADRs already accepted, tests/workflow/test_hooks.py:305) · graph ✓ · diff-check ✓
+
+Overall: FAIL
+
+It found no sign of fabrication. It did not re-check R111–R114 hashes (live content compared instead),
+R133, the C2 and C3 notes, or rows C5–C7 and C9–C12 beyond their "None found" entries.
+
+Further search, 2026-11-09: rows C7 and C9c added; R131–R133 read. No candidate field gained a
+publisher definition.
 
 ## Outcome
-- Graph status set to: todo. Evidence is drafted but the node cannot start until E-INV is done, and
-  drafting early broke one-node-at-a-time (recorded in `PROGRESS.md`). Once started, criterion 1 will
-  keep it blocked.
-- Commit(s): none (maintainer safeguard)
+- Started 2026-11-09, after E-INV closed. Graph status set to: blocked. Criterion 1 is not reworded;
+  it needs the maintainer's G-SRC decision 3.
+- Commit(s): none
