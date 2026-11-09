@@ -7,6 +7,12 @@ Read the diff itself. Line numbers (`l.`) refer to `adr-0006-rev6` unless a row 
 quotes the changed wording only, so it departs from the template's full old-and-new columns. See both
 versions with `git diff main..adr-0006-rev6 -- docs/decisions/`.
 
+**State on 2026-11-09.** You merged PR 1 (`adr-0006-rev6`) into `main` on GitHub (`origin/main` is
+`0c72e75`). ADR-0006, 0007 and 0008 still read Proposed there, so the merge is not acceptance. It did
+come before the graph's acceptance rows, whose last row is the merge. The rev 7 / rev 5 patch passes
+`git apply --cached --check` against `origin/main` in a temporary index. Line references below are still
+to the branch.
+
 ## 1. What you are being asked to decide
 
 Whether to accept ADR-0006 revision 6 and ADR-0007 revision 4 together, by explicit dated

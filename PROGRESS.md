@@ -169,7 +169,7 @@ Each needs maintainer input.
 
 ## Next action
 
-**E-INV and E-LIC are done (2026-11-09 for E-LIC); E-FIELD is ready.** E-FIELD's first criterion needs
+**E-INV and E-LIC are done; E-FIELD is blocked, and no agent task is ready.** E-FIELD's first criterion needs
 publisher documentation that was not found for any candidate, so it depends on G-SRC decision 3.
 The other maintainer decisions are listed above.
 
@@ -323,6 +323,25 @@ The other maintainer decisions are listed above.
 - **Branch / commit:** `workflow-kit`, this update uncommitted. Not pushed.
 - **Needs maintainer:** update local `main`; the open reviews listed above.
 
+### 2026-11-09 — W0, E-B6, E-FIELD — sprint on eligible nodes
+
+- **Did:** W0: added the eligibility, D4.5 and manifest-scope acceptance rows the verifier asked for;
+  fixed the `graph.py` cp1252 crash, the `--check-outputs` skip on `(`, and CRLF from `progress --write`.
+  E-B6: added the missing leak and per-process tests, non-CSV detection and `--expected-column`.
+  E-FIELD: added rows C7 and C9c and read R131–R133; no field gained a publisher definition.
+  No Phase 2–7 node was started: each waits, directly or indirectly, on a maintainer gate.
+- **Proof:** W0 verifier Overall PASS (after one FAIL on criterion 4). E-B6 verifier Overall PASS.
+  E-FIELD verifier Overall FAIL on criterion 1, PASS on criterion 2. Final gates: `uv lock --check`
+  exit 0; `uv sync --locked` exit 0; ruff passed; format 54 files; `uv run pytest -q` 142 passed,
+  4 skipped; `graph.py validate --check-outputs` OK; `git diff --check` exit 0.
+- **Status:** W0 stays `review`. E-B6 stays `done`. E-FIELD is `blocked`. Graph: 4 of 29 done, unchanged.
+- **Real-file validation of E-B6:** not done; no candidate file is held. Synthetic fixtures only.
+- **Branch / commit:** `workflow-kit`, committed by node group on the maintainer's instruction, after
+  W0 and E-B6 verifier reruns (both Overall PASS, tables in their cards).
+- **Needs maintainer:** G-ADR67; W0 approval; E-LGD option; G-SRC decision 3; H-SCREENER.
+- **New nodes added:** none.
+- **Open risks:** D-SPLITCFG can close without the focus-state ADR named in its title (no acceptance row).
+
 ## Dependency graph status
 
 <!-- graph:progress:begin -->
@@ -338,7 +357,7 @@ _Generated from `workflow/graph.toml` on 2026-11-09 — do not edit by hand._
 | P3-pipeline | **T12** T12 implementation task (scope per legacy dependency graph) | dropped | — | G-ADR67 |
 | P1-evidence | **E-LGD** LGD level verification: state / district / sub-district / village | review | maintainer | — |
 | P1-evidence | **E-INV** Candidate source inventory (exact files/snapshots, publishers) | done | — | — |
-| P1-evidence | **E-FIELD** Field semantics evidence (incl. C1a Address_Original_First_Line) | todo | — | — |
+| P1-evidence | **E-FIELD** Field semantics evidence (incl. C1a Address_Original_First_Line) | blocked | — | — |
 | P1-evidence | **E-LIC** Licence + redistribution evidence (B14–B17) | done | — | — |
 | P1-evidence | **E-B6** Scripted aggregate inspection of candidate source files (B6) | done | — | — |
 | P1-evidence | **G-SRC** Maintainer accept/reject decision per source | todo | maintainer | G-ADR67, E-FIELD |
@@ -363,6 +382,6 @@ _Generated from `workflow/graph.toml` on 2026-11-09 — do not edit by hand._
 | P7-release | **B-BASE** Baselines + evaluation scripts | todo | — | A-GOLD |
 | P7-release | **R-REL** Release v1: manifest, hashes, metrics, exclusions, limitations, versioning | todo | maintainer · irreversible | B-BASE |
 
-**Ready now:** E-FIELD, H-SCREENER
+**Ready now:** H-SCREENER
 **Awaiting maintainer:** W0, G-ADR67, E-LGD
 <!-- graph:progress:end -->
