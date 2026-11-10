@@ -1,6 +1,6 @@
 # ADR-0009: Version 1 is a gazetteer toolkit; PataBench moves to version 2
 
-- **Status:** Proposed. Not in force until the maintainer records a dated acceptance here.
+- **Status:** Accepted on 2026-11-10 by Jenoy REX.
 - **Date:** 2026-11-10
 - **Deciders:** Project maintainer
 - **Relates to:** ADR-0001 (context, §4, §5, §8), ADR-0002, ADR-0004 §2, ADR-0005, ADR-0006,
