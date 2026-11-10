@@ -1,4 +1,4 @@
-"""Pata: Indian address intelligence toolkit, validated against PataBench."""
+"""Pata: gazetteer toolkit for Indian address intelligence (scope: ADR-0009)."""
 
 from importlib.metadata import version
 

@@ -458,6 +458,16 @@ The other maintainer decisions are listed above.
 - **New nodes added:** none.
 - **Open risks:** the README tagline still says "benchmark and ML toolkit", to reconcile in R-V1.
 
+### 2026-11-10 — R-V1 — prepared, awaiting the maintainer
+
+- **Did:** On the maintainer's "go R-V1", set the package and lock to 1.0.0, wrote `CHANGELOG.md`, and made
+  the README and package description match ADR-0009.
+- **Proof:** `uv lock --check` exit 0; ruff passed; format passed; `uv run pytest -q` 160 passed, 5 skipped;
+  graph OK; `git diff --check` exit 0. R-V1 verifier: criteria 1 and 3 PASS; criterion 2 UNPROVEN (no commit
+  yet) and criterion 4 not done (maintainer's step). Table in `docs/workflow/cards/R-V1.md`.
+- **Status:** R-V1 `in_progress`. Graph: 8 of 36 live nodes done; version 1: 8 of 9.
+- **Needs maintainer:** push to `main` so CI runs; tag `v1.0.0`; publish the GitHub release; approve R-V1.
+
 ## Dependency graph status
 
 <!-- graph:progress:begin -->
@@ -504,8 +514,8 @@ _Generated from `workflow/graph.toml` on 2026-11-10 — do not edit by hand._
 | P7-release | **R-REL** Release PataBench (version 2 under ADR-0009): manifest, hashes, metrics, exclusions, limitations, versioning | todo | maintainer · irreversible | B-BASE |
 | P0-governance | **G-V1SCOPE** Maintainer decision on ADR-0009: version 1 is a gazetteer toolkit | done | maintainer | — |
 | P7-release | **I-V1KIT** Toolkit v1 readiness: user guide, re-pinning path, honest claims | done | — | — |
-| P7-release | **R-V1** Release Pata gazetteer toolkit 1.0.0 | todo | maintainer · irreversible | — |
+| P7-release | **R-V1** Release Pata gazetteer toolkit 1.0.0 | in_progress | maintainer · irreversible | — |
 
-**Ready now:** H-SCREENER, R-V1
+**Ready now:** H-SCREENER
 **Awaiting maintainer:** G-ADR67
 <!-- graph:progress:end -->

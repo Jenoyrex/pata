@@ -1,7 +1,7 @@
 [project]
 name = "pata"
-version = "0.1.0"
-description = "Pata: an open-source benchmark (PataBench) and ML toolkit for Indian address intelligence."
+version = "1.0.0"
+description = "Pata: an open-source gazetteer toolkit for Indian address intelligence. The PataBench benchmark is planned for version 2."
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]

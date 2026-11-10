@@ -1,8 +1,9 @@
 # Pata
 
-**An open-source benchmark and ML toolkit for Indian address intelligence.**
+**An open-source gazetteer toolkit for Indian address intelligence.** The PataBench benchmark
+and ML components are planned for version 2.
 
-Pata studies how noisy, multilingual, inconsistent Indian addresses can be
+The project's aim is to study how noisy, multilingual, inconsistent Indian addresses can be
 
 - **parsed** into structured components,
 - **normalized**,
@@ -14,11 +15,12 @@ The project has two parts:
 
 - **PataBench** is the credibility layer: dataset, annotation schema, data documentation,
   task definitions, metrics, baselines, reproducible experiments and error analysis.
-- **Pata** is the reusable toolkit. Each of its components is built and validated against PataBench.
+- **Pata** is the reusable toolkit. Any component that makes an address-intelligence claim is
+  validated against PataBench. Version 1 has none (ADR-0009).
 
 ## Status
 
-**Pre-alpha (version 0.1.0). There is no address dataset, model or benchmark result yet.**
+**Version 1.0.0 is a gazetteer toolkit. There is no address dataset, model or benchmark result yet.**
 Any number that appears in this repository will be produced by committed code and a
 recorded experiment.
 
@@ -32,7 +34,8 @@ recorded experiment.
 
 **Version 1 is a gazetteer toolkit**
 ([ADR-0009](docs/decisions/0009-version-1-gazetteer-toolkit.md); see the
-[user guide](docs/toolkit.md)). It has no address dataset, model, benchmark or metric.
+[user guide](docs/toolkit.md)). It has no address dataset, model, benchmark or metric, and it
+delivers a small part of the project's stated aim.
 PataBench moves to version 2, and until then the toolkit is checked by its tests and the
 build's quality checks. Version 1 uses pinned data snapshots; live data is left to later
 versions.
