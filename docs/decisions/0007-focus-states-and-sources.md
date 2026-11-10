@@ -1,15 +1,31 @@
 # ADR-0007: Focus states and address-corpus sources for PataBench v0
 
 - **Status:** Proposed. Not accepted until the decisions in section 10.1 are
-  approved by the maintainer. **Accepted only together with ADR-0006 revision 6**,
+  approved by the maintainer. **Accepted only together with ADR-0006 revision 7**,
   on which sections 3 to 8 depend.
   - Acceptance is an explicit, dated maintainer acceptance recorded in both ADRs'
     status lines.
-  - It comes after the maintainer has reviewed the complete revision diff and has
-    re-approved by name every decision item whose text changed.
+  - It comes after the maintainer has reviewed the complete revision diff, has
+    re-approved by name every decision item whose text changed, and the
+    cross-reference checks pass.
   - An approval in principle of earlier text is not approval of revised text.
+  - Items left open or deferred in sections 10.2 and 10.3 do not block acceptance.
 - **Date:** 2026-10-04
-- **Revision:** 4 (2026-10-28), alongside ADR-0006 revision 6, from the
+- **Revision:** 5 (2026-11-05, extended 2026-11-09 and 2026-11-10), alongside
+  ADR-0006 revision 7, from the G-ADR67 review and the maintainer's rulings of
+  2026-11-09 and 2026-11-10. No decision row changes:
+  - Context and section 6 follow ADR-0006 §17 step 5: every class sharing a
+    `group_key` with a held-out class goes to `test_source_holdout`. Section 6 names
+    all three key types of ADR-0006 §17 step 3.
+  - Section 5 points to the one limited field-evidence exception in ADR-0006 §2,
+    at the evidence limit, the `raw_text` requirement and the split-key column roles.
+  - The header, Context and sections 6 and 7 now match ADR-0006's held-out
+    publisher, recompute, L3 and Consequences text.
+  - The status line and section 10.2 say that open and deferred items do not
+    block acceptance, and the status line adds the cross-reference check.
+
+  Status unchanged.
+- **Revision 4** (2026-10-28), alongside ADR-0006 revision 6, from the
   maintainer's acceptance-readiness rulings of 2026-10-27 and 2026-10-28:
   - section 8 sets one evidence standard for the LGD semantics of all four
     levels, national or per state, with rules for conflicting evidence
@@ -39,8 +55,9 @@
 - **Deciders:** Project maintainer
 - **Relates to:** ADR-0001 §1, §2, §5, §6, §7 (sources, privacy, provenance,
   language and geographic scope), ADR-0002 and ADR-0004 (gazetteer sources),
-  ADR-0005 (`gazetteer_version`), ADR-0006 (annotation scope and schema; this is
-  the "focus-state and source ADR" its Consequences and L3 refer to)
+  ADR-0005 (`gazetteer_version`), ADR-0006 (annotation scope and schema; this ADR
+  holds the evidence standard its L3 refers to, and the procedure for the source
+  ADRs and the focus-state ADR in its Consequences)
 
 This ADR decides **how** focus states and address-corpus sources are chosen,
 recorded and used. It does **not** name any focus state or any address source.
@@ -68,8 +85,10 @@ changes no manifest.
   - no synthetic records in v0 (F6)
   - the split key computed at ingestion from allowlisted `source_context`, the
     source manifest, `raw_text` and the pinned gazetteer, with
-    `test_source_holdout` for "sources designated as held out" (§17, F5). Before
-    the freeze, the split may be recomputed **only** to fix a bug.
+    `test_source_holdout` for any duplicate class with a record from a held-out
+    publisher, and for every class sharing its `group_key` (§17, F5). The split may be recomputed **only** to fix a bug, and a
+    recompute never moves an exposed record into `test` or
+    `test_source_holdout`.
   - split ratios, unresolved-group share and holdout feasibility (P6), answered
     from ingestion-time statistics
   - LGD level semantics, enabling `block` and verifying cue-table entries (L3).
@@ -78,9 +97,9 @@ changes no manifest.
     district, sub-district and village levels.
   - how split assignments carry over between releases is open (L5)
 
-  ADR-0006 does not say who designates held-out sources, how a source is
-  accepted, or which states are in focus. Its Consequences list "the
-  focus-state and source ADRs (with L3)" as the first follow-up.
+  ADR-0006 does not say who designates held-out publishers, how a source is
+  accepted, or which states are in focus. Its Consequences order places source
+  assessments at step 3, source ADRs at step 5 and the focus-state ADR at step 7.
 - **The pinned gazetteer** (`gazetteer_version`
   `bf4a8b5d35130e7c3b94c6e4de812b3fd6deeb059497af22aac178642c2c2c78`) has 36
   state/UT units. Its known limits bear on state choice:
@@ -257,6 +276,10 @@ assessed in writing.
   - Such lists aren't readings of individual records.
   - Under ADR-0006 §17 they aren't human exposure.
 
+ADR-0006 §2 records the one limited exception to this list: a platform field list
+standing in for the publisher's documentation of one source's address, state and
+district columns.
+
 No person reads individual records or readable address text, and assessment
 documents never quote record text. The reason is that the maintainer also writes
 the guidelines and the cue table from dev-pool observation (ADR-0006 §3, §6).
@@ -284,7 +307,8 @@ ADR-0006 §12 is unchanged.
   - A column is declared the source's `state_column` or `district_column` only on
     publisher documentation naming the field's content, plus a scripted aggregate
     exact-match rate against LGD names. The rate is reported; no threshold is set.
-  - A column name alone is never enough.
+  - A column name alone is never enough. ADR-0006 §2 records the one limited
+    exception to the documentation requirement.
   - At most one column per role. A source has exactly one `state_column` or none.
     Other state-like columns are not used for split keys.
 - **Missing-value tokens.** Values that the publisher's documentation defines as
@@ -295,6 +319,8 @@ ADR-0006 §12 is unchanged.
     facility's address (`raw_text_scope: full_address`) or as an address line
     (`address_line`).
   - This is never judged from the values.
+  - ADR-0006 §2 records one limited exception, if the publishers do not answer by a
+    recorded deadline.
 
 A rejected source is recorded with its reason, so it is not reassessed without
 cause.
@@ -335,7 +361,7 @@ defined in `docs/schema.md`. This ADR changes no manifest.
 ### 6. Held-out publishers and grouped splits
 
 ADR-0006 §17 sends every duplicate class that contains a record from a held-out
-source to `test_source_holdout`. This ADR decides how that designation is made:
+publisher, and every class sharing its `group_key`, to `test_source_holdout`. This ADR decides how that designation is made:
 
 - **The unit is the publisher.** Every address source manifest with the same
   `publisher` gets the same designation. Holding out one manifest of a publisher
@@ -360,7 +386,10 @@ source to `test_source_holdout`. This ADR decides how that designation is made:
   across sources (ADR-0006 §17 step 4). A record of a held-out publisher therefore
   pulls the other records of its class into `test_source_holdout`, whoever
   published them.
-  - Only identical texts move. Districts are never merged.
+  - Classes sharing that class's `group_key` follow it (ADR-0006 §17 step 5), so one
+    held-out record can move every record under that key: a whole district, a
+    state's unresolved records, or the unknown-state records with no district match.
+    Steps 3 and 4 still merge no districts.
   - The number of such records is reported per release.
 
 Which publishers are held out is open (O5, its only owner). Whether
@@ -372,7 +401,7 @@ answer.
 - The focus-state list, the set of accepted address sources and the held-out
   publishers for a release are fixed **before its split is first computed**
   (ADR-0006 §17, F5).
-- ADR-0006 §17 allows a recompute before the freeze only to fix a bug. Changing
+- ADR-0006 §17 allows a recompute only to fix a bug. Changing
   any of these three is not a bug fix. It means a new ingestion, a new
   `split_version` and a new release, built under ADR-0006 §17.
 - How split assignments carry over from one release to the next is not decided
@@ -488,6 +517,8 @@ Revision 3 covered only the sub-district level.
 
 #### 10.2 Open
 
+These items are deferred by design and do not block acceptance of this ADR.
+
 O3, O4 and O5 are decided from ingestion-time aggregate statistics (section 4,
 step 3) before the split is first computed, and never from pilot annotations.
 
@@ -517,7 +548,7 @@ benchmark decision. It is recorded in the source ADR (section 5; E5).
 ## Consequences
 
 - Accepting this ADR selects no state and no source. It is accepted together with
-  ADR-0006 revision 6.
+  ADR-0006 revision 7.
 - The next steps follow the **single implementation order in ADR-0006's
   Consequences** (revision 6). Revision 3's separate list is withdrawn: it ran the
   first split before `docs/schema.md` and the split key procedure existed.

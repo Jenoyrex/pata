@@ -250,7 +250,10 @@ def test_check_outputs_ignores_prose_and_outside_git_outputs():
 @pytest.mark.parametrize(
     ("nid", "ruled_item"),
     [("G-SRC", "eligibility"), ("D-SRCADR", "raw_text_scope"), ("D-SRCADR", "record_id_scope")]
-    + [("X-FREEZE", "D4.5"), ("X-FREEZE", "steps 2-5")],
+    + [("X-FREEZE", "D4.5"), ("X-FREEZE", "steps 2-5"), ("X-FREEZE", "after step 5")]
+    + [("I-SPLITKEY", "newly place"), ("I-SPLITKEY-CODE", "newly place")]
+    + [("H-SCREEN", "source_record_ref"), ("H-SCREENER", "must not annotate")]
+    + [("G-ADR67", "S7,S8"), ("E-FIELD", "ADR-0006 section 2 exception")],
 )
 def test_ruled_obligations_have_an_acceptance_row(nid, ruled_item):
     g = graph.Graph.load(ROOT / "workflow" / "graph.toml")

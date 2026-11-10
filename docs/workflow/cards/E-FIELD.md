@@ -13,7 +13,7 @@
 ## Acceptance → proof map
 | # | Acceptance criterion (copied verbatim from graph) | How it will be proven | Result |
 |---|---|---|---|
-| 1 | Each candidate raw-text field backed by publisher documentation, not column names | `docs/research/source-inventory.md`, "Field semantics (E-FIELD)" | **Not met: no publisher definition found for any field** |
+| 1 | Each candidate proposed for acceptance has its raw-text field backed by publisher documentation, not column names, or falls under the ADR-0006 section 2 exception (maintainer ruling 2026-11-10) | `docs/research/source-inventory.md`, "Field semantics (E-FIELD)" | **Not met: no publisher definition found for any field.** The 2026-11-09 verifier judged the earlier wording |
 | 2 | C1a outcome stated: qualifies / does not qualify / undetermined, with evidence | same section | Undetermined, with evidence |
 
 ## Scope fence (will NOT do)
@@ -49,6 +49,6 @@ Further search, 2026-11-09: rows C7 and C9c added; R131–R133 read. No candidat
 publisher definition.
 
 ## Outcome
-- Started 2026-11-09, after E-INV closed. Graph status set to: blocked. Criterion 1 is not reworded;
-  it needs the maintainer's G-SRC decision 3.
+- Started 2026-11-09, after E-INV closed. Graph status set to: blocked. The maintainer reworded criterion 1
+  on 2026-11-10; it is still unmet until a publisher answers or the §2 exception applies.
 - Commit(s): none

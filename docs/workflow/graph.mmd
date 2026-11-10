@@ -6,8 +6,10 @@ flowchart LR
   end
   subgraph P3_pipeline["P3-pipeline"]
     T12["T12<br/>T12 implementation task (scope per legacy dep..."]:::dropped
+    I_INGEST_CODE["I-INGEST-CODE<br/>Ingestion code on labelled synthetic fixtures..."]:::todo
     I_INGEST["I-INGEST<br/>Ingestion: strict decoding, parsing, eligibil..."]:::todo
     G_ADR8{{"G-ADR8<br/>Maintainer acceptance of ADR-0008 (before sel..."}}:::todo
+    I_SPLITKEY_CODE["I-SPLITKEY-CODE<br/>Split-key code on labelled synthetic fixtures..."]:::todo
     I_SPLITKEY["I-SPLITKEY<br/>Split-key step 1, duplicate classes, required..."]:::todo
     D_SPLITCFG{{"D-SPLITCFG<br/>Focus-state ADR + split config (salt, held-ou..."}}:::todo
   end
@@ -25,6 +27,7 @@ flowchart LR
     U_UNICODE["U-UNICODE<br/>Vendor Unicode Scripts.txt pinned to Python u..."]:::todo
   end
   subgraph P4_screen["P4-screen"]
+    I_RULESCREEN_CODE["I-RULESCREEN-CODE<br/>Rules-only screen code on labelled synthetic ..."]:::todo
     I_RULESCREEN["I-RULESCREEN<br/>Rules-only privacy screen in ignored staging"]:::todo
     X_FREEZE{{"X-FREEZE<br/>Freeze split in staging + start exposure log"}}:::todo
     H_SCREENER{{"H-SCREENER<br/>Assign eligible role-restricted test/holdout ..."}}:::todo
@@ -34,6 +37,7 @@ flowchart LR
     I_TABLES["I-TABLES<br/>Reference list, normalization table, cue tabl..."]:::todo
     I_RESOLVE["I-RESOLVE<br/>Candidate generation + resolution with verifi..."]:::todo
     D_GUIDE{{"D-GUIDE<br/>Finalize + freeze annotation guidelines"}}:::todo
+    I_VALIDATOR_CODE["I-VALIDATOR-CODE<br/>Validator code on labelled synthetic fixtures..."]:::todo
     I_VALIDATOR["I-VALIDATOR<br/>Validator: schema, invariants, provenance, sp..."]:::todo
   end
   subgraph P6_annotate["P6-annotate"]
@@ -56,14 +60,23 @@ flowchart LR
   G_SRC --> D_SRCADR
   D_SCHEMA --> D_SRCADR
   G_ADR67 --> U_UNICODE
+  G_ADR67 --> I_INGEST_CODE
+  D_SCHEMA --> I_INGEST_CODE
   D_SRCADR --> I_INGEST
+  I_INGEST_CODE --> I_INGEST
   G_ADR67 --> G_ADR8
+  I_INGEST_CODE --> I_SPLITKEY_CODE
+  U_UNICODE --> I_SPLITKEY_CODE
   I_INGEST --> I_SPLITKEY
   G_ADR8 --> I_SPLITKEY
   U_UNICODE --> I_SPLITKEY
+  I_SPLITKEY_CODE --> I_SPLITKEY
   I_SPLITKEY --> D_SPLITCFG
+  I_INGEST_CODE --> I_RULESCREEN_CODE
+  D_SCHEMA --> I_RULESCREEN_CODE
   I_INGEST --> I_RULESCREEN
   D_SCHEMA --> I_RULESCREEN
+  I_RULESCREEN_CODE --> I_RULESCREEN
   D_SPLITCFG --> X_FREEZE
   I_RULESCREEN --> X_FREEZE
   X_FREEZE --> H_SCREEN
@@ -73,8 +86,10 @@ flowchart LR
   I_TABLES --> I_RESOLVE
   I_RESOLVE --> D_GUIDE
   E_LGD --> D_GUIDE
+  D_SCHEMA --> I_VALIDATOR_CODE
   D_SCHEMA --> I_VALIDATOR
   D_GUIDE --> I_VALIDATOR
+  I_VALIDATOR_CODE --> I_VALIDATOR
   D_GUIDE --> P_PILOT
   I_VALIDATOR --> P_PILOT
   P_PILOT --> G_PILOT

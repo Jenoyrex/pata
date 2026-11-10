@@ -1,4 +1,4 @@
-# Gate review packet — G-ADR67: T11 + D10.1, joint acceptance of ADR-0006 rev 6 and ADR-0007 rev 4
+# Gate review packet — G-ADR67: T11 + D10.1, joint acceptance of ADR-0006 rev 7 and ADR-0007 rev 5
 
 Prepared by Claude on 2026-11-05 from an `adr-reviewer` report. **Review only: nothing was modified,
 committed, merged, pushed or accepted while preparing this packet.**
@@ -15,7 +15,7 @@ to the branch.
 
 ## 1. What you are being asked to decide
 
-Whether to accept ADR-0006 revision 6 and ADR-0007 revision 4 together, by explicit dated
+Whether to accept ADR-0006 revision 7 and ADR-0007 revision 5 together, by explicit dated
 acceptance in both files, and merge the branch. **This gate unblocks D-SCHEMA, U-UNICODE and G-ADR8,
 and through them all pipeline code.** The approval in principle of F1–F13 does not cover the revised
 text (D10.1), so the changed items need approval by name.
@@ -206,12 +206,101 @@ nothing about whether the wording is right.
   earlier idea that I6 and I10 were small text fixes was wrong: both need a ruling. I have made no
   edits to any ADR or to the branch.
 
+## 6a. Fourth `adr-reviewer` run, 2026-11-10 (rev 7 / rev 5 / rev 3, working tree against `aeb13b8`)
+
+**Cross-reference checks as a whole do not pass as written.** Section numbers, revision numbers and
+step numbers pass. All 15 + 10 approval rows are byte-identical to `aeb13b8`, each status line says
+Proposed, and each ruling is implemented faithfully.
+
+| Item | Finding | Needs |
+|---|---|---|
+| X1 | ADR-0007 §5 "may use only" excludes the C2 platform field list that ADR-0006 §2 allows | Text fix |
+| X2 | ADR-0007 "a whole district key": a `group_key` can also be an unresolved state or unknown key | Text fix |
+| X3 | A native `source_record_ref` passes the screen "on the same terms", but every per-record carve-out names only `source_context` | Ruling |
+| X4 | After N1, a whole-class denylist match on a rebuild can remove a key's only held-out class and move its siblings. Depends on an order the text does not fix [UNPROVEN] | Ruling |
+| X5 | The ADR-0006 implementation order has no carve-out for synthetic-fixture code. Whether the D10.2 ruling needs ADR text is [UNPROVEN] | Ruling |
+| X6 | The stage at which the denylist applies is stated three ways | Settled with X4 |
+| E2 | A recompute can leave an exposed class sharing a key with a held-out class: "never move exposed records" collides with "no key in two splits", with no priority stated | Ruling |
+| Graph | G-ADR67 title, "Full diff" row and "Branch merged" row are stale; its notes wrongly say `workflow-kit` holds rev 5 / rev 3 | Graph edit |
+
+Limits: ADR-0008 was read in part, ADR-0002 to 0005 were searched only, and the working tree was not
+compared with the patch file. Fourteen further edge cases are in that run's report; none changes a row.
+
+**Drafted 2026-11-10 (maintainer go), in the working tree:** X1 and X2 in ADR-0007 rev 5, and the G-ADR67
+graph entries.
+
+**Rulings 2026-11-10:** X3a, X4a (settling X6), E2c and X5a, recorded in
+`docs/research/dependency-graph.md` and drafted into ADR-0006 rev 7. This is not acceptance.
+
+## 6b. Fifth `adr-reviewer` run, 2026-11-10 (after those rulings)
+
+**Cross-reference checks still do not pass as written.** Section, step and revision references, all
+25 decision rows (F1–F15, S1–S10; byte-identical to `aeb13b8`), status lines (Proposed) and revision
+notes pass. X1–X5 are resolved; X6 is resolved in the ADRs but not in the graph; E2 is resolved for the
+ruled case only. Each ruling is implemented faithfully.
+
+| Item | Finding | Needs |
+|---|---|---|
+| C1 | ADR-0006 §17 E2 sentence: "would send" also catches a screened class already correctly in holdout; "exposed class" is undefined | Ruling or wording |
+| C2 | An exposed class can also reach test by bucket mapping, or holdout by gaining a held-out member; no rule covers these | Ruling |
+| Lead source | The §2 exception is "for that field only", but `state_column` also needs publisher documentation, and the C2 source is All India with no `coverage_state`. It may have no step-1 state [ASSUMPTION on intent] | Ruling |
+| S7, S8 | Rules behind them changed; neither is on the re-approval list. Whether they need naming is UNPROVEN | Ruling |
+| C3–C7 | Graph: I-RULESCREEN(-CODE) place the denylist before the split; H-SCREEN has no per-record carve-out; H-SCREENER omits the no-annotate rule; X-FREEZE "recompute is a no-op" clashes with §17; I-SPLITKEY rows are missing | Graph edit |
+| X2 residue | ADR-0007 "all unknown-state records" overstates: only those with no district match have that key | Text fix |
+
+Limits: the patch file and T11 edit map were not compared with the text, and ruff, pytest and the §17
+vectors were not run by the reviewer. Its "can wait" list covers `docs/schema.md`, source ADR and pilot items.
+
+**Rulings 2026-11-10 (later):** C1a, C2a, lead-source columns a, and S7 and S8 added to the re-approval
+list. Recorded in `docs/research/dependency-graph.md` and drafted into ADR-0006 rev 7 and ADR-0007 rev 5.
+Graph rows C3–C7 and the X2 phrase are corrected. This is not acceptance.
+
+## 6c. Sixth `adr-reviewer` run, 2026-11-10
+
+**Cross-reference checks do not pass as written, narrowly.** All section 6a and 6b items are resolved.
+Each ruling is implemented faithfully, no decision row changed and each status line says Proposed.
+
+| Item | Finding | Needs |
+|---|---|---|
+| N1 | "A class is exposed when any member is in the exposure log" sits unscoped in §17. Every screened record is in the log, which makes the accidental-exposure flag and the with-and-without metric vacuous | Wording |
+| N2 | E-FIELD criterion 1 cannot be met even when the §2 exception fires | Ruling (rewords a criterion) |
+| Rev note | ADR-0007 rev 5 credits only the 2026-11-09 rulings; the column ruling is 2026-11-10 | Text fix |
+| R1 | Does the exposed-class exclusion feed back into steps 4 and 5? | Should settle |
+| R2 | "Newly" has no baseline, and test-to-holdout is literally newly placed | Should settle |
+| R3 | The exposure log's state is not pinned, so a later re-run could exclude different classes | Should settle |
+
+Also: S6's row does not disclose the §2 exception, so re-approve it knowing that. Packet title and the
+"28 + 22" counts are stale: the two approval tables have 15 + 10 rows. Limits: R33, the patch file and
+D10.1 were not read in this run, and ruff, pytest and the §17 vectors were not run by the reviewer.
+
+**Rulings 2026-11-10 (last):** N1, N2, R1, R2 and R3, recorded in `docs/research/dependency-graph.md` and
+drafted. The packet title and section 6a counts are corrected. This is not acceptance.
+
+## 6d. Seventh `adr-reviewer` run, 2026-11-10 (scoped to the last edits)
+
+**Cross-reference checks do not pass for this scope, narrowly.** N1, N2, R1, R2, R3 and the revision note
+are resolved as ruled. The approval tables are byte-identical to `aeb13b8` and each status line says
+Proposed.
+
+| Item | Finding | Needs |
+|---|---|---|
+| M1 | "Never moves an exposed record into `test` or `test_source_holdout`" (ADR-0006 §17, twice; ADR-0007 Context) forbids a move between the two test splits, which R2 does not exclude. No leakage; a wording conflict | Ruling |
+| M2 | "It was in neither of those splits" is undefined when a recompute merges classes. On one reading an exposed `train` record enters `test`, breaking F5 | Ruling |
+
+Can wait: where R3's state is recorded (`docs/schema.md`, kept private); graph rows carrying R1 and R3; E-FIELD
+has no dependency on G-ADR67. Fourth consecutive round not to clear the check: stopped and reported to the
+maintainer under the three-attempt rule.
+
+**Ruling 2026-11-10 (final): option A for M1 and M2**, recorded in `docs/research/dependency-graph.md` and
+drafted into ADR-0006 §17. Mechanical checks only and no `adr-reviewer` run on that sentence, by agreement.
+Whether the cross-reference checks now pass is the maintainer's call. This is not acceptance.
+
 ## 7. Maintainer checklist
 
 - [ ] Every approved ruling is incorporated (D10.1). The reviewer did not trace every sentence
-- [ ] Cross-reference checks pass (D10.1). Fixes for I1–I5, I7, I8, I9 and I11 exist only in the unapplied patch. N1 and the other section 4b items are open
+- [ ] Cross-reference checks pass (D10.1). The rev 7 patch and the 2026-11-09 rulings are applied, uncommitted; sections 6a to 6c record what remained
 - [ ] I read the full diff, not only this packet
-- [ ] Every changed decision is acceptable as written: F1, F3, F5, F9, F10, F12, F14, F15, S6, S9
+- [ ] Every changed decision is acceptable as written: F1, F3, F5, F9, F10, F12, F14, F15, S6, S7, S8, S9
 - [ ] Deferred P, L, O and E items are genuinely non-blocking, and that is documented
 - [ ] I decided what to do about I1–I11
 - [ ] I wrote dated acceptance in each document myself

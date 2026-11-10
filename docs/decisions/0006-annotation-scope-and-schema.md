@@ -2,7 +2,7 @@
 
 - **Status:** Proposed. Not accepted until the decisions in section 21.1 are
   approved by the maintainer.
-  - It is accepted **together with ADR-0007 revision 4**, by an explicit, dated
+  - It is accepted **together with ADR-0007 revision 5**, by an explicit, dated
     maintainer acceptance recorded in both status lines.
   - Acceptance comes after the maintainer has reviewed the complete revision diff,
     has re-approved by name every decision item whose text changed, and the
@@ -11,7 +11,41 @@
     5. That approval is **not** approval of revised text.
   - Items explicitly deferred in sections 21.2 and 21.3 do not block acceptance.
 - **Date:** 2026-10-04
-- **Revision:** 6 (2026-10-28), alongside ADR-0007 revision 4, from the
+- **Revision:** 7 (2026-11-05, extended 2026-11-09 and 2026-11-10), alongside
+  ADR-0007 revision 5, from the G-ADR67 review and the maintainer's rulings of
+  2026-11-05, 2026-11-09 and 2026-11-10. No row of section 21.1 changes, but these
+  rules behind F1, F5, F12 and F15 do, and §2 gains one limited exception:
+  - §2: if the publishers do not answer by 2026-11-23, C2's platform field list
+    stands in for publisher documentation of its address, state and district
+    columns, as a recorded limitation.
+  - §12: a screener must not annotate records they screened.
+  - §12: a native `source_record_ref` value passes the same screen as a
+    `source_context` value, on the same terms. A failure caused only by it counts as
+    one caused only by `source_context`.
+  - §17 step 5: every class sharing a `group_key` with a held-out class also goes to
+    `test_source_holdout`, so no key appears in two splits.
+  - §17: a bug-fix recompute counts as a rebuild. If it would newly place an exposed
+    class in `test` or `test_source_holdout`, that class is excluded from the build,
+    after step 5 and with no feedback into steps 4 and 5. The rule defines "exposed"
+    and "newly" for itself, a move between the two test splits is not a move into
+    test, and the exposure-log state used is recorded.
+  - §12 and §17: every denylist exclusion takes effect after split-key step 5. The
+    excluded record or class still counts toward duplicate classes, class keys and
+    holdout, so a rebuild reproduces the split. A failure caused only by
+    `source_context` drops only the matched record, and the reason categories must
+    identify such a failure.
+  - §12: the staging limit applies to source columns. A native `source_record_ref`
+    is allowed, and values computed for each record may be held with them. The
+    ingestion rule for `context_columns` gets a matching exception for the
+    `raw_text` field and a native `source_record_ref`.
+  - Consequences: the implementation order governs real-data work. Code built and
+    tested only on labelled synthetic fixtures is outside it.
+  - Wording aligned, with no new rule: §4 and §20 (national or per state, as in L3), §17
+    (the freeze point covers any record, as in F5), §18 (denylist entries as in
+    §12) and §19 (`deferred_coverage` as in F9 and §8).
+
+  Status unchanged.
+- **Revision 6** (2026-10-28), alongside ADR-0007 revision 4, from the
   maintainer's acceptance-readiness rulings of 2026-10-27 and 2026-10-28:
   - Layer A records roles as written. Designator verification covers all four LGD
     levels, gates only Layer C and Layer D, and is checked by a deterministic gate
@@ -190,6 +224,15 @@ records.
 **Which field is `raw_text`.**
 - A field is eligible only if the publisher's documentation presents it as the
   facility's address or as an address line. This is never judged from the values.
+  - **One recorded exception.** For candidate C2 in
+    `docs/research/source-inventory.md` (the All India Health Centres Directory),
+    the publishers are asked to document the field and its `State Name` and
+    `District Name` columns, by 2026-11-23. If none answers by then, the platform's
+    field list on data.gov.in stands in for the publisher's documentation, for
+    those three columns only. A state or district column role still needs its
+    scripted match rate (ADR-0007 §5).
+    The source ADR, manifest and datasheet record this as a limitation. It settles
+    nothing about the licence. Any other source needs a new decision.
 - The manifest records the field and its `raw_text_scope` (ADR-0007 §5):
   - `full_address`
   - `address_line`: a documented single line of the address
@@ -324,7 +367,7 @@ merged is a pilot question (section 21.2, P3).
 
 **`block` is not a v0 label.** Revision 1 had it. It is withdrawn because whether
 LGD's sub-district level corresponds to development blocks, revenue circles,
-tehsils or something else must be checked for each selected state before the label
+tehsils or something else must be checked, national or per state, before the label
 can be defined (section 21.3, L3). Revision 1 also listed "sub-division" under
 `subdistrict`. That was wrong: a sub-division may be a separate tier, so it too
 counts as an unverified designator. Text that names a block or sub-division is
@@ -727,12 +770,16 @@ record before its split is frozen (ADR-0007 §5) and nothing that fails reaches
 1. **Rules-only screen** (`admission.screened_by: rule:{name}`), before the split.
 2. The split is **computed and frozen in a staging area** outside
    `data/processed/` (for example `data/interim/`, ignored by git like all of
-   `data/`). Staging holds only `raw_text` and allowlisted `source_context`.
+   `data/`). Of a source's columns, staging holds only the `raw_text` field,
+   allowlisted `source_context` and a native `source_record_ref`. Values computed
+   for each record at ingestion and at the split, such as `raw_text_sha256`,
+   `record_id`, `group_key` and the split assignment, may be held with them.
 3. **Human screen** on the staged records, after the freeze. It is the first human
    exposure (section 17).
    - Dev and train records may be screened by anyone.
    - Test and `test_source_holdout` records are screened only by people who don't
      write or change the guidelines or the cue table.
+   - A screener must not annotate records they screened.
 4. **Only records that pass** are written to `data/processed/`.
 
 A record that fails the human screen is excluded without recomputing or moving any
@@ -756,28 +803,39 @@ other record's frozen split assignment (section 17).
   - It is kept in private maintainer storage. It is never committed and never
     released.
   - It is applied as a versioned screen rule, and every change bumps
-    `screen_version`.
+    `screen_version`. Unlike the rules-only screen, it takes effect after section 17
+    step 5.
   - An entry matches a record when all three identifiers are equal. The record's
-    whole duplicate class is then excluded in that build.
+    whole duplicate class is then excluded in that build, unless the entry's
+    reason category records a failure caused only by a `source_context` value. In
+    that case only the record is excluded.
+  - An excluded record or class still counts toward duplicate classes, class keys
+    and holdout designation (section 17 steps 4 and 5), so no other record's key or
+    split changes.
   - Rebuilds from the same pinned snapshots are therefore deterministic.
   - **Limitation:** a new snapshot that drops the original row or changes its
     text, and a duplicate that appears in another source after the original row
     has gone, match no entry. These are caught only by the human screen of the
     new ingestion.
-  - The reason categories are a format question for `docs/schema.md`.
+  - The reason categories are a format question for `docs/schema.md`. They must
+    identify a failure caused only by a `source_context` value.
 - Names that honour public figures ("Mahatma Gandhi Road") are admissible.
 - Businesses named after a private person are excluded.
 - **When in doubt, the record is excluded** (section 21.1, F1).
 
 **`source_context` allowlist:**
-- A source's manifest lists its approved `context_columns`. Nothing outside the
-  list is ingested.
+- A source's manifest lists its approved `context_columns`. Apart from the
+  `raw_text` field and a native `source_record_ref` (section 2), nothing outside
+  the list is ingested.
 - Only administrative-geography and facility-category columns can be approved,
   such as state, district, sub-district, village, PIN and facility type.
 - Columns holding names of people, phone numbers, email addresses, identifiers of
   people or free-text remarks are never approved.
 - `source_context` values pass **the same screen** as `raw_text`. If any value
   fails, the whole record is excluded.
+- A native `source_record_ref` value passes the same screen, on the same terms as a
+  `source_context` value. Throughout this ADR, a failure caused only by such a value
+  counts as a failure caused only by a `source_context` value.
 
 **Annotator notes:**
 - Released data contains only `comment_codes` from a closed list:
@@ -997,7 +1055,7 @@ labels. It decides which records get double annotation (section 15). It is
 versioned (`split_version`).
 
 **Freeze point.** The split is computed and frozen in staging **before the first
-human exposure** of any admitted record (section 12).
+human exposure** of any record (section 12).
 - Human exposure means a person viewing an individual record's `raw_text` or
   `source_context`, for screening, pilot, guideline work or annotation.
 - Scripted aggregate statistics, and the distinct-value lists used for value
@@ -1011,7 +1069,8 @@ human exposure** of any admitted record (section 12).
   `test_source_holdout`.
 - **Assignments are fixed per `record_id`** when the split is first computed.
   Removing a record later (a failed human screen, a withdrawal) never recomputes
-  or moves another record's key or split.
+  or moves another record's key or split. In a rebuild, every record or class
+  excluded by a denylist entry still counts in steps 4 and 5 (section 12).
 - **Accidental exposure.** If a person who writes or changes the guidelines or the
   cue table sees a `test` or `test_source_holdout` record outside test annotation:
   - It is logged.
@@ -1114,6 +1173,8 @@ annotators.
 5. **Assignment.**
    - **Held out.** A duplicate class with any record from a held-out publisher goes
      wholly to `test_source_holdout`.
+     - Every other class with the same `group_key` goes there too, so no key
+       appears in two splits.
      - The designation is per publisher, listed in the versioned split
        configuration (ADR-0007 §6).
    - **Bucket mapping.** Every other class goes to `train`, `dev` or `test`:
@@ -1180,6 +1241,16 @@ annotators.
 - A recompute is allowed **only** to fix a bug in the procedure.
   - It is a new `split_version`, and it never uses gold.
   - It never moves an exposed record into `test` or `test_source_holdout`.
+  - It counts as a rebuild: the denylist applies, and every record or class it
+    excludes still counts in steps 4 and 5 (section 12).
+  - If it would newly place an exposed class in `test` or `test_source_holdout`, that
+    class is excluded from the build, so no exposed record enters test and no key
+    appears in two splits. For this rule, a class is exposed when any of its members
+    is in the exposure log. A class is newly placed when any of its exposed members
+    was in neither of those splits under the immediately preceding `split_version`,
+    and a move between those two splits is not a move into test in ADR-0006 or
+    ADR-0007. The exclusion applies after step 5 and does not feed back into steps 4 and 5. The exposure-log state
+    used is recorded with the new `split_version`.
 
 The table below fixes **what** the split file must record. Its exact field
 names, structure, types and serialization are defined in `docs/schema.md`
@@ -1250,8 +1321,10 @@ release:
 1. A new release is made without the affected records.
 2. An **errata entry** is appended to the errata log. It contains the date, the
    affected release versions, a reason category and the number of records
-   removed. It never contains the record's text, `record_id` or hashes. The
-   record and its duplicate class are added to the denylist (section 12).
+   removed. It never contains the record's text, `record_id` or hashes. An
+   entry for the record is added to the denylist. As section 12 sets out, a match
+   excludes its whole duplicate class unless the failure was caused only by a
+   `source_context` value.
 3. Pata stops distributing the affected releases wherever it controls
    distribution.
 4. Scores on different releases are marked as not directly comparable.
@@ -1268,9 +1341,10 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
   at all.
 - Layer D: a `city` role is not a role at any LGD level, so it changes no Layer D
   status. A level the record does not otherwise state stays `not_specified`.
-  `deferred_coverage` is used only for a role with an unverified designator whose
-  cue-table `pending_level` (section 3) is that level, and `no_such_level` only
-  where the gazetteer has no units below the deepest linked ancestor (section 8).
+  `deferred_coverage` is used only for a role with a designator that is unverified,
+  or that a gate rejected, whose cue-table `pending_level` (section 3) is that
+  level, and `no_such_level` only where the gazetteer has no units below the
+  deepest linked ancestor (section 8).
 - Results: always reported by `settlement_signal`. A headline linking number must
   state which share of roles was linkable.
 - Village names with suffixes such as `(Ct)`, `(Og)` or `(Part)` are matched and
@@ -1297,8 +1371,8 @@ Urban addresses are in scope for A and B, and for C wherever a role is linkable
   codes overlap village codes), `dop:po:`, `pin:`.
 - **Reasons mark what to re-link when coverage grows:**
   `urban_deferred`, `source_deferred`, `level_mapping_unverified`.
-- **`block`** can be added once LGD semantics are verified for the selected
-  geography (L3).
+- **`block`** can be added once LGD semantics are verified, national or per
+  state (L3).
 - **Nested spans** can be added with an optional `parent_span_id` if a case
   appears that two roles on one span can't express.
 - **Synthetic data** needs `source_type: synthetic` plus generator fields in a
@@ -1409,5 +1483,9 @@ U17 (`settlement_context`) is not removed: it is replaced by F11.
   12. Implement and run the validator.
   13. Conduct the dev-pool pilot (P1 to P5, P7) and resolve its decisions. Only
       then proceed to gold annotation.
+
+  This order governs work on real data. Code built and tested only on labelled
+  synthetic fixtures is outside it, and running that code on real data stays within
+  it.
 
   None of this produces results until real admitted records exist.

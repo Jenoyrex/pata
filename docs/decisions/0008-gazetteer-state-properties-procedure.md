@@ -3,9 +3,11 @@
 - **Status:** Proposed. Not accepted until the decisions in section 8.1 are
   approved by the maintainer. It defines the "versioned procedure" that
   ADR-0007 §4 step 3 requires, so it is used only once ADR-0007 is accepted.
-  ADR-0007 is itself Proposed and cannot be accepted before ADR-0006.
+  ADR-0007 is itself Proposed and is accepted only together with ADR-0006.
 - **Date:** 2026-10-26
-- **Revision:** 2 (2026-10-26). Records the maintainer's resolutions of Q1
+- **Revision:** 3 (2026-11-05). Corrects the status line's ADR-0007 acceptance
+  order, from the G-ADR67 review. Status unchanged.
+- **Revision 2** (2026-10-26). Records the maintainer's resolutions of Q1
   to Q3 (section 8.2). Status unchanged.
 - **Deciders:** Project maintainer
 - **Relates to:** ADR-0001 §5 and §7, ADR-0004, ADR-0005 (`gazetteer_version`,

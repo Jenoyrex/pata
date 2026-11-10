@@ -1344,3 +1344,55 @@ acceptance of any ADR, and they do not settle the revision numbers or ADR-0008 r
 - **I10.** The D7.1′ derived staging note limits source columns: the `raw_text` field, allowlisted
   `source_context` and a native `source_record_ref`. Values computed for each record may be held with
   them. §12's "Nothing outside the list is ingested" gets a matching exception.
+
+### Maintainer rulings, 2026-11-09 (none of these accepts an ADR)
+
+- **Revision numbers:** ADR-0006 rev 7, ADR-0007 rev 5 and ADR-0008 rev 3 approved.
+- **Native `source_record_ref`:** gets the `source_context` screen (ADR-0006 §12).
+- **N1:** the whole `group_key` group goes to `test_source_holdout` (ADR-0006 §17 step 5, ADR-0007 §6).
+- **Rebuild scope:** a bug-fix recompute counts as a rebuild (ADR-0006 §17).
+- **E-FIELD (G-SRC decision 3):** ask the publishers, with a deadline. If there is no reply, the
+  platform field list for C2 is used as a recorded limitation (ADR-0006 §2). Deadline: 2026-11-23.
+- **Screener and annotation:** a screener must not annotate records they screened (ADR-0006 §12).
+- **D10.2:** orders real-data work only. Code built and tested on labelled synthetic fixtures is outside
+  it. Graph change approved: `I-INGEST-CODE`, `I-SPLITKEY-CODE`, `I-RULESCREEN-CODE`, `I-VALIDATOR-CODE`.
+- **OSM:** stays out of v1 for now. If B14 is not cleared by 2026-11-23, prepare an ADR proposing OSM as
+  a fallback source. That ADR stays Proposed.
+- **E-LGD:** accepted as unverified. The drafted query is to be sent without waiting for a reply. The
+  Rajasthan help text is not verification.
+- **B14:** write first. C1a and C2 stay unclear until a reply.
+- **W0:** approved by the maintainer. The `graph.py approve` record is still to be run.
+
+### Maintainer rulings, 2026-11-10 (none of these accepts an ADR)
+
+Options as set out from the fourth `adr-reviewer` run (`docs/workflow/reviews/G-ADR67.md`, section 6a).
+- **X3 (option a):** a failure caused only by a native `source_record_ref` value is treated as one caused
+  only by a `source_context` value, so it stays per record (ADR-0006 §12).
+- **X4 (option a):** every denylist exclusion takes effect after split-key step 5. This also settles X6,
+  the stage at which the denylist applies (ADR-0006 §12, §17).
+- **E2 (option c):** an exposed class that collides with a held-out `group_key` is excluded from that
+  build, so no exposed record enters test and no key appears in two splits (ADR-0006 §17).
+- **X5 (option a):** the ADR says that the implementation order governs real-data work, and that code
+  built and tested on labelled synthetic fixtures is outside it (ADR-0006 Consequences).
+
+Later on 2026-11-10, from the fifth `adr-reviewer` run (packet section 6b):
+- **C1 and C2 (option a for both):** one rule replaces the E2 wording. If a recompute would newly place an
+  exposed class in `test` or `test_source_holdout`, that class is excluded from the build. A class is
+  exposed when any member is in the exposure log (ADR-0006 §17).
+- **Lead source columns (option a):** the C2 exception also covers its state and district columns, with the
+  same deadline and recorded limitation (ADR-0006 §2, ADR-0007 §5). This widens the 2026-11-09 ruling.
+- **S7 and S8 (option a):** added to the G-ADR67 re-approval list.
+
+Last on 2026-11-10, from the sixth `adr-reviewer` run (packet section 6c):
+- **N1:** the definition of an exposed class applies to the recompute rule only (ADR-0006 §17).
+- **N2:** E-FIELD's first criterion is reworded by the maintainer: each candidate proposed for acceptance
+  has its raw-text field backed by publisher documentation, or falls under the ADR-0006 §2 exception.
+- **R1:** the exposed-class exclusion applies after step 5 and does not feed back into steps 4 and 5.
+- **R2:** "newly" is measured against the immediately preceding `split_version`. A class already in
+  `test` or `test_source_holdout` is not newly placed.
+- **R3:** the exposure-log state used is recorded with each new `split_version`.
+
+Final on 2026-11-10, from the seventh `adr-reviewer` run (packet section 6d):
+- **M1 and M2 (option A):** a class is newly placed when any of its exposed members was in neither test
+  split under the immediately preceding `split_version`, and a move between those two splits is not a
+  move into test in ADR-0006 or ADR-0007 (ADR-0006 §17). This replaces the R2 baseline wording.

@@ -57,7 +57,7 @@ verify = ["uv run python scripts/graph.py validate", "uv run pytest tests/workfl
 
 [[node]]
 id = "G-ADR67"
-title = "T11 + D10.1: review and joint acceptance of ADR-0006 rev 6 and ADR-0007 rev 4"
+title = "T11 + D10.1: review and joint acceptance of ADR-0006 rev 7 and ADR-0007 rev 5"
 phase = "P0-governance"
 kind = "decision"
 status = "review"
@@ -71,13 +71,13 @@ outputs = [
 acceptance = [
   "T11 incorporates every approved ruling (D10.1)",
   "Cross-reference checks pass (D10.1)",
-  "Full diff main..adr-0006-rev6 reviewed",
-  "Changed decision items re-approved by name (D10.1): ADR-0006 F1,F3,F5,F9,F10,F12,F14,F15; ADR-0007 S6,S9",
+  "Full diff of docs/decisions/ from 0d1c570 (before rev 6) to the rev 7 / rev 5 text reviewed",
+  "Changed decision items re-approved by name (D10.1): ADR-0006 F1,F3,F5,F9,F10,F12,F14,F15; ADR-0007 S6,S7,S8,S9",
   "Deferred P/L/O/E items confirmed non-blocking and documented",
   "Dated maintainer acceptance written in BOTH ADRs by the maintainer",
-  "Branch merged by the maintainer",
+  "Rev 7 / rev 5 text committed and merged to main by the maintainer",
 ]
-notes = "Maps legacy T11 (coordinated revision). The draft exists only on local branch adr-0006-rev6 (099fdb6, 0513447); on main and workflow-kit both ADRs are still rev 5 / rev 3. Use /gate-review G-ADR67. Claude prepares the review packet only."
+notes = "Maps legacy T11 (coordinated revision). PR 1 (merged by the maintainer, 2026-11-09) carried rev 6 / rev 4 to main, before acceptance. The maintainer approved the numbers rev 7 / rev 5 / ADR-0008 rev 3 on 2026-11-09; that text is uncommitted in the workflow-kit working tree as of 2026-11-10. Use /gate-review G-ADR67. Claude prepares the review packet only."
 
 [[node]]
 id = "T12"
@@ -131,14 +131,14 @@ title = "Field semantics evidence (incl. C1a Address_Original_First_Line)"
 phase = "P1-evidence"
 kind = "evidence"
 status = "blocked"
-blocker = "Criterion 1 cannot be met: no publisher documentation defining any candidate field was found (verifier 2026-11-09). Needs G-SRC decision 3: ask the publishers, or the maintainer rules on what suffices."
+blocker = "Criterion 1 not yet met: no publisher documentation defining any candidate field was found (verifier 2026-11-09). Maintainer ruling 2026-11-09: ask the publishers by 2026-11-23; if none answers, the ADR-0006 section 2 exception may apply to C2 once that ADR is accepted."
 notes = "2026-11-04: evidence gathered in docs/research/source-inventory.md, eleventh pass. Started once E-INV is done."
 deps = ["E-INV"]
 gate = "none"
 owner = "agent"
 outputs = ["docs/research/source-inventory.md", "docs/research/focus-state-source-evaluation.md"]
 acceptance = [
-  "Each candidate raw-text field backed by publisher documentation, not column names",
+  "Each candidate proposed for acceptance has its raw-text field backed by publisher documentation, not column names, or falls under the ADR-0006 section 2 exception (maintainer ruling 2026-11-10)",
   "C1a outcome stated: qualifies / does not qualify / undetermined, with evidence",
 ]
 
@@ -251,12 +251,33 @@ notes = "The kit's vendor/unicode/ path is not adopted: committing a data file c
 
 # ---------------------------------------------------------------- Phase 3: pipeline
 [[node]]
+id = "I-INGEST-CODE"
+title = "Ingestion code on labelled synthetic fixtures (no real-data run)"
+phase = "P3-pipeline"
+kind = "impl"
+status = "todo"
+deps = ["G-ADR67", "D-SCHEMA"]
+gate = "none"
+owner = "agent"
+outputs = ["src/pata/ingest/", "tests/ingest/"]
+acceptance = [
+  "No replacement characters ever produced; decode errors are reason-coded exclusions",
+  "Malformed rows, non-text cells, empty text, declared missing tokens each tested",
+  "Eligibility counts reproducible across two runs (byte-identical output)",
+  "Fixtures are labelled: source_type = 'synthetic', generator version and seed (ADR-0001 §3)",
+  "Tests read fixtures only; a test asserts none opens a path under data/raw",
+  "No synthetic result is reported as a benchmark result",
+]
+verify = ["uv run pytest tests/ingest -q"]
+notes = "Code only; real-data runs stay gated in I-INGEST. Maintainer ruling 2026-11-09: D10.2 orders real-data work only."
+
+[[node]]
 id = "I-INGEST"
 title = "Ingestion: strict decoding, parsing, eligibility, reason-coded exclusions"
 phase = "P3-pipeline"
 kind = "impl"
 status = "todo"
-deps = ["D-SRCADR"]
+deps = ["D-SRCADR", "I-INGEST-CODE"]
 gate = "none"
 owner = "agent"
 outputs = ["src/pata/ingest/", "tests/ingest/"]
@@ -266,6 +287,7 @@ acceptance = [
   "Eligibility counts reproducible across two runs (byte-identical output)",
 ]
 verify = ["uv run pytest tests/ingest -q"]
+notes = "Real-data run. The code is built in I-INGEST-CODE."
 
 [[node]]
 id = "G-ADR8"
@@ -280,12 +302,12 @@ outputs = ["docs/decisions/0008-gazetteer-state-properties-procedure.md"]
 acceptance = ["Dated maintainer acceptance in ADR-0008"]
 
 [[node]]
-id = "I-SPLITKEY"
-title = "Split-key step 1, duplicate classes, required statistics, selection records"
+id = "I-SPLITKEY-CODE"
+title = "Split-key code on labelled synthetic fixtures (no real-data run)"
 phase = "P3-pipeline"
 kind = "impl"
 status = "todo"
-deps = ["I-INGEST", "G-ADR8", "U-UNICODE"]
+deps = ["I-INGEST-CODE", "U-UNICODE"]
 gate = "none"
 owner = "agent"
 outputs = ["src/pata/split/", "tests/split/"]
@@ -294,6 +316,35 @@ acceptance = [
   "Hash input = group key + '\\n' + 64-hex lowercase salt, UTF-8, no BOM, no trailing newline",
   "Integer-only bucket arithmetic (test forbids float)",
   "Holdout-publisher member ⇒ whole class to test_source_holdout",
+  "Every class sharing a group_key with a held-out class goes to test_source_holdout (ADR-0006 §17 step 5)",
+  "Denylist exclusions take effect after step 5; excluded records and classes still count in steps 4 and 5 (ADR-0006 §12, §17)",
+  "A recompute that would newly place an exposed class in test or test_source_holdout excludes that class from the build (ADR-0006 §17)",
+  "Reproduces the T5 synthetic test-vector and boundary tables in docs/research/dependency-graph.md (salt and 8/1/1 weights as stated there)",
+  "Fixtures are labelled: source_type = 'synthetic', generator version and seed (ADR-0001 §3)",
+  "Tests read fixtures only; a test asserts none opens a path under data/raw",
+  "No synthetic result is reported as a benchmark result",
+]
+verify = ["uv run pytest tests/split -q"]
+notes = "Code only; real-data runs and selection records stay gated in I-SPLITKEY. Maintainer ruling 2026-11-09: D10.2 orders real-data work only."
+
+[[node]]
+id = "I-SPLITKEY"
+title = "Split-key step 1, duplicate classes, required statistics, selection records"
+phase = "P3-pipeline"
+kind = "impl"
+status = "todo"
+deps = ["I-INGEST", "G-ADR8", "U-UNICODE", "I-SPLITKEY-CODE"]
+gate = "none"
+owner = "agent"
+outputs = ["src/pata/split/", "tests/split/"]
+acceptance = [
+  "Duplicate class = identical name_key(raw_text); class key = lexicographically smallest member key",
+  "Hash input = group key + '\\n' + 64-hex lowercase salt, UTF-8, no BOM, no trailing newline",
+  "Integer-only bucket arithmetic (test forbids float)",
+  "Holdout-publisher member ⇒ whole class to test_source_holdout",
+  "Every class sharing a group_key with a held-out class goes to test_source_holdout (ADR-0006 §17 step 5)",
+  "Denylist exclusions take effect after step 5; excluded records and classes still count in steps 4 and 5 (ADR-0006 §12, §17)",
+  "A recompute that would newly place an exposed class in test or test_source_holdout excludes that class from the build (ADR-0006 §17)",
   "Reproduces the T5 synthetic test-vector and boundary tables in docs/research/dependency-graph.md (salt and 8/1/1 weights as stated there)",
 ]
 verify = ["uv run pytest tests/split -q"]
@@ -312,19 +363,39 @@ acceptance = ["Salt, holdouts, weights pinned and accepted by maintainer"]
 
 # ---------------------------------------------------------------- Phase 4: screening + freeze
 [[node]]
-id = "I-RULESCREEN"
-title = "Rules-only privacy screen in ignored staging"
+id = "I-RULESCREEN-CODE"
+title = "Rules-only screen code on labelled synthetic fixtures (no real-data run)"
 phase = "P4-screen"
 kind = "impl"
 status = "todo"
-deps = ["I-INGEST", "D-SCHEMA"]
+deps = ["I-INGEST-CODE", "D-SCHEMA"]
 gate = "none"
 owner = "agent"
 outputs = ["src/pata/screen/", "tests/screen/"]
 acceptance = [
   "Runs only on staging paths that are git-ignored",
   "Exclusion report has counts + reason codes, no raw text/IDs/hashes",
-  "D8.1 denylist applied as a versioned screen rule (empty at first); every change bumps screen_version",
+  "D8.1 denylist held as a versioned screen rule (empty at first), taking effect after split-key step 5 (ADR-0006 §12); every change bumps screen_version",
+  "Fixtures are labelled: source_type = 'synthetic', generator version and seed (ADR-0001 §3)",
+  "Tests read fixtures only; a test asserts none opens a path under data/raw",
+  "No synthetic result is reported as a benchmark result",
+]
+notes = "Code only; real-data runs stay gated in I-RULESCREEN. Maintainer ruling 2026-11-09: D10.2 orders real-data work only."
+
+[[node]]
+id = "I-RULESCREEN"
+title = "Rules-only privacy screen in ignored staging"
+phase = "P4-screen"
+kind = "impl"
+status = "todo"
+deps = ["I-INGEST", "D-SCHEMA", "I-RULESCREEN-CODE"]
+gate = "none"
+owner = "agent"
+outputs = ["src/pata/screen/", "tests/screen/"]
+acceptance = [
+  "Runs only on staging paths that are git-ignored",
+  "Exclusion report has counts + reason codes, no raw text/IDs/hashes",
+  "D8.1 denylist held as a versioned screen rule (empty at first), taking effect after split-key step 5 (ADR-0006 §12); every change bumps screen_version",
 ]
 
 [[node]]
@@ -341,7 +412,8 @@ outputs = ["staging/split/frozen.manifest"]
 acceptance = [
   "Frozen before ANY human sees individual raw text",
   "Split-key steps 2-5 run after the rules screen and before the freeze (D10.2), with step 2 applying the D4.5 district rules; each step has a test",
-  "Split file hashes recorded; recompute is a no-op",
+  "Any non-empty denylist takes effect after step 5; excluded records and classes still count in steps 4 and 5 (ADR-0006 §12, §17)",
+  "Split file hashes recorded; re-running from the same inputs reproduces them (a bug-fix recompute is a new split_version, ADR-0006 §17)",
   "Exposure log initialised outside Git",
 ]
 
@@ -355,7 +427,10 @@ deps = []
 gate = "maintainer"
 owner = "maintainer"
 outputs = ["docs/governance/roles.md"]
-acceptance = ["Screener is not an author of guidelines or cue tables; recorded in roles.md"]
+acceptance = [
+  "Screener is not an author of guidelines or cue tables; recorded in roles.md",
+  "A screener must not annotate records they screened (ADR-0006 §12); recorded in roles.md",
+]
 
 [[node]]
 id = "H-SCREEN"
@@ -368,7 +443,7 @@ gate = "maintainer"
 owner = "screener"
 outputs = ["private/denylist (outside Git)", "reports/exclusions.md"]
 acceptance = [
-  "Denylist match on (source ID, source record ref, raw-text SHA-256) excludes the whole duplicate class",
+  "Denylist match on (source ID, source record ref, raw-text SHA-256) excludes the whole duplicate class, or only the record when the entry records a failure caused only by a source_context or native source_record_ref value (ADR-0006 §12)",
   "Public report contains counts and reasons only",
   "Only records that pass are written to data/processed/ (ADR-0001 §2, D7.1′)",
 ]
@@ -414,12 +489,30 @@ outputs = ["docs/guidelines/"]
 acceptance = ["Guidelines versioned and frozen; LGD unverified levels stated"]
 
 [[node]]
+id = "I-VALIDATOR-CODE"
+title = "Validator code on labelled synthetic fixtures (no real-data run)"
+phase = "P5-resolve"
+kind = "impl"
+status = "todo"
+deps = ["D-SCHEMA"]
+gate = "none"
+owner = "agent"
+outputs = ["src/pata/validate/", "tests/validate/"]
+acceptance = [
+  "Each invariant has a failing-fixture test",
+  "Fixtures are labelled: source_type = 'synthetic', generator version and seed (ADR-0001 §3)",
+  "Tests read fixtures only; a test asserts none opens a path under data/raw",
+  "No synthetic result is reported as a benchmark result",
+]
+notes = "Code only; the run on staged data stays gated in I-VALIDATOR, after D-GUIDE. Maintainer ruling 2026-11-09: D10.2 orders real-data work only."
+
+[[node]]
 id = "I-VALIDATOR"
 title = "Validator: schema, invariants, provenance, splits, gates, exclusions, manifest"
 phase = "P5-resolve"
 kind = "impl"
 status = "todo"
-deps = ["D-SCHEMA", "D-GUIDE"]
+deps = ["D-SCHEMA", "D-GUIDE", "I-VALIDATOR-CODE"]
 gate = "none"
 owner = "agent"
 outputs = ["src/pata/validate/", "tests/validate/"]
