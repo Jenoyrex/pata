@@ -16,7 +16,7 @@
 | 1 | Package version is 1.0.0 and the changelog lists what is and is not included | `pyproject.toml`, `uv.lock`, `tests/test_package.py`, `CHANGELOG.md` | see verifier |
 | 2 | All project gates pass on the release commit | The documented gates, on the release tree; rerun on the commit by CI after the maintainer pushes | see verifier |
 | 3 | No data file is in the release or in git | `git ls-files data` lists only `data/manifests/` | see verifier |
-| 4 | Tag, push and publication done by the maintainer | Maintainer step; not done by Claude | Pending the maintainer |
+| 4 | Tag, push and publication done by the maintainer | Maintainer step; not done by Claude | see verifier |
 
 ## Scope fence (will NOT do)
 - Tag, push, publish or record the approval. Publish derived tables.
@@ -49,6 +49,19 @@ Overall: FAIL
 Its warnings 1 and 2 were then fixed: the changelog names the tagged source release, and the changelog
 and README say version 1 delivers a small part of the project's aim. CI runs on a push to `main`.
 
+After the release, 2026-11-10: **Overall PASS.** The verifier's table, verbatim:
+
+| # | Criterion (verbatim) | Verdict | Evidence (path:line / test id / command) |
+|---|---|---|---|
+| 1 | Package version is 1.0.0 and the changelog lists what is and is not included | PASS | At tag v1.0.0 (718549d): E:\PATA\pyproject.toml:3 `version = "1.0.0"`; uv.lock:54-55 `pata` 1.0.0; `uv lock --check` exit 0; `tests/test_package.py::test_version_is_exposed` asserts `pata.__version__ == "1.0.0"` (line 5), read from package metadata, so it fails on any other version; `uv build` on the tagged tree produced `pata-1.0.0` sdist and wheel. E:\PATA\CHANGELOG.md has "### Included" and "### Not included" sections and is in the release commit (`git cat-file -e 718549d:CHANGELOG.md`). No test covers the changelog; the evidence is the file itself. |
+| 2 | All project gates pass on the release commit | PASS | CI run https://github.com/Jenoyrex/pata/actions/runs/42802502460, headSha 718549d, conclusion success; `uv sync --locked`, ruff, format and pytest steps all success. Rerun by me on `git archive v1.0.0` exported to the scratchpad: `uv lock --check` 0, `uv sync --locked` 0, ruff 0, format 0 (60 files), pytest 159 passed/0 failed/6 skipped, `graph.py validate --check-outputs` OK. `git diff --check 718549d~1 718549d` exit 0. Sixth skip is `tests/test_gazetteer.py:380` (pinned LGD snapshots not in data/raw), expected in a clean export; it ran and passed on the working tree (160 passed). |
+| 3 | No data file is in the release or in git | PASS | `git ls-tree -r --name-only 718549d` under data/ gives only 5 `data/manifests/*.toml`; extension census shows only md, py, toml, yml, typed, patch, mmd, lock, json and config files; none under `report data`, private or staging. `git log --all --diff-filter=A --name-only` for data extensions and data/, report data, private, staging paths: nothing beyond data/manifests. `gh release view v1.0.0`: `assets: []`. Built sdist and wheel contain only src/pata/*, LICENSE, README, pyproject and metadata. |
+| 4 | Tag, push and publication done by the maintainer | PASS | Annotated tag a21880d -> 718549d, tagger Jenoy REX (`git cat-file -p v1.0.0`); same tag SHA on remote (`git ls-remote --tags origin`, `gh api .../git/ref/tags/v1.0.0`); origin/main and origin/workflow-kit both at 718549d; GitHub release v1.0.0 published 2026-11-10T10:51:32Z by Jenoyrex, not draft or prerelease. Maintainer approval entry in E:\PATA\workflow\graph.toml (node R-V1, by Jenoy REX, ref "tag v1.0.0, commit 718549d"), and `graph.py approve` refuses non-interactive use (scripts/graph.py:439). Limit: git and GitHub identity show the account, not who was at the keyboard; the approval entry is the attestation of that. |
+
+Checks: ruff ✓ · format ✓ · pytest 160 passed/0 failed (5 skipped) on working tree; 159 passed/0 failed (6 skipped) on tagged tree · graph ✓ · diff-check ✓
+
+Overall: PASS (all rows PASS)
+
 ## Outcome
-- Graph status stays `in_progress` until the maintainer pushes, tags, publishes and approves.
-- Commit(s): the release commit.
+- Graph status set to: done. Tag `v1.0.0` at `718549d`, published 2026-11-10 by the maintainer.
+- Commit(s): `718549d` (release); this record follows it.

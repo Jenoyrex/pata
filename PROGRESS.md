@@ -5,16 +5,15 @@ results.
 
 ## Current objective
 
-Get the maintainer-gated nodes W0, G-ADR67 and E-LGD through review, and finish E-FIELD. What to
+Version 1.0.0 (gazetteer toolkit) is released. Next is version 2, PataBench: G-ADR67, then E-FIELD. What to
 work on is decided by `workflow/graph.toml` (`uv run python scripts/graph.py next`). Legacy tasks and
 the ruling ledger: [`docs/research/dependency-graph.md`](docs/research/dependency-graph.md).
 
-## Repository state (2026-11-09)
+## Repository state (2026-11-10)
 
-- `origin/main` is at `0c72e75`. The maintainer pushed the branches and merged PR 1 (`adr-0006-rev6`)
-  and PR 2 (`workflow-kit`) on GitHub on 2026-11-09.
-- Local `main` is still at `0d1c570`, 12 commits behind `origin/main`. Local `workflow-kit` matches
-  `origin/workflow-kit` (`7947461`, before this update) and does not contain the ADR merge.
+- Tag `v1.0.0` is at `718549d`, published on GitHub by the maintainer on 2026-11-10. `origin/main` and
+  `origin/workflow-kit` were at `718549d` then; the closing record for R-V1 follows on `workflow-kit`.
+- Local `main` is still at `0d1c570`, behind `origin/main`.
 - The ADR-0006 rev 6 and ADR-0007 rev 4 text is now on `origin/main`, **still Proposed**. Merging it
   is not acceptance: G-ADR67 stays in `review` and D10.1 still needs an explicit, dated acceptance.
 - Accepted ADRs: 0001, 0002, 0004, 0005. Proposed: 0003 (permission pending), 0006,
@@ -204,7 +203,7 @@ Each needs maintainer input.
 
 ## Next action
 
-**E-INV and E-LIC are done; E-FIELD is blocked, and no agent task is ready.** E-FIELD's first criterion needs
+**Version 1.0.0 is released; version 2 waits on the maintainer, and no agent task is ready.** E-FIELD's first criterion needs
 publisher documentation that was not found for any candidate, so it depends on G-SRC decision 3.
 The other maintainer decisions are listed above.
 
@@ -466,15 +465,19 @@ The other maintainer decisions are listed above.
   graph OK; `git diff --check` exit 0. R-V1 verifier: criteria 1 and 3 PASS; criterion 2 UNPROVEN (no commit
   yet) and criterion 4 not done (maintainer's step). Table in `docs/workflow/cards/R-V1.md`.
 - **Status:** R-V1 `in_progress`. Graph: 8 of 36 live nodes done; version 1: 8 of 9.
-- **Needs maintainer:** push to `main` so CI runs; tag `v1.0.0`; publish the GitHub release; approve R-V1.
+- **Released, 2026-11-10:** the maintainer pushed, tagged `v1.0.0` at `718549d`, published the GitHub release
+  and approved R-V1. CI passed on `718549d`. Final verifier Overall PASS, 4 of 4; on a clean export of the
+  tag, pytest 159 passed, 6 skipped (the sixth skip needs the pinned LGD snapshots). R-V1 is `done`.
+- **Needs maintainer, for version 2:** G-ADR67 acceptance; the B14 and LGD emails (deadline 2026-11-23);
+  H-SCREENER.
 
 ## Dependency graph status
 
 <!-- graph:progress:begin -->
 _Generated from `workflow/graph.toml` on 2026-11-10 — do not edit by hand._
 
-**Graph nodes done:** 8/36 (node count, not effort; design nodes ≠ implementation).
-**Of those in version 1 (ADR-0009):** 8/9.
+**Graph nodes done:** 9/36 (node count, not effort; design nodes ≠ implementation).
+**Of those in version 1 (ADR-0009):** 9/9.
 
 | Phase | Node | Status | Gate | Waiting on |
 |---|---|---|---|---|
@@ -514,7 +517,7 @@ _Generated from `workflow/graph.toml` on 2026-11-10 — do not edit by hand._
 | P7-release | **R-REL** Release PataBench (version 2 under ADR-0009): manifest, hashes, metrics, exclusions, limitations, versioning | todo | maintainer · irreversible | B-BASE |
 | P0-governance | **G-V1SCOPE** Maintainer decision on ADR-0009: version 1 is a gazetteer toolkit | done | maintainer | — |
 | P7-release | **I-V1KIT** Toolkit v1 readiness: user guide, re-pinning path, honest claims | done | — | — |
-| P7-release | **R-V1** Release Pata gazetteer toolkit 1.0.0 | in_progress | maintainer · irreversible | — |
+| P7-release | **R-V1** Release Pata gazetteer toolkit 1.0.0 | done | maintainer · irreversible | — |
 
 **Ready now:** H-SCREENER
 **Awaiting maintainer:** G-ADR67

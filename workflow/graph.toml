@@ -653,7 +653,7 @@ id = "R-V1"
 title = "Release Pata gazetteer toolkit 1.0.0"
 phase = "P7-release"
 kind = "release"
-status = "in_progress"
+status = "done"
 deps = ["G-V1SCOPE", "I-V1KIT", "W0", "E-LGD"]
 gate = "maintainer"
 irreversible = true
@@ -691,3 +691,9 @@ node = "G-V1SCOPE"
 by = "Jenoy REX"
 date = "2026-11-10"
 ref = "ADR-0009 status line, 6faa28a"
+
+[[approval]]
+node = "R-V1"
+by = "Jenoy REX"
+date = "2026-11-10"
+ref = "tag v1.0.0, commit 718549d"
