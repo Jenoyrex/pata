@@ -377,18 +377,73 @@ The other maintainer decisions are listed above.
 - **New nodes added:** none.
 - **Open risks:** D-SPLITCFG can close without the focus-state ADR named in its title (no acceptance row).
 
+### 2026-11-09 — G-ADR67 — rulings applied, awaiting acceptance
+
+- **Did:** The maintainer fast-forwarded `workflow-kit` to `origin/main` (`aeb13b8`); Claude's attempt was
+  blocked by the guard. Applied `docs/workflow/reviews/G-ADR67-rev7-rev5.patch` to the working tree and
+  added the 2026-11-09 rulings to ADR-0006 rev 7 and ADR-0007 rev 5. Rulings recorded in
+  `docs/research/dependency-graph.md`.
+- **Proof:** `uv lock --check` exit 0; ruff passed; format 54 files; `graph.py validate --check-outputs`
+  OK; `git diff --check` exit 0; all 56 ADR decision and open-item rows byte-identical to `aeb13b8`; all
+  three status lines Proposed. `uv run pytest` equivalent, no cache: 142 passed, 4 skipped. A first run
+  failed one hook test only because the shell had `PYTHONIOENCODING=utf-8` set; it passes without it.
+  No `adr-reviewer` run on the 2026-11-09 text.
+- **Status:** G-ADR67 stays `review`. No ADR accepted.
+- **Later the same day, maintainer rulings:** E-FIELD deadline 2026-11-23; a screener must not annotate
+  records they screened (ADR-0006 §12); D10.2 orders real-data work only; four `-CODE` nodes added to the
+  graph on the maintainer's approval (29 to 33 live nodes). OSM stays out of v1; if B14 is not cleared by
+  2026-11-23, prepare a Proposed ADR for OSM as a fallback.
+- **Graph approvals:** W0 and E-LGD have no `[[approval]]` entry in `workflow/graph.toml`, checked
+  2026-11-09. Both stay `review`.
+- **Branch / commit:** `workflow-kit`, uncommitted. Not pushed.
+- **Needs maintainer:** send the B14 and LGD emails (not sent); run `graph.py approve` for W0 and E-LGD;
+  review the diff and accept.
+- **Open risks:** N1 can move a whole district key into `test_source_holdout`, which bears on P6. The
+  `-CODE` fixtures' `source_type = 'synthetic'` conflicts with ADR-0006 §2 and F6 (`real` only) unless
+  `docs/schema.md` keeps the label in fixture metadata.
+
+### 2026-11-10 — G-ADR67 — fourth reviewer run and text fixes
+
+- **Did:** Fourth `adr-reviewer` run on the rev 7 / rev 5 / rev 3 text; findings in packet section 6a.
+  On maintainer go, drafted X1 and X2 in ADR-0007 rev 5 and updated G-ADR67's graph title, two acceptance
+  rows and notes to the current revisions.
+- **Proof:** Reviewer: cross-reference checks do not pass as written; 50 decision rows byte-identical to
+  `aeb13b8`; each status line Proposed. After the fixes: `graph.py validate --check-outputs` OK;
+  `tests/workflow/test_graph.py` 34 passed. No reviewer run on the X1 and X2 text.
+- **Status:** G-ADR67 stays `review`. No ADR accepted.
+- **Branch / commit:** `workflow-kit`, uncommitted. Not pushed.
+- **Later the same day:** maintainer rulings X3a, X4a, E2c and X5a, recorded in
+  `docs/research/dependency-graph.md` and drafted into ADR-0006 rev 7. Fifth `adr-reviewer` run: rulings
+  faithful, 25 decision rows byte-identical, status lines Proposed; cross-reference checks still do not
+  pass as written (packet section 6b).
+- **Later again:** maintainer rulings C1a, C2a, lead-source columns a, and S7/S8 added; drafted with graph
+  rows C3–C7. Sixth `adr-reviewer` run: all earlier items resolved; cross-reference checks narrowly do
+  not pass (packet section 6c). `test_graph.py` 40 passed; graph, ruff and format pass.
+- **Then:** maintainer rulings N1, N2 and R1–R3, drafted; E-FIELD criterion 1 reworded by the maintainer.
+  Seventh `adr-reviewer` run, scoped: those items resolved; M1 and M2 remain (packet section 6d). Fourth
+  consecutive round not to clear the check, so stopped under the three-attempt rule.
+- **Final:** maintainer ruling option A for M1 and M2, drafted into ADR-0006 §17. Mechanical checks only, by
+  agreement: approval tables byte-identical to `aeb13b8`; all three status lines Proposed; ruff, format,
+  graph validate and `git diff --check` pass. No `adr-reviewer` run on that sentence.
+- **Needs maintainer:** judge the cross-reference checks; read the full diff; re-approve F1, F3, F5, F9, F10,
+  F12, F14, F15, S6, S7, S8 and S9 by name; confirm deferred items; commit; write the dated acceptance;
+  run `graph.py approve G-ADR67`. Also send the B14 and LGD emails.
+- **Maintainer direction, 2026-11-10:** version 1 uses available pinned data; live data waits for later
+  versions. README updated to the current state. No node status changed: no address file is held, and
+  every remaining build node waits on a maintainer gate. Claude cannot push; the maintainer pushes.
+
 ## Dependency graph status
 
 <!-- graph:progress:begin -->
-_Generated from `workflow/graph.toml` on 2026-11-09 — do not edit by hand._
+_Generated from `workflow/graph.toml` on 2026-11-10 — do not edit by hand._
 
-**Graph nodes done:** 4/29 (node count, not effort; design nodes ≠ implementation).
+**Graph nodes done:** 4/33 (node count, not effort; design nodes ≠ implementation).
 
 | Phase | Node | Status | Gate | Waiting on |
 |---|---|---|---|---|
 | P0-governance | **LEGACY** T0–T10 design/planning tasks (imported) | done | — | — |
 | P0-governance | **W0** Install workflow kit (graph, LOOP, hooks, commands, agents) | review | maintainer | — |
-| P0-governance | **G-ADR67** T11 + D10.1: review and joint acceptance of ADR-0006 rev 6 and ADR-0007 rev 4 | review | maintainer | — |
+| P0-governance | **G-ADR67** T11 + D10.1: review and joint acceptance of ADR-0006 rev 7 and ADR-0007 rev 5 | review | maintainer | — |
 | P3-pipeline | **T12** T12 implementation task (scope per legacy dependency graph) | dropped | — | G-ADR67 |
 | P1-evidence | **E-LGD** LGD level verification: state / district / sub-district / village | review | maintainer | — |
 | P1-evidence | **E-INV** Candidate source inventory (exact files/snapshots, publishers) | done | — | — |
@@ -399,18 +454,22 @@ _Generated from `workflow/graph.toml` on 2026-11-09 — do not edit by hand._
 | P2-spec | **D-SCHEMA** docs/schema.md: schemas, statuses, reason-category vocabulary, provenance fields | todo | maintainer | G-ADR67 |
 | P2-spec | **D-SRCADR** Source ADRs + provenance manifests | todo | maintainer | G-SRC, D-SCHEMA |
 | P2-spec | **U-UNICODE** Vendor Unicode Scripts.txt pinned to Python unicodedata version | todo | — | G-ADR67 |
-| P3-pipeline | **I-INGEST** Ingestion: strict decoding, parsing, eligibility, reason-coded exclusions | todo | — | D-SRCADR |
+| P3-pipeline | **I-INGEST-CODE** Ingestion code on labelled synthetic fixtures (no real-data run) | todo | — | G-ADR67, D-SCHEMA |
+| P3-pipeline | **I-INGEST** Ingestion: strict decoding, parsing, eligibility, reason-coded exclusions | todo | — | D-SRCADR, I-INGEST-CODE |
 | P3-pipeline | **G-ADR8** Maintainer acceptance of ADR-0008 (before selection records) | todo | maintainer | G-ADR67 |
-| P3-pipeline | **I-SPLITKEY** Split-key step 1, duplicate classes, required statistics, selection records | todo | — | I-INGEST, G-ADR8, U-UNICODE |
+| P3-pipeline | **I-SPLITKEY-CODE** Split-key code on labelled synthetic fixtures (no real-data run) | todo | — | I-INGEST-CODE, U-UNICODE |
+| P3-pipeline | **I-SPLITKEY** Split-key step 1, duplicate classes, required statistics, selection records | todo | — | I-INGEST, G-ADR8, U-UNICODE, I-SPLITKEY-CODE |
 | P3-pipeline | **D-SPLITCFG** Focus-state ADR + split config (salt, held-out publishers, ratio weights) | todo | maintainer | I-SPLITKEY |
-| P4-screen | **I-RULESCREEN** Rules-only privacy screen in ignored staging | todo | — | I-INGEST, D-SCHEMA |
+| P4-screen | **I-RULESCREEN-CODE** Rules-only screen code on labelled synthetic fixtures (no real-data run) | todo | — | I-INGEST-CODE, D-SCHEMA |
+| P4-screen | **I-RULESCREEN** Rules-only privacy screen in ignored staging | todo | — | I-INGEST, D-SCHEMA, I-RULESCREEN-CODE |
 | P4-screen | **X-FREEZE** Freeze split in staging + start exposure log | todo | maintainer · irreversible | D-SPLITCFG, I-RULESCREEN |
 | P4-screen | **H-SCREENER** Assign eligible role-restricted test/holdout screener | todo | maintainer | — |
 | P4-screen | **H-SCREEN** Role-restricted human screen + private denylist | todo | maintainer | X-FREEZE, H-SCREENER |
 | P5-resolve | **I-TABLES** Reference list, normalization table, cue table (dev-pool only) | todo | — | H-SCREEN, E-LGD |
 | P5-resolve | **I-RESOLVE** Candidate generation + resolution with verification gates | todo | — | I-TABLES |
 | P5-resolve | **D-GUIDE** Finalize + freeze annotation guidelines | todo | maintainer | I-RESOLVE, E-LGD |
-| P5-resolve | **I-VALIDATOR** Validator: schema, invariants, provenance, splits, gates, exclusions, manifest | todo | — | D-SCHEMA, D-GUIDE |
+| P5-resolve | **I-VALIDATOR-CODE** Validator code on labelled synthetic fixtures (no real-data run) | todo | — | D-SCHEMA |
+| P5-resolve | **I-VALIDATOR** Validator: schema, invariants, provenance, splits, gates, exclusions, manifest | todo | — | D-SCHEMA, D-GUIDE, I-VALIDATOR-CODE |
 | P6-annotate | **P-PILOT** Dev-pool annotation pilot + reliability metrics | todo | — | D-GUIDE, I-VALIDATOR |
 | P6-annotate | **G-PILOT** Maintainer resolves pilot decisions | todo | maintainer | P-PILOT |
 | P6-annotate | **A-GOLD** Gold annotation: independent annotation, adjudication, audit trail | todo | maintainer | G-PILOT |
