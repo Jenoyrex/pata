@@ -42,7 +42,7 @@ id = "W0"
 title = "Install workflow kit (graph, LOOP, hooks, commands, agents)"
 phase = "P0-governance"
 kind = "infra"
-status = "review"
+status = "done"
 deps = []
 gate = "maintainer"
 owner = "agent"
@@ -99,7 +99,7 @@ id = "E-LGD"
 title = "LGD level verification: state / district / sub-district / village"
 phase = "P1-evidence"
 kind = "evidence"
-status = "review"
+status = "done"
 deps = []
 gate = "maintainer"
 owner = "agent"
@@ -622,7 +622,7 @@ id = "G-V1SCOPE"
 title = "Maintainer decision on ADR-0009: version 1 is a gazetteer toolkit"
 phase = "P0-governance"
 kind = "decision"
-status = "review"
+status = "done"
 deps = ["LEGACY"]
 gate = "maintainer"
 owner = "maintainer"
@@ -635,7 +635,7 @@ id = "I-V1KIT"
 title = "Toolkit v1 readiness: user guide, re-pinning path, honest claims"
 phase = "P7-release"
 kind = "impl"
-status = "todo"
+status = "done"
 deps = ["G-V1SCOPE"]
 gate = "none"
 owner = "agent"
@@ -673,3 +673,21 @@ acceptance = [
 # by = "Jenoy"
 # date = "2026-10-29"
 # ref = "ADR-0006 §Status, ADR-0007 §Status, merge commit <sha>"
+
+[[approval]]
+node = "W0"
+by = "Jenoy REX"
+date = "2026-11-10"
+ref = "W0 card verifier PASS 2026-11-10"
+
+[[approval]]
+node = "E-LGD"
+by = "Jenoy REX"
+date = "2026-11-10"
+ref = "levels.md, accepted as unverified 2026-11-09"
+
+[[approval]]
+node = "G-V1SCOPE"
+by = "Jenoy REX"
+date = "2026-11-10"
+ref = "ADR-0009 status line, 6faa28a"

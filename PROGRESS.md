@@ -445,21 +445,34 @@ The other maintainer decisions are listed above.
 - **Open risks:** a user's fresh LGD download is refused until they re-pin; users cannot reproduce the
   maintainer's exact gazetteer without the same files (ADR-0009 section 4).
 
+### 2026-11-10 — I-V1KIT — done
+
+- **Did:** The maintainer accepted ADR-0009 (`6faa28a`) and approved G-V1SCOPE, W0 and E-LGD in their own
+  terminal; those nodes are `done`. Wrote `docs/toolkit.md`, `tests/test_toolkit_v1.py` and the README scope.
+- **Proof:** I-V1KIT verifier: first run FAIL (guide step 2 gave a path that is not found; the test skipped
+  it); fixed; second run Overall PASS, 4 of 4. `uv run pytest -q` 160 passed, 5 skipped.
+- **Limits:** synthetic fixtures only. No real LGD re-pin was run, and the portal download step was not run.
+- **Branch / commit:** `workflow-kit`, uncommitted. Not pushed.
+- **Now ready:** R-V1 (irreversible; needs the maintainer's explicit "go R-V1").
+- **Needs maintainer:** "go R-V1"; then tag, push and publish.
+- **New nodes added:** none.
+- **Open risks:** the README tagline still says "benchmark and ML toolkit", to reconcile in R-V1.
+
 ## Dependency graph status
 
 <!-- graph:progress:begin -->
 _Generated from `workflow/graph.toml` on 2026-11-10 — do not edit by hand._
 
-**Graph nodes done:** 4/36 (node count, not effort; design nodes ≠ implementation).
-**Of those in version 1 (ADR-0009):** 4/9.
+**Graph nodes done:** 8/36 (node count, not effort; design nodes ≠ implementation).
+**Of those in version 1 (ADR-0009):** 8/9.
 
 | Phase | Node | Status | Gate | Waiting on |
 |---|---|---|---|---|
 | P0-governance | **LEGACY** T0–T10 design/planning tasks (imported) | done | — | — |
-| P0-governance | **W0** Install workflow kit (graph, LOOP, hooks, commands, agents) | review | maintainer | — |
+| P0-governance | **W0** Install workflow kit (graph, LOOP, hooks, commands, agents) | done | maintainer | — |
 | P0-governance | **G-ADR67** T11 + D10.1: review and joint acceptance of ADR-0006 rev 7 and ADR-0007 rev 5 | review | maintainer | — |
 | P3-pipeline | **T12** T12 implementation task (scope per legacy dependency graph) | dropped | — | G-ADR67 |
-| P1-evidence | **E-LGD** LGD level verification: state / district / sub-district / village | review | maintainer | — |
+| P1-evidence | **E-LGD** LGD level verification: state / district / sub-district / village | done | maintainer | — |
 | P1-evidence | **E-INV** Candidate source inventory (exact files/snapshots, publishers) | done | — | — |
 | P1-evidence | **E-FIELD** Field semantics evidence (incl. C1a Address_Original_First_Line) | blocked | — | — |
 | P1-evidence | **E-LIC** Licence + redistribution evidence (B14–B17) | done | — | — |
@@ -479,9 +492,9 @@ _Generated from `workflow/graph.toml` on 2026-11-10 — do not edit by hand._
 | P4-screen | **X-FREEZE** Freeze split in staging + start exposure log | todo | maintainer · irreversible | D-SPLITCFG, I-RULESCREEN |
 | P4-screen | **H-SCREENER** Assign eligible role-restricted test/holdout screener | todo | maintainer | — |
 | P4-screen | **H-SCREEN** Role-restricted human screen + private denylist | todo | maintainer | X-FREEZE, H-SCREENER |
-| P5-resolve | **I-TABLES** Reference list, normalization table, cue table (dev-pool only) | todo | — | H-SCREEN, E-LGD |
+| P5-resolve | **I-TABLES** Reference list, normalization table, cue table (dev-pool only) | todo | — | H-SCREEN |
 | P5-resolve | **I-RESOLVE** Candidate generation + resolution with verification gates | todo | — | I-TABLES |
-| P5-resolve | **D-GUIDE** Finalize + freeze annotation guidelines | todo | maintainer | I-RESOLVE, E-LGD |
+| P5-resolve | **D-GUIDE** Finalize + freeze annotation guidelines | todo | maintainer | I-RESOLVE |
 | P5-resolve | **I-VALIDATOR-CODE** Validator code on labelled synthetic fixtures (no real-data run) | todo | — | D-SCHEMA |
 | P5-resolve | **I-VALIDATOR** Validator: schema, invariants, provenance, splits, gates, exclusions, manifest | todo | — | D-SCHEMA, D-GUIDE, I-VALIDATOR-CODE |
 | P6-annotate | **P-PILOT** Dev-pool annotation pilot + reliability metrics | todo | — | D-GUIDE, I-VALIDATOR |
@@ -489,10 +502,10 @@ _Generated from `workflow/graph.toml` on 2026-11-10 — do not edit by hand._
 | P6-annotate | **A-GOLD** Gold annotation: independent annotation, adjudication, audit trail | todo | maintainer | G-PILOT |
 | P7-release | **B-BASE** Baselines + evaluation scripts | todo | — | A-GOLD |
 | P7-release | **R-REL** Release PataBench (version 2 under ADR-0009): manifest, hashes, metrics, exclusions, limitations, versioning | todo | maintainer · irreversible | B-BASE |
-| P0-governance | **G-V1SCOPE** Maintainer decision on ADR-0009: version 1 is a gazetteer toolkit | review | maintainer | — |
-| P7-release | **I-V1KIT** Toolkit v1 readiness: user guide, re-pinning path, honest claims | todo | — | G-V1SCOPE |
-| P7-release | **R-V1** Release Pata gazetteer toolkit 1.0.0 | todo | maintainer · irreversible | G-V1SCOPE, I-V1KIT, W0, E-LGD |
+| P0-governance | **G-V1SCOPE** Maintainer decision on ADR-0009: version 1 is a gazetteer toolkit | done | maintainer | — |
+| P7-release | **I-V1KIT** Toolkit v1 readiness: user guide, re-pinning path, honest claims | done | — | — |
+| P7-release | **R-V1** Release Pata gazetteer toolkit 1.0.0 | todo | maintainer · irreversible | — |
 
-**Ready now:** H-SCREENER
-**Awaiting maintainer:** W0, G-ADR67, E-LGD, G-V1SCOPE
+**Ready now:** H-SCREENER, R-V1
+**Awaiting maintainer:** G-ADR67
 <!-- graph:progress:end -->

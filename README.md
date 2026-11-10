@@ -26,15 +26,16 @@ recorded experiment.
 |---|---|
 | Reference gazetteer | Built from pinned LGD snapshots: 680,531 administrative units and 672,619 village-to-PIN rows ([docs/gazetteer.md](docs/gazetteer.md)). The snapshots are not in this repository |
 | Source research | Candidate inventory and licence evidence recorded in [docs/research/source-inventory.md](docs/research/source-inventory.md). No address source is accepted, and no candidate has a clear licence yet |
-| Annotation scope and sources | [ADR-0006](docs/decisions/0006-annotation-scope-and-schema.md) and [ADR-0007](docs/decisions/0007-focus-states-and-sources.md) are drafted and awaiting maintainer acceptance |
+| Annotation scope and sources | [ADR-0006](docs/decisions/0006-annotation-scope-and-schema.md) and [ADR-0007](docs/decisions/0007-focus-states-and-sources.md) are drafted for version 2 and awaiting maintainer acceptance |
 | Tooling | Aggregate-only source inspection (`scripts/source_stats.py`) and the workflow graph (`scripts/graph.py`). The inspection tool has run on synthetic fixtures only |
 | Not started | Ingestion, split generation, privacy screening, annotation, evaluation and baselines |
 
-**Version 1 is proposed as a gazetteer toolkit**
-([ADR-0009](docs/decisions/0009-version-1-gazetteer-toolkit.md), awaiting maintainer
-acceptance). It will contain no address dataset, model, benchmark or metric. PataBench moves
-to version 2, and until then the toolkit is checked by its tests and the build's quality
-checks. Version 1 uses pinned data snapshots; live data is left to later versions.
+**Version 1 is a gazetteer toolkit**
+([ADR-0009](docs/decisions/0009-version-1-gazetteer-toolkit.md); see the
+[user guide](docs/toolkit.md)). It has no address dataset, model, benchmark or metric.
+PataBench moves to version 2, and until then the toolkit is checked by its tests and the
+build's quality checks. Version 1 uses pinned data snapshots; live data is left to later
+versions.
 
 Work is ordered by the dependency graph in
 [workflow/graph.toml](workflow/graph.toml), and
@@ -87,8 +88,8 @@ uv run ruff format .       # format
 uv run python scripts/graph.py next   # what the workflow graph says is ready
 ```
 
-To build the gazetteer, place the LGD snapshots named in `data/manifests/` under
-`data/raw/lgdirectory.gov.in/`, then run `uv run python scripts/build_gazetteer.py`.
+To build the gazetteer from your own LGD files, follow the
+[user guide](docs/toolkit.md).
 
 ## Repository layout
 
