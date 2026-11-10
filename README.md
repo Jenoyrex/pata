@@ -30,8 +30,13 @@ recorded experiment.
 | Tooling | Aggregate-only source inspection (`scripts/source_stats.py`) and the workflow graph (`scripts/graph.py`). The inspection tool has run on synthetic fixtures only |
 | Not started | Ingestion, split generation, privacy screening, annotation, evaluation and baselines |
 
-Version 1 will use pinned data snapshots. Live or frequently refreshed data is left to
-later versions. Work is ordered by the dependency graph in
+**Version 1 is proposed as a gazetteer toolkit**
+([ADR-0009](docs/decisions/0009-version-1-gazetteer-toolkit.md), awaiting maintainer
+acceptance). It will contain no address dataset, model, benchmark or metric. PataBench moves
+to version 2, and until then the toolkit is checked by its tests and the build's quality
+checks. Version 1 uses pinned data snapshots; live data is left to later versions.
+
+Work is ordered by the dependency graph in
 [workflow/graph.toml](workflow/graph.toml), and
 [PROGRESS.md](PROGRESS.md) records its current state.
 

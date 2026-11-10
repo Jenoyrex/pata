@@ -1396,3 +1396,6 @@ Final on 2026-11-10, from the seventh `adr-reviewer` run (packet section 6d):
 - **M1 and M2 (option A):** a class is newly placed when any of its exposed members was in neither test
   split under the immediately preceding `split_version`, and a move between those two splits is not a
   move into test in ADR-0006 or ADR-0007 (ADR-0006 §17). This replaces the R2 baseline wording.
+
+**Version 1 scope (maintainer direction, 2026-11-10):** version 1 is a gazetteer toolkit and PataBench
+moves to version 2. Drafted as ADR-0009, Proposed. This is not acceptance of any ADR.

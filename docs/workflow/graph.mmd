@@ -3,6 +3,7 @@ flowchart LR
     LEGACY["LEGACY<br/>T0–T10 design/planning tasks (imported)"]:::done
     W0{{"W0<br/>Install workflow kit (graph, LOOP, hooks, com..."}}:::review
     G_ADR67{{"G-ADR67<br/>T11 + D10.1: review and joint acceptance of A..."}}:::review
+    G_V1SCOPE{{"G-V1SCOPE<br/>Maintainer decision on ADR-0009: version 1 is..."}}:::review
   end
   subgraph P3_pipeline["P3-pipeline"]
     T12["T12<br/>T12 implementation task (scope per legacy dep..."]:::dropped
@@ -47,7 +48,9 @@ flowchart LR
   end
   subgraph P7_release["P7-release"]
     B_BASE["B-BASE<br/>Baselines + evaluation scripts"]:::todo
-    R_REL{{"R-REL<br/>Release v1: manifest, hashes, metrics, exclus..."}}:::todo
+    R_REL{{"R-REL<br/>Release PataBench (version 2 under ADR-0009):..."}}:::todo
+    I_V1KIT["I-V1KIT<br/>Toolkit v1 readiness: user guide, re-pinning ..."]:::todo
+    R_V1{{"R-V1<br/>Release Pata gazetteer toolkit 1.0.0"}}:::todo
   end
   LEGACY --> G_ADR67
   G_ADR67 --> T12
@@ -96,6 +99,12 @@ flowchart LR
   G_PILOT --> A_GOLD
   A_GOLD --> B_BASE
   B_BASE --> R_REL
+  LEGACY --> G_V1SCOPE
+  G_V1SCOPE --> I_V1KIT
+  G_V1SCOPE --> R_V1
+  I_V1KIT --> R_V1
+  W0 --> R_V1
+  E_LGD --> R_V1
   classDef done fill:#e8f7ef,stroke:#177245,color:#0b3d24
   classDef doing fill:#eaf1ff,stroke:#244b8f,color:#10264d
   classDef review fill:#fff4d8,stroke:#8a5700,color:#4a2f00

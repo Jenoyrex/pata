@@ -255,6 +255,7 @@ class Graph:
     def progress_markdown(self) -> str:
         total = [n for n in self.order if self.status(n) != "dropped"]
         done = [n for n in total if self.status(n) == "done"]
+        v1 = [n for n in total if self.nodes[n].get("release") != "v2"]
         lines = [
             BEGIN,
             f"_Generated from `workflow/graph.toml` on {_today().isoformat()}"
@@ -264,6 +265,7 @@ class Graph:
                 f"**Graph nodes done:** {len(done)}/{len(total)} "
                 "(node count, not effort; design nodes ≠ implementation)."
             ),
+            f"**Of those in version 1 (ADR-0009):** {len(set(done) & set(v1))}/{len(v1)}.",
             "",
             "| Phase | Node | Status | Gate | Waiting on |",
             "|---|---|---|---|---|",
@@ -375,7 +377,7 @@ def cmd_show(g: Graph, nid: str) -> int:
         return 1
     n = g.nodes[nid]
     print(f"{nid} — {n['title']}")
-    for key in ("phase", "kind", "status", "gate", "owner", "irreversible", "blocker"):
+    for key in ("phase", "kind", "status", "release", "gate", "owner", "irreversible", "blocker"):
         if key in n:
             print(f"  {key:<12} {n[key]}")
     print("  deps        " + (", ".join(f"{d}({g.status(d)})" for d in g.deps(nid)) or "—"))

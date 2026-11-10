@@ -241,6 +241,32 @@ def test_check_outputs_sees_a_path_with_a_note():
     assert any("no/such/file.txt" in w for w in g.validate(check_outputs=True).warnings)
 
 
+def test_version_1_does_not_depend_on_the_benchmark():
+    g = graph.Graph.load(ROOT / "workflow" / "graph.toml")
+    assert not [n for n in ancestors(g, "R-V1") if g.nodes[n].get("release") == "v2"]
+    assert g.nodes["R-V1"]["irreversible"] and g.nodes["R-V1"]["gate"] == "maintainer"
+
+
+def test_benchmark_nodes_are_marked_for_version_2():
+    g = graph.Graph.load(ROOT / "workflow" / "graph.toml")
+    for nid in (
+        "G-ADR67",
+        "E-FIELD",
+        "G-SRC",
+        "D-SCHEMA",
+        "I-INGEST",
+        "H-SCREEN",
+        "A-GOLD",
+        "R-REL",
+    ):
+        assert g.nodes[nid].get("release") == "v2", nid
+
+
+def test_progress_counts_version_1_separately():
+    g = make([node("A", status="done"), node("B", release="v2", status="done"), node("C")])
+    assert "version 1 (ADR-0009):** 1/2" in g.progress_markdown()
+
+
 def test_check_outputs_ignores_prose_and_outside_git_outputs():
     outputs = ["a manifest under no/such/ (name UNDECIDED)", "private/denylist (outside Git)"]
     g = make([node("A", status="done", outputs=outputs)])

@@ -432,12 +432,26 @@ The other maintainer decisions are listed above.
   versions. README updated to the current state. No node status changed: no address file is held, and
   every remaining build node waits on a maintainer gate. Claude cannot push; the maintainer pushes.
 
+### 2026-11-10 — G-V1SCOPE — version 1 rescoped, awaiting acceptance
+
+- **Did:** On the maintainer's direction, drafted ADR-0009: version 1 is a gazetteer toolkit and PataBench
+  moves to version 2. Added nodes G-V1SCOPE, I-V1KIT and R-V1, marked 27 benchmark nodes `release = "v2"`,
+  and added a version 1 count to the progress block. README updated.
+- **Proof:** see the checks run before commit; `tests/workflow/test_graph.py` 44 passed; graph OK. No
+  `adr-reviewer` run on ADR-0009.
+- **Status:** G-V1SCOPE `review`. ADR-0009 Proposed. ADR-0006, 0007 and 0008 stay Proposed.
+- **Branch / commit:** `workflow-kit`, uncommitted. Not pushed.
+- **Needs maintainer:** accept ADR-0009; run `graph.py approve` for G-V1SCOPE, W0 and E-LGD.
+- **Open risks:** a user's fresh LGD download is refused until they re-pin; users cannot reproduce the
+  maintainer's exact gazetteer without the same files (ADR-0009 section 4).
+
 ## Dependency graph status
 
 <!-- graph:progress:begin -->
 _Generated from `workflow/graph.toml` on 2026-11-10 — do not edit by hand._
 
-**Graph nodes done:** 4/33 (node count, not effort; design nodes ≠ implementation).
+**Graph nodes done:** 4/36 (node count, not effort; design nodes ≠ implementation).
+**Of those in version 1 (ADR-0009):** 4/9.
 
 | Phase | Node | Status | Gate | Waiting on |
 |---|---|---|---|---|
@@ -474,8 +488,11 @@ _Generated from `workflow/graph.toml` on 2026-11-10 — do not edit by hand._
 | P6-annotate | **G-PILOT** Maintainer resolves pilot decisions | todo | maintainer | P-PILOT |
 | P6-annotate | **A-GOLD** Gold annotation: independent annotation, adjudication, audit trail | todo | maintainer | G-PILOT |
 | P7-release | **B-BASE** Baselines + evaluation scripts | todo | — | A-GOLD |
-| P7-release | **R-REL** Release v1: manifest, hashes, metrics, exclusions, limitations, versioning | todo | maintainer · irreversible | B-BASE |
+| P7-release | **R-REL** Release PataBench (version 2 under ADR-0009): manifest, hashes, metrics, exclusions, limitations, versioning | todo | maintainer · irreversible | B-BASE |
+| P0-governance | **G-V1SCOPE** Maintainer decision on ADR-0009: version 1 is a gazetteer toolkit | review | maintainer | — |
+| P7-release | **I-V1KIT** Toolkit v1 readiness: user guide, re-pinning path, honest claims | todo | — | G-V1SCOPE |
+| P7-release | **R-V1** Release Pata gazetteer toolkit 1.0.0 | todo | maintainer · irreversible | G-V1SCOPE, I-V1KIT, W0, E-LGD |
 
 **Ready now:** H-SCREENER
-**Awaiting maintainer:** W0, G-ADR67, E-LGD
+**Awaiting maintainer:** W0, G-ADR67, E-LGD, G-V1SCOPE
 <!-- graph:progress:end -->
